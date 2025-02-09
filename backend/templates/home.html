@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to VolunteerMatch{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Volunteer Opportunities Feed</h2>
+            <p class="card-text text-muted">Feed placeholder - Opportunities will appear here</p>
+        </div>
+    </div>
+{% else %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Welcome to VolunteerMatch</h1>
+    <p class="lead">Connect with meaningful volunteer opportunities in your community.</p>
+    <hr class="my-4">
+</div>
+
+<div class="row justify-content-center g-4">
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-person-heart fs-1 text-primary mb-3"></i>
+                <h2 class="card-title">I want to Volunteer</h2>
+                <p class="card-text">Looking to make a difference? Sign up as a volunteer to find meaningful opportunities in your community.</p>
+                <ul class="text-start mb-4">
+                    <li>Browse volunteer opportunities</li>
+                    <li>Match with causes you care about</li>
+                    <li>Track your volunteer hours</li>
+                </ul>
+                <a href="{% url 'volunteer_signup' %}" class="btn btn-primary btn-lg">Sign Up as Volunteer</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-building fs-1 text-success mb-3"></i>
+                <h2 class="card-title">I'm an Organization</h2>
+                <p class="card-text">Need volunteers for your cause? Register your organization to connect with passionate volunteers.</p>
+                <ul class="text-start mb-4">
+                    <li>Post volunteer opportunities</li>
+                    <li>Manage volunteer applications</li>
+                    <li>Track volunteer engagement</li>
+                </ul>
+                <a href="{% url 'organization_signup' %}" class="btn btn-success btn-lg">Register Organization</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
