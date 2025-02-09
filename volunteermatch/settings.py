@@ -11,26 +11,24 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)po&1l6=t#@827$&)8!i5f%7@5)786u*v2$lwq2zj@m&*arjz%'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 AUTH_USER_MODEL = 'backend.User'
-
-
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -44,7 +42,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
     }
 }
-
 
 SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
@@ -63,7 +60,7 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-
+GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_MAP_API_KEY')
 
 # Application definition
 
@@ -79,7 +76,25 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'mapwidgets',
 ]
+
+MAP_WIDGETS = {
+    "GoogleMap": {
+        "apiKey": GOOGLE_MAP_API_KEY,
+        "PointField": {
+            "interactive": {
+                "mapOptions": {
+                    "zoom": 15,
+                    "streetViewControl": False,
+                },
+                "GooglePlaceAutocompleteOptions": {
+                    "componentRestrictions": {"country": "uk"}
+                },
+            }
+        }
+    }
+}
 
 SITE_ID = 1
 
@@ -104,6 +119,7 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -140,7 +156,7 @@ WSGI_APPLICATION = 'volunteermatch.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join('/var/sqlite', 'db.sqlite3') if not DEBUG else BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -179,11 +195,46 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Google Maps settings
+GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_MAP_API_KEY')
+
+# Cache settings (using local memory cache for simplicity)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

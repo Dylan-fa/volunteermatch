@@ -1,6 +1,19 @@
 {% extends 'base.html' %}
+{% load opportunity_tags %}
 
 {% block title %}Welcome to VolunteerMatch{% endblock %}
+
+{% block extrahead %}
+{% if user.is_authenticated %}
+<style>
+    #opportunities-map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endif %}
+{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
@@ -10,10 +23,53 @@
         {% endfor %}
     {% endif %}
     
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Volunteer Opportunities Map</h2>
+            <div id="opportunities-map"></div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
-            <h2 class="card-title">Volunteer Opportunities Feed</h2>
-            <p class="card-text text-muted">Feed placeholder - Opportunities will appear here</p>
+            <h2 class="card-title">Volunteer Opportunities List</h2>
+            {% for opportunity in opportunities %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ opportunity.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ opportunity.organization.name }}</h6>
+                    <p class="card-text">{{ opportunity.description|truncatewords:30 }}</p>
+                    <p class="card-text"><small class="text-muted">Location: {{ opportunity.location_name }}</small></p>
+                    <div class="mt-3">
+                        <a href="{% url 'opportunity_detail' opportunity.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-info-circle"></i> View Details
+                        </a>
+                        {% if user.organization and opportunity.organization == user.organization %}
+                            <a href="{% url 'edit_opportunity' opportunity.pk %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'manage_applications' opportunity.pk %}" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-people"></i> Applications
+                                {% with count=opportunity.pending_applications_count %}
+                                    {% if count > 0 %}
+                                        <span class="badge bg-danger">{{ count }}</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </a>
+                        {% elif user.volunteer %}
+                            {% has_applied opportunity as has_user_applied %}
+                            {% if not has_user_applied %}
+                                <a href="{% url 'join_opportunity' opportunity.pk %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-person-plus"></i> Join
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="card-text text-muted">No opportunities available at the moment.</p>
+            {% endfor %}
         </div>
     </div>
 {% else %}
@@ -35,7 +91,10 @@
                     <li>Match with causes you care about</li>
                     <li>Track your volunteer hours</li>
                 </ul>
-                <a href="{% url 'volunteer_signup' %}" class="btn btn-primary btn-lg">Sign Up as Volunteer</a>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'volunteer_signup' %}" class="btn btn-primary btn-lg">Sign Up as Volunteer</a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary">Already registered? Sign In</a>
+                </div>
             </div>
         </div>
     </div>
@@ -51,10 +110,71 @@
                     <li>Manage volunteer applications</li>
                     <li>Track volunteer engagement</li>
                 </ul>
-                <a href="{% url 'organization_signup' %}" class="btn btn-success btn-lg">Register Organization</a>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'organization_signup' %}" class="btn btn-success btn-lg">Register Organization</a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-success">Already registered? Sign In</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block extrascripts %}
+{% if user.is_authenticated %}
+<script>
+function initMap() {
+    const map = new google.maps.Map(document.getElementById('opportunities-map'), {
+        zoom: 10,
+        center: { lat: 51.5074, lng: -0.1278 }, // Default to London
+    });
+
+    const bounds = new google.maps.LatLngBounds();
+    const infoWindow = new google.maps.InfoWindow();
+
+    const opportunities = [
+        {% for opp in opportunities %}
+        {
+            title: "{{ opp.title|escapejs }}",
+            org: "{{ opp.organization.name|escapejs }}",
+            location: "{{ opp.location_name|escapejs }}",
+            lat: {{ opp.latitude|default:"null" }},
+            lng: {{ opp.longitude|default:"null" }}
+        },
+        {% endfor %}
+    ];
+
+    opportunities.forEach(opp => {
+        if (opp.lat && opp.lng) {
+            const position = { lat: opp.lat, lng: opp.lng };
+            const marker = new google.maps.Marker({
+                position,
+                map,
+                title: opp.title
+            });
+
+            bounds.extend(position);
+
+            marker.addListener('click', () => {
+                const content = `
+                    <div>
+                        <h6>${opp.title}</h6>
+                        <p><strong>${opp.org}</strong></p>
+                        <p>${opp.location}</p>
+                    </div>
+                `;
+                infoWindow.setContent(content);
+                infoWindow.open(map, marker);
+            });
+        }
+    });
+
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
+    }
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAP_API_KEY }}&callback=initMap" async defer></script>
 {% endif %}
 {% endblock %}

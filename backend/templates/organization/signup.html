@@ -27,15 +27,33 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="{{ form.charity_number.id_for_label }}" class="form-label">Charity Registration Number</label>
-                        {{ form.charity_number.errors }}
-                        <input type="text" class="form-control" id="{{ form.charity_number.id_for_label }}" name="{{ form.charity_number.html_name }}" required>
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                        {{ form.username.errors }}
+                        <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.html_name }}" required>
                     </div>
 
                     <div class="mb-3">
                         <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
                         {{ form.email.errors }}
                         <input type="email" class="form-control" id="{{ form.email.id_for_label }}" name="{{ form.email.html_name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.charity_number.id_for_label }}" class="form-label">Charity Registration Number</label>
+                        {{ form.charity_number.errors }}
+                        <input type="text" class="form-control" id="{{ form.charity_number.id_for_label }}" name="{{ form.charity_number.html_name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+                        {{ form.password1.errors }}
+                        <input type="password" class="form-control" id="{{ form.password1.id_for_label }}" name="{{ form.password1.html_name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
+                        {{ form.password2.errors }}
+                        <input type="password" class="form-control" id="{{ form.password2.id_for_label }}" name="{{ form.password2.html_name }}" required>
                     </div>
 
                     <div class="mb-3">
