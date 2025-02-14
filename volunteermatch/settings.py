@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from django.core.management.utils import get_random_secret_key
 
 load_dotenv()
 
@@ -21,7 +20,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", 'InsecureDebug')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -31,15 +30,21 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split("
 AUTH_USER_MODEL = 'backend.User'
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": ""
         },
-        'OAUTH_PKCE_ENABLED': True,
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "offline",  # Changed from 'online' to 'offline'
+        },
+        "OAUTH_PKCE_ENABLED": True,
+        "VERIFIED_EMAIL": True
     }
 }
 
@@ -71,6 +76,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
     'backend',
     'allauth',
     'allauth.account',
@@ -98,18 +106,6 @@ MAP_WIDGETS = {
 
 SITE_ID = 1
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    }
-}
-
 # Skip the intermediate social account signup page
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
@@ -125,9 +121,21 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware'
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 ROOT_URLCONF = 'volunteermatch.urls'
 
@@ -156,7 +164,7 @@ WSGI_APPLICATION = 'volunteermatch.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/var/sqlite', 'db.sqlite3') if not DEBUG else BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -205,6 +213,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Google Maps settings
 GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_MAP_API_KEY')
+
+# I fixed the admin page
+# charity api settings just paste the api key here helloooooooooo
+
+CHARITY_API_KEY = os.getenv('CHARITY_COMMISSION_API_KEY')
+
+
 
 # Cache settings (using local memory cache for simplicity)
 CACHES = {
