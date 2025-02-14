@@ -26,21 +26,15 @@ const Login = () => {
       }
 
       const data = await response.json();
-      
-      // Store tokens
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
-      
-      // Update user context
       login(data.user);
-      
-      navigate(data.user.is_organization ? '/organization/dashboard' : '/volunteer/dashboard');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Update Google login handler to use same token names
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const response = await fetch('/api/auth/google/callback/', {
@@ -50,7 +44,7 @@ const Login = () => {
         },
         body: JSON.stringify({
           credential: credentialResponse.credential,
-          user_type: 'volunteer' // or get this from a state/prop
+          user_type: 'volunteer'
         }),
       });
       
@@ -62,8 +56,7 @@ const Login = () => {
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
       login(data.user);
-      
-      navigate(data.user.is_organization ? '/organization/dashboard' : '/volunteer/dashboard');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message);
     }
