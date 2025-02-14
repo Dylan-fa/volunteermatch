@@ -15,6 +15,7 @@ import AboutUs from './pages/AboutUs';
 import CreateOpportunity from './pages/CreateOpportunity';
 import PrivateRoute from './components/PrivateRoute';
 import OrganizationDashboard from './pages/OrganizationDashboard';
+import GoogleOneTap from './components/GoogleOneTap';
 import './styles/components.css';
 
 // Create a wrapper component for AnimatePresence
@@ -76,6 +77,7 @@ function App() {
         <Router>
           <div className="min-h-screen bg-gray-50">
             <NavBar isScrolled={isScrolled} gradientStyle={gradientStyle} />
+            <GoogleOneTap />
             <main className="pt-16">
               <AnimatedRoutes />
             </main>
