@@ -102,17 +102,37 @@ def login_view(request):
 def google_login_callback(request):
     adapter = GoogleOAuth2Adapter(request)
     try:
+        # Try to get either id_token or credential
+        token = request.data.get('id_token') or request.data.get('credential')
+        if not token:
+            return Response({'error': 'No valid token provided'}, status=400)
+
         app = adapter.get_provider().app
-        token = request.data.get('access_token')
-        user = adapter.complete_login(request, app, token)
-        refresh = RefreshToken.for_user(user)
+        # Decode and verify the token
+        data = adapter._decode_id_token(app, token)
+        
+        # Get or create social login
+        login = adapter.get_provider().sociallogin_from_response(request, data)
+        
+        if not login.user:
+            # If user doesn't exist, create one
+            user_type = request.data.get('user_type', 'volunteer')
+            login.save()
+            
+            # Create the appropriate profile
+            if user_type == 'volunteer':
+                Volunteer.objects.get_or_create(user=login.user)
+            elif user_type == 'organization':
+                Organization.objects.get_or_create(user=login.user)
+
+        refresh = RefreshToken.for_user(login.user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
-                'email': user.email,
-                'is_volunteer': hasattr(user, 'volunteer'),
-                'is_organization': hasattr(user, 'organization')
+                'email': login.user.email,
+                'is_volunteer': hasattr(login.user, 'volunteer'),
+                'is_organization': hasattr(login.user, 'organization')
             }
         })
     except Exception as e:

@@ -48,7 +48,10 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ access_token: credentialResponse.credential }),
+        body: JSON.stringify({
+          credential: credentialResponse.credential,
+          user_type: 'volunteer' // or get this from a state/prop
+        }),
       });
       
       if (!response.ok) {
@@ -58,9 +61,9 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      login(data.user);
       
-      navigate('/dashboard');
+      navigate(data.user.is_organization ? '/organization/dashboard' : '/volunteer/dashboard');
     } catch (err) {
       setError(err.message);
     }
