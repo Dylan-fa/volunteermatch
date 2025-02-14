@@ -126,9 +126,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware'
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
 
 REST_FRAMEWORK = {
@@ -210,9 +208,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Google Maps settings
-GOOGLE_MAP_API_KEY = os.getenv('GOOGLE_MAP_API_KEY')
 
 # I fixed the admin page
 # charity api settings just paste the api key here helloooooooooo
