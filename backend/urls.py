@@ -19,4 +19,6 @@ urlpatterns = [
     path('api/opportunities/create/', views.api_create_opportunity, name='api_create_opportunity'),
     path('api/organization/stats/', views.api_organization_stats, name='api_organization_stats'),
     path('api/organization/profile/', views.api_organization_profile, name='api_organization_profile'),
+
+    path('<int:charity>/<int:volunteer>', views.calculate_impact)
 ]

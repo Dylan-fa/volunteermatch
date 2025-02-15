@@ -28,7 +28,10 @@ class Interest(models.Model):
 class Volunteer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
-    interests = models.ManyToManyField(Interest, related_name='interested_volunteers')
+    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True, null=True)
+    #------------------------------------------------------------------------------------------- Alex added below
+    opportunities_completed = models.IntegerField(default = 0)
+    last_completion = models.DateTimeField(null = True, blank=True)
 
 
     def __str__(self):
@@ -65,16 +68,33 @@ class Organization(models.Model):
 
 class Opportunity(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='opportunities')
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, unique = True)
     description = models.TextField()
     requirements = models.TextField()
-    location_name = models.CharField(max_length=200)
+    location_name = models.CharField(max_length=200)        #Make sure it is always a city please
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    categories = models.ManyToManyField(Category, related_name='opportunities')
+    categories = models.ManyToManyField(Category, related_name='opportunities', blank=True, null=True)
+    #------------------------------------------------------------------------------------------------- Alex Addded Below Need to talk through
+
+    CHOICES = {
+        "low" : "Low", 
+        "medium" : "Medium", 
+        "high" : "High"
+    }
+    # start and end time are reflective of the normal work hours like 9-5 where start is 9 and end is 17 since it is a 24 hour clock
+    start_time = models.IntegerField() # add validators not more than 24 and not less than 0
+    end_time = models.IntegerField() # add validators not more than 24 and not less than 0
+    estimated_duration = models.IntegerField()
+    estimated_effort_ranking = models.CharField(choices = CHOICES, max_length=6)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    capacity = models.IntegerField(default = 0)
+    current_colunteers_count = models.IntegerField(default = 0)
+
 
     def __str__(self):
         return self.title
@@ -92,6 +112,7 @@ class Application(models.Model):
     volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='applications')
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE, related_name='applications')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    current_volunteers = models.IntegerField()
     date_applied = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     notes = models.TextField(blank=True)

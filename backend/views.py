@@ -3,13 +3,13 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
 from django.conf import settings
-from .models import Organization, Volunteer, Opportunity
+from .models import Organization, Volunteer, Opportunity, Application
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.conf import settings
 import requests
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET
 import json
 from rest_framework import status
@@ -20,6 +20,158 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
+import os
+from datetime import datetime
+
+
+def calculate_impact(request, charity, volunteer):
+
+    opportunity = Opportunity.objects.get(id = charity)
+    print(opportunity)
+    volunteer = get_object_or_404(Volunteer, id = volunteer)
+    applications = Application.objects.all()
+    current_application = None
+
+    for application in applications:
+        if  application.volunteer == volunteer:
+            current_application = application
+            break
+
+
+
+    print(applications)
+
+    # Open and load JSON file to get population data
+    file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    city = opportunity.location_name # get from organisation api
+    start_time = opportunity.start_time
+    end_time = opportunity.end_time
+    opportunities_completed = volunteer.opportunities_completed
+    duration_taken = datetime.now().day - application.date_applied.day
+    estimated_duration = opportunity.estimated_duration
+    effort_ranking = opportunity.estimated_effort_ranking
+    if volunteer.last_completion != None:
+        days_since_last_opportunity_completed = datetime.now().day - volunteer.last_completion.day
+    else:
+        days_since_last_opportunity_completed = 100000
+    bonus_points = 0 #-----------------------------------------------FIXXXXXX
+    start_date = opportunity.start_date
+    date_time_applied = current_application.date_applied
+    end_date = opportunity.end_date
+    capacity = opportunity.capacity
+    participants_at_application = current_application.current_volunteers
+
+
+    people_helped = 0
+
+
+    opening_duration = end_date.day - start_date.day    # finds how long the opportunity was posted for
+    if ((end_date.day - date_time_applied.day) < opening_duration * 0.15) and participants_at_application < capacity / 2:
+        bonus_points += round((end_date - date_time_applied).total_seconds() / 3600)   
+        # adds a point for every hour they applied before the closing when it is in the last 15% of opening time
+
+    # each factors weights contributing to the final score
+                                                                            
+    weights = {
+        "duration" : 20,    # the time it took them to complete in proportion to estimated time
+        "effort" : 15,      # how physically straining it is    
+        "recent" : 10,      # how recent the last opportunity they completed was
+        "time" : 15,        # the hours worked (early and late shifts get more points)
+        "status" : 5,      # how new the user is (the more tasks completed = less points)"
+        "population_affected" : 15      # the population of the closest city to charity 
+    }
+
+    time_value = 0.5
+    duration = end_time - start_time
+    if duration < 0:
+        duration += 24
+
+    if start_time >= 9 and end_time <= 17:  #checking if shift(s) are a normal 9-5
+        time_value = 0.5
+
+    elif start_time > 17 and (end_time < 9 or end_time < 24):   # checking if the shift(s) starts after 5 
+
+        if end_time - start_time >= 6:  # checking if the shift(s) was more than 6 hours meaning it went into midnight
+            time_value = 2
+        else:
+            time_value = 1.25
+
+    elif duration >= 16:   # checking if the shift was more than 16 hours
+        time_value = 2.5
+
+    elif duration > 8:      # checking if the shift was more than 8 hours
+        time_value = 1.75
+
+    elif duration > 4:      # checking if the shift was more than 4 hours
+        time_value = 1
+
+        # this code ensures that a more experienced volunteer gets less points per completion  
+        # so that it becomes more of a challenge to unlock the next badges
+    status_value = max(10 / (1 + opportunities_completed / 10), 1)
+    status_value = round(status_value, 1)
+
+    duration_value = 1
+
+    """ this code ensures that a volunteer gets an adequate amount of points based on the time they took to complete the activity in proportion to 
+    how long it was expected to take"""
+    duration_value = duration_taken / estimated_duration            # allows for volunteers that have spent a longer amount of time trying to 
+    duration_value = round(duration_value, 2)                       # complete an opportunity to gain more points and people who dont take as long
+                                                                    # as they maybe should get a lower multiplier
+
+    recent_value = 50 - (days_since_last_opportunity_completed - duration_taken)
+    if recent_value < 0:
+        recent_value = 0                # rewards volunteers with a multiplier based on how quickly they are doing
+    recent_value /= 10                  #  new opportunities once one is finished
+
+    population = 0
+    for i in range(len(data)):
+        if city == data[i]["city"]:
+            population = data[i]["population"]
+            break
+
+    people_helped = int(population) / 5
+
+    effort_value = 1
+
+    if effort_ranking == "low":
+        effort_value = 0.5              # if organisation ranks their opportunity as higher effort it is rewarded with higher points
+        people_helped *= 0.5
+    elif effort_ranking == "high":
+        effort_value = 1
+    else:
+        people_helped *= 0.75
+
+    people_helped = round(people_helped)
+
+
+
+
+    final_value = time_value * weights.get("time") + status_value * weights.get("status") + duration_value * weights.get("duration") + recent_value * weights.get("recent") + effort_value * weights.get("effort") + min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected") + bonus_points# + distance_value * weights.get("distance")
+
+    if days_since_last_opportunity_completed < 30 or days_since_last_opportunity_completed > 120:
+        final_value *= 1.2              # adds a streak bonus to help volunteers keep going as it gives them incentive to do more volunteering
+
+    if(opportunities_completed < 5):
+        final_value *= 1 + (0.25 - opportunities_completed / 20)    # allows for new users to gain increased points for their first 5 opportunities
+
+    final_value /= 2
+    final_value = round(final_value)
+
+
+    return HttpResponse(final_value)
+
+
+
+
+
+
+
+
+
+
 
 @require_GET
 def charity_search(request):
@@ -39,6 +191,7 @@ def charity_search(request):
         response = requests.get(api_url, headers=headers)
         response.raise_for_status()
         charities = response.json()
+        print(charities)
         # Format the response according to the actual API fields and limit results
         formatted_charities = [
             {
