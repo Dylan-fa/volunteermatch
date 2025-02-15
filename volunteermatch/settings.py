@@ -84,25 +84,10 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'mapwidgets',
-]
 
-MAP_WIDGETS = {
-    "GoogleMap": {
-        "apiKey": GOOGLE_MAP_API_KEY,
-        "PointField": {
-            "interactive": {
-                "mapOptions": {
-                    "zoom": 15,
-                    "streetViewControl": False,
-                },
-                "GooglePlaceAutocompleteOptions": {
-                    "componentRestrictions": {"country": "uk"}
-                },
-            }
-        }
-    }
-}
+
+    
+]
 
 SITE_ID = 1
 
