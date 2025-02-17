@@ -23,6 +23,107 @@ from .serializers import OpportunitySerializer
 import os
 from datetime import datetime
 
+# Use this file for your templated views only
+from django.http import HttpResponse, HttpResponseForbidden
+from .serializers import *
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
+from .forms import *
+from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext as _
+
+def get_permission(request):
+    permission = ""
+    if request.user.has_perm('label_music_manager.editor'):
+        permission = 'editor'
+    elif request.user.has_perm('label_music_manager.artist'):
+        permission = 'artist'
+    elif request.user.has_perm('label_music_manager.viewer'):
+        permission = 'viewer'
+
+    return permission
+
+def view_all_opportunities(request):
+
+    context = {
+        'charities': ['Charity 1', 'Charity 2', 'Charity 3', 'Charity 4', 'Charity 5', 'Charity 6', 
+                          'Charity 7', 'Charity 8', 'Charity 9', 'Charity 10', 'Charity 11', 'Charity 12']
+    }
+
+    return render(request, 'viewAllOpportunities.html', context)
+
+def view_badges(request):
+
+    context = {
+
+    }
+
+    if(request.user.is_authenticated):
+        return render(request, 'badgesView.html', context)
+    return render(request, 'viewBadgeOptions.html')
+
+    
+
+def view_specified_badge(request, slug):
+
+    context = {
+        "score":50,
+        "global_score":50,
+        "title": slug.replace("-", " "),
+        "slug":slug
+    }
+
+    return render(request, 'singleBadgeView.html', context)
+
+def view_all_badges(request, slug):
+
+    badge1 = "/media/badge_placeholder.png"
+    badge2 = "/media/badge_placeholder.png"
+    badge3 = "/media/badge_placeholder.png"
+    badge4 = "/media/badge_placeholder.png"
+    badge5 = "/media/badge_placeholder.png"
+    badge6 = "/media/badge_placeholder.png"
+    
+    if slug == "Elderly-Badges":
+        badge1 = "/media/ElderlyBadge.png"
+        badge2 = "/media/ElderlyBadge.png"
+        badge3 = "/media/ElderlyBadge.png"
+        badge4 = "/media/ElderlyBadge.png"
+
+
+    context = {
+        "badge1": badge1,
+        "badge2": badge2,
+        "badge3": badge3,
+        "badge4": badge4,
+        "badge5": badge5,
+        "badge6": badge6,
+        "title": slug.replace("-", " "),
+    }
+
+    return render(request, 'viewAllBadgeUpgrades.html', context)
+
+def hello(request):         #  Used to collect all information needed to display the homepage and then reders the homepage
+
+    context = {
+            'ongoingActivities': ['Activity 1', 'Activity 2'],
+            'completedActivities' : ['Activity 1', 'Activity 2', 'Activity 3', 'Activity 4', 'Activity 5', 'Activity 6', 
+                          'Activity 7', 'Activity 8', 'Activity 9', 'Activity 10', 'Activity 11', 'Activity 12'],
+            'charities': ['Charity 1', 'Charity 2', 'Charity 3', 'Charity 4', 'Charity 5', 'Charity 6', 
+                          'Charity 7', 'Charity 8', 'Charity 9', 'Charity 10', 'Charity 11', 'Charity 12']
+        }
+    
+    if request.user.is_authenticated:
+        return render(request, 'homepage.html', context)
+    else:
+        return render(request, 'noLoginHome.html', context)
+
+
+
+def custom404(request, exception):          #  used to render the 404 page when a 404 error is thrown only when django debug settings set to False
+    return render(request, "404Page.html", status = 404)
+
+
 
 def calculate_impact(request, charity, volunteer):
 

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+
+
+{% block title %}
+    {%trans 'Delete Page: '%}
+{% endblock title %}
+
+{% block content %}
+
+    <div class = "display">
+        <img src="/media/{{ album.cover_image }}", width = 300, height = 300><br>
+        {{album.title}}<br>
+        {%trans album.description %}<br>
+        {{album.artist}}<br>
+        {{album.price}}<br>
+        {{album.format}}<br>
+        {{album.release_date}}
+    </div>
+
+
+    {% if permission != 'editor' %}
+            <h3> {% trans 'You must have editor permission to use this.' %} </h3>
+    {% else %}
+        <h1> {% trans 'Are you sure you want to delete this album?' %}</h1>
+        <form method="POST" action="/albums/{{album.id}}/delete/">
+            {% csrf_token %}
+            <button class = "REDbutton" type="submit" name = "action" value = 'deleting'>{% trans 'Confirm' %}</button>
+        </form>
+        <form method="GET" action="/albums/{{album.id}}/">
+            {% csrf_token %}
+            <button class = "button" type="submit" name = "action" value = 'Cancel'>{% trans 'Cancel' %}</button>
+        </form>
+    {% endif %}
+{% endblock content%}
+

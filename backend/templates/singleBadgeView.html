@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+    {% block title %}
+    {% trans 'Explore' %}
+    {% endblock title %}
+<body>
+    {% block content %}
+    
+    <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
+    <h1>{{title}}</h1>
+        
+    <div style="display: flex;">
+        <div style="margin-top: 7vw; margin-left: 7vw; text-align: center; transform: scale(1.5);">
+            <div class = "displayBadgeSingular" style="margin-top: 1vw;">
+                    
+                    <img src="/media/ElderlyBadge.png">
+                
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20vh; margin-left: 7vw; transform: scale(1.7);">
+            <div>
+                <h3> Your Contribution </h3>
+                <h1> {{score}} </h1>
+            </div>
+            <div>
+                <h3> Global Contribution </h3>
+                <h1> {{global_score}} </h1>
+            </div>
+        </div>
+
+    <div>
+        <span class = "verticalBar"><span class = "anim"></span></span>
+    </div>
+
+    </div>
+    <form method = "GET" action = "/view-all/badges/{{slug}}s">
+        <button class = "button" type = "submit">View All {{title}}</button>
+    </form>
+    
+
+
+</body>
+</html>
+    {% endblock content %}

@@ -93,7 +93,7 @@ class Opportunity(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     capacity = models.IntegerField(default = 0)
-    current_colunteers_count = models.IntegerField(default = 0)
+    current_volunteers_count = models.IntegerField(default = 0)
 
 
     def __str__(self):

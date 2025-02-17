@@ -3,6 +3,8 @@ from django.contrib.auth import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views
 from .views import login_view, google_login_callback, register_volunteer, register_organization
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('api/charity-search/', views.charity_search, name='charity_search'),
@@ -20,5 +22,10 @@ urlpatterns = [
     path('api/organization/stats/', views.api_organization_stats, name='api_organization_stats'),
     path('api/organization/profile/', views.api_organization_profile, name='api_organization_profile'),
 
-    path('<int:charity>/<int:volunteer>', views.calculate_impact)
+    path('<int:charity>/<int:volunteer>', views.calculate_impact),
+    path('view/opportunity/all/', views.view_all_opportunities),
+    path('view-all/badges/<slug:slug>/', views.view_all_badges),
+    path('view/badges/<slug:slug>/', views.view_specified_badge),
+    path('view/badges/', views.view_badges),
+    path('', views.hello),
 ]
