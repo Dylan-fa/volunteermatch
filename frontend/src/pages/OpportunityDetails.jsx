@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 
 const OpportunityDetails = () => {

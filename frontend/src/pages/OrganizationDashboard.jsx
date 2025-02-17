@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axios';  // Update import to use configured instance
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 
 const StatCard = ({ title, value, icon }) => (

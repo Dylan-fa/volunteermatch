@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import api from '../utils/api';
 
 const defaultCenter = {
@@ -138,7 +138,7 @@ const OpportunityForm = () => {
             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50"
           />
           <div className="mt-2 h-[400px] w-full">
-            <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+            <LoadScript googleMapsApiKey={import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY}>
               <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '100%' }}
                 center={defaultCenter}

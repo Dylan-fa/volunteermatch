@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { debounce } from 'lodash';
+import { useNavigate } from 'react-router';
+import _ from 'lodash';
+const { debounce } = _;
 import { useUser } from '../contexts/UserContext';  // Add this import
 
 const OrganizationRegistration = () => {

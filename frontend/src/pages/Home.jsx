@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 
 const Home = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import axios from 'axios';

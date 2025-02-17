@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { GoogleLogin } from '@react-oauth/google';
 
 const VolunteerRegistration = () => {

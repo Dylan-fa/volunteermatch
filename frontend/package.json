@@ -2,28 +2,26 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "proxy": "http://localhost:8000",
   "dependencies": {
     "@react-google-maps/api": "^2.20.6",
     "@react-oauth/google": "^0.12.1",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^14.6.1",
+    "@react-router/node": "^7.1.5",
+    "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "framer-motion": "^12.4.2",
+    "isbot": "^5",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
-    "react-router-dom": "^7.1.5",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^4.2.4"
+    "vite": "^6.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-router dev",
+    "build": "react-router build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
@@ -44,10 +42,7 @@
     ]
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.6",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.2",
-    "postcss-loader": "^8.1.1",
+    "@react-router/dev": "^7.1.5",
     "tailwindcss": "^4.0.6"
   }
 }
