@@ -1,21 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
+import useInView from '../hooks/useInView';
 
 const Home = () => {
-  const [showOptions, setShowOptions] = useState(false);
   const [gradientPosition, setGradientPosition] = useState(0);
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const optionsRef = useRef(null);
+  const isOptionsInView = useInView(optionsRef);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      // Show options when scrolling down past 100px, hide when scrolling back up
-      setShowOptions(scrollPosition > 100);
-      // Update gradient position based on scroll
       setGradientPosition(scrollPosition * 0.2);
-      // Add header animation trigger
       setIsHeaderCompact(scrollPosition > 50);
     };
 
@@ -28,7 +25,6 @@ const Home = () => {
       behavior: 'smooth',
       block: 'center'
     });
-    setShowOptions(true);
   };
 
   // Add this style to your title span
@@ -107,7 +103,7 @@ const Home = () => {
                 <div className="py-32" ref={optionsRef}>
                   <div 
                     className={`max-w-4xl mx-auto grid grid-cols-1 gap-8 md:grid-cols-2 transition-all duration-1000 transform
-                      ${showOptions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+                      ${isOptionsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                   >
                     {/* Volunteer Option */}
                     <div className="group relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">

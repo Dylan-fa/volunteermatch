@@ -1,52 +1,91 @@
-import axios from 'axios';
+const BASE_URL = '/api';
 
-const api = axios.create({
-  baseURL: '/api'
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+const api = {
+  async request(endpoint, options = {}) {
+    const url = `${BASE_URL}${endpoint}`;
+    const token = localStorage.getItem('access_token');
     
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` })
+    };
+
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
+      }
+    };
+
+    try {
+      const response = await fetch(url, config);
       
-      try {
+      if (response.status === 401 && !config._retry) {
+        // Handle token refresh
         const refreshToken = localStorage.getItem('refresh_token');
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
 
-        const response = await axios.post('/api/token/refresh/', {
-          refresh: refreshToken
+        const refreshResponse = await fetch(`${BASE_URL}/token/refresh/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: refreshToken })
         });
-        
-        const { access } = response.data;
+
+        if (!refreshResponse.ok) {
+          throw new Error('Token refresh failed');
+        }
+
+        const { access } = await refreshResponse.json();
         localStorage.setItem('access_token', access);
-        
-        originalRequest.headers.Authorization = `Bearer ${access}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Clear all auth data if refresh fails
+
+        // Retry original request
+        config.headers.Authorization = `Bearer ${access}`;
+        config._retry = true;
+        return this.request(endpoint, config);
+      }
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error.message === 'Token refresh failed') {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
         window.location.href = '/login';
-        return Promise.reject(refreshError);
       }
+      throw error;
     }
-    
-    return Promise.reject(error);
+  },
+
+  get(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: 'GET' });
+  },
+
+  post(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  put(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  delete(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: 'DELETE' });
   }
-);
+};
 
 export default api;

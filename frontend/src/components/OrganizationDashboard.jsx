@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../utils/axios';  // Update import to use configured instance
 import { Link } from 'react-router';
-import PageTransition from '../components/PageTransition';
+import PageTransition from './PageTransition';
+import api from '../utils/api';
 
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -26,12 +26,12 @@ const OrganizationDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, profileRes] = await Promise.all([
-          axiosInstance.get('/api/organization/stats/'),  // Use axiosInstance instead of axios
-          axiosInstance.get('/api/organization/profile/')
+          api.get('/organization/stats/'),
+          api.get('/organization/profile/')
         ]);
-        setStats(statsRes.data);
-        setProfile(profileRes.data);
-        setEditForm(profileRes.data);
+        setStats(statsRes);
+        setProfile(profileRes);
+        setEditForm(profileRes);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -51,10 +51,10 @@ const OrganizationDashboard = () => {
         }
       });
 
-      const response = await axiosInstance.put('/api/organization/profile/', formData, {  // Use axiosInstance
+      const response = await api.put('/organization/profile/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setProfile(response.data);
+      setProfile(response);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);

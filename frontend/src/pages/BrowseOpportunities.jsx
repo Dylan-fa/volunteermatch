@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
-import axios from 'axios';
+import api from '../utils/api';
 
 const CATEGORIES = [
   { name: 'All Categories', count: '2.5k' },
@@ -125,8 +125,8 @@ const BrowseOpportunities = () => {
     const fetchOpportunities = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('/api/opportunities/');
-        setOpportunities(response.data);
+        const data = await api.get('/opportunities/');
+        setOpportunities(data);
       } catch (error) {
         console.error('Error fetching opportunities:', error);
       } finally {

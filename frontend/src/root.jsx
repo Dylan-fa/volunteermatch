@@ -10,7 +10,7 @@ import { AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { UserProvider } from './contexts/UserContext';
 import NavBar from './components/NavBar';
-import GoogleOneTap from './components/GoogleOneTap';
+import GoogleOneTapProvider from './components/GoogleOneTapProvider';
 import "./index.css";
 
 export function Layout({ children }) {
@@ -54,18 +54,21 @@ export default function Root() {
     backgroundPosition: `${gradientPosition}% 50%`,
   };
     return (
-        <GoogleOAuthProvider clientId="1032409090840-gus43isikcnuq4n365l7gocm53h725dl.apps.googleusercontent.com">
-          <UserProvider>
-              <div className="min-h-screen bg-gray-50">
-                <NavBar isScrolled={isScrolled} gradientStyle={gradientStyle} />
-                <GoogleOneTap />
-                <AnimatePresence mode="wait">
-                  <main className="pt-16">
-                    <Outlet />
-                  </main>
-                </AnimatePresence>
-              </div>
-          </UserProvider>
-        </GoogleOAuthProvider>
+          <GoogleOAuthProvider 
+            clientId="1032409090840-gus43isikcnuq4n365l7gocm53h725dl.apps.googleusercontent.com"
+          >
+            <UserProvider>
+              <GoogleOneTapProvider>
+                <div className="min-h-screen bg-gray-50">
+                  <NavBar isScrolled={isScrolled} gradientStyle={gradientStyle} />
+                  <AnimatePresence mode="wait">
+                    <main className="pt-16">
+                      <Outlet />
+                    </main>
+                  </AnimatePresence>
+                </div>
+              </GoogleOneTapProvider>
+            </UserProvider>
+          </GoogleOAuthProvider>
     );
 }

@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
 import { GoogleLogin } from '@react-oauth/google';
 
-const VolunteerRegistration = () => {
+const VolunteerRegistration = ({ onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     password2: ''
   });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,17 +20,12 @@ const VolunteerRegistration = () => {
         body: JSON.stringify(formData),
       });
       
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Registration failed');
       }
 
-      const data = await response.json();
-      localStorage.setItem('token', data.access);
-      localStorage.setItem('refreshToken', data.refresh);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      navigate('/dashboard');
+      onRegisterSuccess(data);
     } catch (err) {
       setError(err.message);
     }
@@ -51,16 +44,12 @@ const VolunteerRegistration = () => {
         }),
       });
       
+      const data = await response.json();
       if (!response.ok) {
         throw new Error('Google registration failed');
       }
 
-      const data = await response.json();
-      localStorage.setItem('token', data.access);
-      localStorage.setItem('refreshToken', data.refresh);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      navigate('/dashboard');
+      onRegisterSuccess(data);
     } catch (err) {
       setError(err.message);
     }
@@ -78,6 +67,8 @@ const VolunteerRegistration = () => {
         onSuccess={handleGoogleSuccess}
         onError={() => setError('Google registration failed')}
         className="w-full mb-4"
+        containerProps={{ allow: "identity-credentials-get" }}
+        use_fedcm_for_prompt
       />
 
       <div className="relative my-6">

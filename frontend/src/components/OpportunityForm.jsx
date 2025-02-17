@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { Map, AdvancedMarker, APIProvider } from '@vis.gl/react-google-maps';
 import { useNavigate } from 'react-router';
 import api from '../utils/api';
 
@@ -29,9 +29,9 @@ const OpportunityForm = () => {
     }));
   };
 
-  const handleMapClick = async (e) => {
-    const lat = e.latLng.lat();
-    const lng = e.latLng.lng();
+  const handleMapClick = (e) => {
+    const lat = e.lat;
+    const lng = e.lng;
     
     setMarker({ lat, lng });
     setFormData(prev => ({
@@ -44,17 +44,18 @@ const OpportunityForm = () => {
     const geocoder = new window.google.maps.Geocoder();
     const latlng = { lat, lng };
     
-    try {
-      const response = await geocoder.geocode({ location: latlng });
-      if (response.results[0]) {
-        setFormData(prev => ({
-          ...prev,
-          location_name: response.results[0].formatted_address
-        }));
-      }
-    } catch (error) {
-      console.error('Geocoding failed:', error);
-    }
+    geocoder.geocode({ location: latlng })
+      .then(response => {
+        if (response.results[0]) {
+          setFormData(prev => ({
+            ...prev,
+            location_name: response.results[0].formatted_address
+          }));
+        }
+      })
+      .catch(error => {
+        console.error('Geocoding failed:', error);
+      });
   };
 
   const handleSubmit = async (e) => {
@@ -138,16 +139,21 @@ const OpportunityForm = () => {
             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50"
           />
           <div className="mt-2 h-[400px] w-full">
-            <LoadScript googleMapsApiKey={import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY}>
-              <GoogleMap
-                mapContainerStyle={{ width: '100%', height: '100%' }}
-                center={defaultCenter}
-                zoom={13}
-                onClick={handleMapClick}
+            <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+              <Map
+                defaultCenter={defaultCenter}
+                defaultZoom={13}
+                reuseMaps={true}
+                onClick={(e) => handleMapClick(e.detail.latLng)}
+                mapId="107f378fc363e5a7"
               >
-                {marker && <Marker position={marker} />}
-              </GoogleMap>
-            </LoadScript>
+                {marker && (
+                  <AdvancedMarker
+                    position={marker}
+                  />
+                )}
+              </Map>
+            </APIProvider>
           </div>
           <p className="mt-2 text-sm text-gray-500">Click on the map to set the location</p>
         </div>

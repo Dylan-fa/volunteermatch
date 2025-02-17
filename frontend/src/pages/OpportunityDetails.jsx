@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { useParams, Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
+import api from '../utils/api';
 
 const OpportunityDetails = () => {
   const { id } = useParams();
@@ -11,9 +11,9 @@ const OpportunityDetails = () => {
   useEffect(() => {
     const fetchOpportunity = async () => {
       try {
-        const response = await axios.get(`/api/opportunities/${id}/`);
-        setOpportunity(response.data);
-        initMap(response.data);
+        const data = await api.get(`/opportunities/${id}/`);
+        setOpportunity(data);
+        initMap(data);
       } catch (error) {
         console.error('Error fetching opportunity:', error);
       }
@@ -38,10 +38,10 @@ const OpportunityDetails = () => {
 
   const handleApply = async () => {
     try {
-      await axios.post(`/api/opportunities/${id}/apply/`);
+      await api.post(`/opportunities/${id}/apply/`);
       // Refresh opportunity data to update application status
-      const response = await axios.get(`/api/opportunities/${id}/`);
-      setOpportunity(response.data);
+      const data = await api.get(`/opportunities/${id}/`);
+      setOpportunity(data);
     } catch (error) {
       console.error('Error applying:', error);
     }

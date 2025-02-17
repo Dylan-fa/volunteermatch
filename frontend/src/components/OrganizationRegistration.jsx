@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import _ from 'lodash';
-const { debounce } = _;
-import { useUser } from '../contexts/UserContext';  // Add this import
+import debounce from 'lodash/debounce';
+import { useUser } from '../contexts/UserContext';
 
-const OrganizationRegistration = () => {
+const OrganizationRegistration = ({ onRegisterSuccess }) => {
   const [step, setStep] = useState(1);
   const [charityData, setCharityData] = useState({
     name: '',
@@ -149,21 +148,12 @@ const OrganizationRegistration = () => {
         body: formDataToSend,
       });
       
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Registration failed');
       }
 
-      const data = await response.json();
-      
-      // Update tokens in localStorage
-      localStorage.setItem('token', data.access);
-      localStorage.setItem('refreshToken', data.refresh);
-      
-      // Update user context to trigger UI updates
-      login(data.user);
-      
-      navigate('/dashboard');
+      onRegisterSuccess(data);
     } catch (err) {
       setError(err.message);
     }

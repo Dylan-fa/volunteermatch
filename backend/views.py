@@ -100,39 +100,49 @@ def login_view(request):
 
 @api_view(['POST'])
 def google_login_callback(request):
-    adapter = GoogleOAuth2Adapter(request)
     try:
-        # Try to get either id_token or credential
-        token = request.data.get('id_token') or request.data.get('credential')
-        if not token:
-            return Response({'error': 'No valid token provided'}, status=400)
+        credential = request.data.get('credential')
+        if not credential:
+            return Response({'error': 'No credential provided'}, status=400)
 
-        app = adapter.get_provider().app
-        # Decode and verify the token
-        data = adapter._decode_id_token(app, token)
+        # Verify the token with Google
+        google_response = requests.get(
+            'https://oauth2.googleapis.com/tokeninfo',
+            params={'id_token': credential}
+        )
         
-        # Get or create social login
-        login = adapter.get_provider().sociallogin_from_response(request, data)
+        if not google_response.ok:
+            return Response({'error': 'Invalid credential'}, status=400)
         
-        if not login.user:
-            # If user doesn't exist, create one
-            user_type = request.data.get('user_type', 'volunteer')
-            login.save()
+        google_data = google_response.json()
+        
+        # Get or create user
+        try:
+            user = User.objects.get(email=google_data['email'])
+        except User.DoesNotExist:
+            user = User.objects.create_user(
+                username=google_data['email'],
+                email=google_data['email'],
+                first_name=google_data.get('given_name', ''),
+                last_name=google_data.get('family_name', '')
+            )
             
-            # Create the appropriate profile
+            # Create profile based on user_type
+            user_type = request.data.get('user_type', 'volunteer')
             if user_type == 'volunteer':
-                Volunteer.objects.get_or_create(user=login.user)
+                Volunteer.objects.create(user=user)
             elif user_type == 'organization':
-                Organization.objects.get_or_create(user=login.user)
+                Organization.objects.create(user=user)
 
-        refresh = RefreshToken.for_user(login.user)
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
-                'email': login.user.email,
-                'is_volunteer': hasattr(login.user, 'volunteer'),
-                'is_organization': hasattr(login.user, 'organization')
+                'email': user.email,
+                'is_volunteer': hasattr(user, 'volunteer'),
+                'is_organization': hasattr(user, 'organization')
             }
         })
     except Exception as e:

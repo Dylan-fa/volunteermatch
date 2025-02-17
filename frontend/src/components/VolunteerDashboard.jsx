@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
-import PageTransition from '../components/PageTransition';
+import PageTransition from './PageTransition';
 
 // Badge definitions
 const BADGES = {
