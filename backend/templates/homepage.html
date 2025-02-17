@@ -22,7 +22,11 @@
             {% for charity in charities %}
         
             <div class = "display">
-                {{charity}}
+                <img src="{{charity.logo}}">
+                <br>
+                {{charity.name}}
+                <br>
+                charity number = {{charity.charity_number}}
             </div>
             {% endfor %}
         </div>

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import os
+import json
 
 class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
@@ -94,6 +96,17 @@ class Opportunity(models.Model):
     end_date = models.DateTimeField()
     capacity = models.IntegerField(default = 0)
     current_volunteers_count = models.IntegerField(default = 0)
+
+    def save(self, *args, **kwargs):
+        file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
+        with open(file_path, "r") as file:
+            data = json.load(file)
+
+        for location in data:
+            if self.location_name == location["city"]:
+                self.latitude = location["lat"]
+                self.longitude = location["lng"]
+        return super().save(*args, **kwargs)
 
 
     def __str__(self):

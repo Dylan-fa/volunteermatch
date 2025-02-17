@@ -46,8 +46,7 @@ def get_permission(request):
 def view_all_opportunities(request):
 
     context = {
-        'charities': ['Charity 1', 'Charity 2', 'Charity 3', 'Charity 4', 'Charity 5', 'Charity 6', 
-                          'Charity 7', 'Charity 8', 'Charity 9', 'Charity 10', 'Charity 11', 'Charity 12']
+        'charities': Opportunity.objects.all(),
     }
 
     return render(request, 'viewAllOpportunities.html', context)
@@ -105,12 +104,13 @@ def view_all_badges(request, slug):
 
 def hello(request):         #  Used to collect all information needed to display the homepage and then reders the homepage
 
+    charities = Organization.objects.all()
+
     context = {
             'ongoingActivities': ['Activity 1', 'Activity 2'],
             'completedActivities' : ['Activity 1', 'Activity 2', 'Activity 3', 'Activity 4', 'Activity 5', 'Activity 6', 
                           'Activity 7', 'Activity 8', 'Activity 9', 'Activity 10', 'Activity 11', 'Activity 12'],
-            'charities': ['Charity 1', 'Charity 2', 'Charity 3', 'Charity 4', 'Charity 5', 'Charity 6', 
-                          'Charity 7', 'Charity 8', 'Charity 9', 'Charity 10', 'Charity 11', 'Charity 12']
+            'charities': charities
         }
     
     if request.user.is_authenticated:
@@ -128,7 +128,6 @@ def custom404(request, exception):          #  used to render the 404 page when 
 def calculate_impact(request, charity, volunteer):
 
     opportunity = Opportunity.objects.get(id = charity)
-    print(opportunity)
     volunteer = get_object_or_404(Volunteer, id = volunteer)
     applications = Application.objects.all()
     current_application = None
@@ -137,10 +136,6 @@ def calculate_impact(request, charity, volunteer):
         if  application.volunteer == volunteer:
             current_application = application
             break
-
-
-
-    print(applications)
 
     # Open and load JSON file to get population data
     file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")

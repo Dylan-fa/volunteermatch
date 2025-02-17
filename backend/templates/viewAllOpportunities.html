@@ -24,7 +24,9 @@
         <div class = "gridDisplay">
             {% for charity in charities %}
                 <div class = "display">
-                    {{charity}}
+                    {{charity.title}} <br>
+                    {{charity.categories.all}} <br>
+                    Effort: {{charity.estimated_effort_ranking}}
                 </div>
             {% endfor %}
         </div>
