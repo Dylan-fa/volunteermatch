@@ -8,11 +8,41 @@
     {% block content %}
 
 <body>
+    <h1 style = "background-color: rgb(116, 213, 116); margin: 0 0 0 0;">{{message}}</h1>
     <h2 style = "margin-left: 0;">Search for a Friend</h2>
     <input type="text" id="searchBar" onkeyup="searchFriend()" placeholder="Search for a name...">
-    <div id="userList">
-        {% for volunteer in users %}
-            <div class="user">{{volunteer.display_name}}</div>
+    <div id="userList", style = "display: flex;">
+        <div class = "gridDisplay" style="border: 0; margin: 0 10vw 0 10vw;">
+            {% for volunteer in users %}
+            
+                <form class="user" method = "post" action="/view/friends/">
+                    {% csrf_token %}
+                    {{volunteer.display_name}}
+                    <br>
+                    <input type="hidden" name="volunteer_id" value="{{ volunteer.id }}">
+                    <button type = "submit" class = "addButton" style = "margin: 3vh 0 0 0;">
+                        Add
+                    </button>
+                </form>
+        
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <H1 style = "margin: 0 0 0 0">Requests</H1>
+        {% for request in requests %}
+        
+            <form class="user" method = "post" action="/view/friends/">
+                {% csrf_token %}
+                {{request.from_volunteer.display_name}}
+                <br>
+                <input type="hidden" name="accept" value="{{ request.id }}">
+                <button type = "submit" class = "addButton" style = "margin: 3vh 0 0 0;">
+                    Accept
+                </button>
+            </form>
+    
         {% endfor %}
     </div>
 

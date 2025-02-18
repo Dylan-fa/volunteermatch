@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
 from django.conf import settings
-from .models import Organization, Volunteer, Opportunity, Application
+from .models import Organization, Volunteer, Opportunity, Application, Friendship
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
@@ -250,9 +250,39 @@ def calculate_impact(request, charity, volunteer):
 
 @login_required
 def view_friends(request):
+    message = ""
+
+    fromV = Volunteer.objects.get(user = request.user)
+
+    if request.method =="POST":
+        if request.POST.get("accept"):
+            friendship = Friendship.objects.get(id = request.POST.get("accept"))
+            friendship.status = "accepted"
+            friendship.save()
+            message = "Added as a Friend Successfully"
+        else:
+
+            toVol = request.POST.get("volunteer_id")
+            toV = Volunteer.objects.get(id = toVol)
+            message = "Sent a request to " + toV.display_name
+            
+            
+            Friendship.objects.create(from_volunteer = fromV, to_volunteer = toV, status = "pending")
+
+    reqs = []
+
+    for friendship in Friendship.objects.filter(status = "pending"):
+        if friendship.to_volunteer == fromV:
+            reqs.append(friendship)
+
+    print(reqs)
+
+    users = Volunteer.objects.exclude(id = fromV.id)
 
     context = {
-            "users": Volunteer.objects.all()
+            "message": message,
+            "users": users,
+            "requests": reqs
         }
     
     return render(request, 'friends_page.html', context)

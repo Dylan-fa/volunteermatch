@@ -11,8 +11,8 @@
 <body>
     {% block content %}
     
-    <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
-    <h1>{{title}}</h1>
+    <h4 style = "margin-left: 0;" class = "greyText">{% trans 'Welcome to' %}</h4>
+    <h1 style = "margin-left: 0;">{{title}}</h1>
         
     <div style="display: flex;">
         <div style="margin-top: 7vw; margin-left: 7vw; text-align: center; transform: scale(1.5);">
@@ -24,12 +24,12 @@
         </div>
         <div style="text-align: center; margin-top: 20vh; margin-left: 7vw; transform: scale(1.7);">
             <div>
-                <h3> Your Contribution </h3>
-                <h1> {{score}} </h1>
+                <h3 style = "margin-left: 10vw;"> Your Contribution </h3>
+                <h1 style = "margin-left: 10vw;"> {{score}} </h1>
             </div>
             <div>
-                <h3> Global Contribution </h3>
-                <h1> {{global_score}} </h1>
+                <h3 style = "margin-left: 10vw;"> Global Contribution </h3>
+                <h1 style = "margin-left: 10vw;"> {{global_score}} </h1>
             </div>
         </div>
 
