@@ -12,7 +12,7 @@
     {% endblock title %}
 
     {% block content %}
-    
+    <h1 style = "background-color: rgb(116, 213, 116); margin: 0 0 0 0;">{{message}}</h1>
     <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
     <h1> {% trans '"Project Name" Explore' %}</h1>
     <h2 style = "padding-top: 5vw;">{%trans 'Picked For You' %}</h2>
@@ -50,16 +50,23 @@
         <button class = "overlay-button-right" onclick="scrollRightCurrent()">></button>
     </div>
 
-    <h2 style = "padding-top: 5vw;">{% trans 'Your Completed Activities' %} </h2>
+    <h2 style = "padding-top: 5vw;">{% trans 'Friends' %} </h2>
 
     <div class = "grid" id = "completedOpportunities">
 
         <div class = scroll-content id = scrollable-content-complete>
-            {% for activity in completedActivities %}
+            {% for friend in friends %}
         
-            <div class = "display">
-                {{activity}}
-            </div>
+            <form class = "display", method = "post", action = "/">
+                {% csrf_token %}
+                {{friend.display_name}}
+                <br>
+                <input type="hidden" name="friend_id" value="{{ friend.id }}">
+                <button type = "submit" class = "addButton" style = "margin: 14vw 0 0 5vw; height: 3vh; background-color: red;">
+                    Remove
+                </button>
+                    
+            </form>
             {% endfor %}
         </div>
         <button class = "overlay-button-left" onclick="scrollLeftComplete()"><</button>

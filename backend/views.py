@@ -92,14 +92,39 @@ def view_all_badges(request, slug):
     return render(request, 'viewAllBadgeUpgrades.html', context)
 
 def hello(request):         #  Used to collect all information needed to display the homepage and then reders the homepage
+    message = ""
+
+
 
     charities = Organization.objects.all()
+    friends = []
+    current_user = None
+    if request.user.is_authenticated:
+        current_user = Volunteer.objects.get(user = request.user)
+
+    if request.method == "POST":
+        fID = request.POST.get("friend_id")
+        try:
+            friendship = Friendship.objects.get(to_volunteer = current_user, from_volunteer = Volunteer.objects.get(id = fID))
+            friendship.delete()
+        except:
+            friendship = Friendship.objects.get(to_volunteer = Volunteer.objects.get(id = fID), from_volunteer = current_user)
+            friendship.delete()
+            
+        message = "Removed Friend Successfully"
+
+    for friendship in Friendship.objects.all():
+        if friendship.to_volunteer == current_user or friendship.from_volunteer == current_user:
+            if friendship.to_volunteer == current_user:
+                friends.append(friendship.from_volunteer)
+            elif friendship.from_volunteer == current_user:
+                friends.append(friendship.to_volunteer)
 
     context = {
             'ongoingActivities': ['Activity 1', 'Activity 2'],
-            'completedActivities' : ['Activity 1', 'Activity 2', 'Activity 3', 'Activity 4', 'Activity 5', 'Activity 6', 
-                          'Activity 7', 'Activity 8', 'Activity 9', 'Activity 10', 'Activity 11', 'Activity 12'],
-            'charities': charities
+            'friends' : friends,
+            'charities': charities,
+            'message': message
         }
     
     if request.user.is_authenticated:
@@ -278,6 +303,12 @@ def view_friends(request):
     print(reqs)
 
     users = Volunteer.objects.exclude(id = fromV.id)
+
+    for friendship in Friendship.objects.all():
+        if friendship.to_volunteer == fromV or friendship.from_volunteer == fromV:
+            users = users.exclude(id = friendship.to_volunteer.id)
+            users = users.exclude(id = friendship.from_volunteer.id)
+
 
     context = {
             "message": message,

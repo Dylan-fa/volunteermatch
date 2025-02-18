@@ -392,6 +392,7 @@
         
             <div class = "right-Item">
                 {% if user.is_authenticated %}
+                {{user.email}}
                     <div style="float: right;">
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
