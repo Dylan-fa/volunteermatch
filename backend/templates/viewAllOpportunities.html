@@ -17,9 +17,62 @@
      
     <div style = "display:flex; margin-top: 5vw;">
 
-        <div class = "filterBox">
-            filters
-        </div>
+        <form class = "filterBox" action = "/view/opportunity/all/" method = "post">
+            {% csrf_token %}
+            <h3 style = "margin: 0">filters</h3>
+            <label><input type="checkbox" name="elderly"> Elderly</label><br>
+            <label><input type="checkbox" name="medical"> Medical</label><br>
+            <label><input type="checkbox" name="disability"> Disability</label><br>
+            <label><input type="checkbox" name="animal"> Animal</label><br>
+            <label><input type="checkbox" name="educational"> Educational</label><br>
+            <label><input type="checkbox" name="sport"> Sport</label><br>
+            <label><input type="checkbox" name="greener_planet"> Greener Planet</label><br>
+            <label><input type="checkbox" name="community"> Community</label><br>
+
+            <!-- Verified Checkbox -->
+            <label><input type="checkbox" name="verification" {% if request.GET.verification %}checked{% endif %}> Verified</label><br>
+
+            <!-- Effort Level Checkboxes -->
+            <label for="dropdown">Effort:</label>
+
+            <select name="effort" id="dropdown">
+
+              <option value="-">-</option> 
+          
+              <option value="low">Low</option>
+          
+              <option value="medium">Medium</option>
+          
+              <option value="high">High</option>
+          
+            </select>
+            
+
+            <!-- Location Checkbox -->
+            <label>Postcode: <input type="text" name="user_postcode" value="{{ request.GET.user_postcode }}"></label><br>
+            <label>Max Distance (km): <input type="number" name="max_distance_km" value="{{ request.GET.max_distance_km }}"></label><br>
+
+            <!-- Sorting Options -->
+            <label for="dropdown">Sort by:</label>
+
+            <select name="order" id="dropdown">
+
+              <option value="-">-</option> 
+          
+              <option value="nearest_deadline">Closest DeadLine</option>
+          
+              <option value="furthest_deadline">Furthest DeadLine</option>
+          
+              <option value="newest">Newest First</option>
+
+              <option value="oldest">Oldest First</option>
+          
+            </select>
+
+            <!-- Submit Button -->
+            <button type="submit">Apply Filters</button>
+            <button type="reset">Clear Filters</button>
+        </form>
 
         <div class = "gridDisplay">
             {% for charity in charities %}

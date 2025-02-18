@@ -22,7 +22,11 @@ from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
 from datetime import datetime
-from django.views.decorators.csrf import csrf_exempt
+
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
+from geopy.distance import geodesic
+
 
 # Use this file for your templated views only
 from django.http import HttpResponse, HttpResponseForbidden
@@ -34,12 +38,13 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 
 def view_all_opportunities(request):
-
-    context = {
-        'charities': Opportunity.objects.all(),
-    }
-
-    return render(request, 'viewAllOpportunities.html', context)
+    if request.method == "POST":
+        return(filtered_opp(request))
+    else:
+        context = {
+            'charities': Opportunity.objects.all(),
+        }
+        return render(request, 'viewAllOpportunities.html', context)
 
 def view_badges(request):
 
@@ -450,6 +455,144 @@ def api_volunteer_detail(request, id):
         } for friend in friends]
     }
     return Response(data)
+
+    
+def sort(opportunities, type):
+    filtered = []
+
+    for opportunity in opportunities:
+        print("opportunity = " + opportunity.title)
+        for category in opportunity.categories.all():
+            print("category = " + category.name)
+            print("type = " + type)
+            if type == category.name:
+                filtered.append(opportunity)
+    
+    return filtered
+
+def sort_verified(opportunities, isverified):
+    filtered = []
+    for opportunity in opportunities:
+        if opportunity.organisation.approved == isverified:
+            filtered.append(opportunity)
+    
+    return filtered
+
+def sort_effort(opportunities, effort):
+    filtered = []
+    for opportunity in opportunities:
+        if opportunity.estimated_effort_ranking == effort:
+            filtered.append(opportunity)
+
+    return filtered
+
+def get_coordinates_from_postcode(postcode):
+    
+    geolocator = Nominatim(user_agent="backend")
+    print(geolocator)
+    
+    try:
+        location = geolocator.geocode(postcode)
+        print(location)
+        if location:
+            return location.latitude, location.longitude
+        else:
+            return None, None
+    except GeocoderTimedOut:
+        return None, None
+
+def sort_location(opportunities, user_postcode, max_distance_km):
+
+    user_lat, user_lon = get_coordinates_from_postcode(user_postcode)
+
+    if user_lat is None or user_lon is None:
+        return []  # No results if we can't determine user's location
+
+    filtered = []
+
+    for opportunity in opportunities:
+        if opportunity.latitude is not None and opportunity.longitude is not None:
+            opp_location = (opportunity.latitude, opportunity.longitude)
+            user_location = (user_lat, user_lon)
+            
+            distance = geodesic(user_location, opp_location).km  # Calculate distance in km
+            print(str (distance))
+            if float(distance) <= float(max_distance_km):
+                filtered.append(opportunity)
+
+    return filtered
+
+def ordering(opportunities, order):
+    print("pip")
+    if order == "nearest_deadline":
+        ordered = opportunities.order_by("-start_time")
+    
+    elif order == "furthest_deadline":
+        ordered = opportunities.order_by("start_time")
+    
+    elif order == "newest":
+        ordered = opportunities.order_by("-date_created")
+    
+    elif order == "oldest":
+        ordered = opportunities.order_by("date_created")
+    return ordered
+
+def filtered_opp(request):
+    elderly = request.POST.get('elderly') == 'on'
+    medical = request.POST.get('medical') == 'on'
+    disability = request.POST.get('disability') == 'on'
+    animal = request.POST.get('animal') == 'on'
+    educational = request.POST.get('educational') == 'on'
+    sport = request.POST.get('sport') == 'on'
+    greener_planet = request.POST.get('greener_planet') == 'on'
+    community = request.POST.get('community') == 'on'
+    verification = request.POST.get('verification') == 'on'
+    effort = request.POST.get('effort')
+    user_postcode = request.POST.get('user_postcode')
+    max_distance_km = request.POST.get('max_distance_km')
+    order = request.POST.get('order')
+
+
+    opportunities = Opportunity.objects.all()
+
+    if elderly:
+        opportunities = sort(opportunities, "Elderly")
+    
+    if medical:
+        opportunities = sort(opportunities, "Medical")
+    
+    if disability:
+        opportunities = sort(opportunities, "Disability")
+    
+    if animal:
+        opportunities = sort(opportunities, "Animal")
+    
+    if educational:
+        opportunities = sort(opportunities, "Educational")
+    
+    if sport:
+        opportunities = sort(opportunities, "Sports")
+    
+    if greener_planet:
+        opportunities = sort(opportunities, "Greener_Planet")
+    
+    if community:
+        opportunities = sort(opportunities, "Community")
+    
+    if verification:
+        opportunities = sort_verified(opportunities, True)
+    
+    if effort != "-":
+        opportunities = sort_effort(opportunities, effort)
+
+    if user_postcode and max_distance_km:
+        opportunities = sort_location(opportunities, user_postcode, max_distance_km)
+
+    if order != "-":
+        opportunities = ordering(opportunities, order)
+
+
+    return render(request, "viewAllOpportunities.html", {"charities": opportunities})
 
 
 

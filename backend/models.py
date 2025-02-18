@@ -95,7 +95,7 @@ class Opportunity(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    categories = models.ManyToManyField(Category, related_name='opportunities', blank=True, null=True)
+    categories = models.ManyToManyField(Category, related_name='opportunities')
     #------------------------------------------------------------------------------------------------- Alex Addded Below Need to talk through
 
     CHOICES = {
