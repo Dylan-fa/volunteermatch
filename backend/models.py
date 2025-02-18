@@ -34,6 +34,7 @@ class Volunteer(models.Model):
     #------------------------------------------------------------------------------------------- Alex added below
     opportunities_completed = models.IntegerField(default = 0)
     last_completion = models.DateTimeField(null = True, blank=True)
+    display_name = models.CharField(max_length = 16, unique = True)
 
 
     def __str__(self):

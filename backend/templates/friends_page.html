@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+    {% block content %}
+
+<body>
+    <h2 style = "margin-left: 0;">Search for a Friend</h2>
+    <input type="text" id="searchBar" onkeyup="searchFriend()" placeholder="Search for a name...">
+    <div id="userList">
+        {% for volunteer in users %}
+            <div class="user">{{volunteer.display_name}}</div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function searchFriend() {
+            let input = document.getElementById("searchBar").value.toLowerCase();
+            let users = document.querySelectorAll(".user");
+            
+            users.forEach(user => {
+                if (user.textContent.toLowerCase().includes(input)) {
+                    user.style.display = "block";
+                } else {
+                    user.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+{% endblock content %}

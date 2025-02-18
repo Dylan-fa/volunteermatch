@@ -27,5 +27,6 @@ urlpatterns = [
     path('view-all/badges/<slug:slug>/', views.view_all_badges),
     path('view/badges/<slug:slug>/', views.view_specified_badge),
     path('view/badges/', views.view_badges),
+    path('view/friends/', views.view_friends),
     path('', views.hello),
 ]

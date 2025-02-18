@@ -32,17 +32,6 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 
-def get_permission(request):
-    permission = ""
-    if request.user.has_perm('label_music_manager.editor'):
-        permission = 'editor'
-    elif request.user.has_perm('label_music_manager.artist'):
-        permission = 'artist'
-    elif request.user.has_perm('label_music_manager.viewer'):
-        permission = 'viewer'
-
-    return permission
-
 def view_all_opportunities(request):
 
     context = {
@@ -62,7 +51,7 @@ def view_badges(request):
     return render(request, 'viewBadgeOptions.html')
 
     
-
+@login_required
 def view_specified_badge(request, slug):
 
     context = {
@@ -259,7 +248,14 @@ def calculate_impact(request, charity, volunteer):
 
     return HttpResponse(final_value)
 
+@login_required
+def view_friends(request):
 
+    context = {
+            "users": Volunteer.objects.all()
+        }
+    
+    return render(request, 'friends_page.html', context)
 
 
 
