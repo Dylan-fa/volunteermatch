@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from './PageTransition';
-
+import api from '../utils/api';
 // Badge definitions
 const BADGES = {
   hours: [
@@ -182,12 +182,27 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
 };
 
 const VolunteerDashboard = () => {
-  const user = {
-    name: "Alex Thompson",
-    hours: 65,
-    completedProjects: 12,
-    earnedBadges: [1, 2, 3, 5, 9],
-  };
+  const [user, setUser] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOpportunities = async () => {
+      try {
+        setIsLoading(true);
+        const data = await api.get('/volunteer/1/');
+        console.log(data)
+        setUser(data);
+
+      } catch (error) {
+        console.error('Error fetching opportunities:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOpportunities();
+  }, []);
+
 
   const [isVisible, setIsVisible] = useState(false);
   const statsRef = useRef(null);
@@ -219,7 +234,7 @@ const VolunteerDashboard = () => {
             <div className="flex items-center gap-6">
               <div className="text-5xl bg-white/20 p-4 rounded-full">{user.avatar || "👤"}</div>
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-white">{user.name}</h1>
+                <h1 className="text-2xl font-semibold text-white">{user.f_name + " " + user.l_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaClock className="w-5 h-5" />
@@ -227,7 +242,7 @@ const VolunteerDashboard = () => {
                   </span>
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaMedal className="w-5 h-5" />
-                    {user.earnedBadges.length} badges earned
+                     badges earned
                   </span>
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaUsers className="w-5 h-5" />
@@ -248,7 +263,7 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Total Hours</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={65} /> : '0'}
+                {isVisible ? <AnimatedCounter value={user.hours} /> : '0'}
               </p>
               <p className="text-sm text-white/80 mt-1">Hours volunteered</p>
             </div>
@@ -258,7 +273,7 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Projects</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={12} /> : '0'}
+                {isVisible ? <AnimatedCounter value={user.opportunities_completed} /> : '0'}
               </p>
               <p className="text-sm text-white/80 mt-1">Completed projects</p>
             </div>
@@ -268,7 +283,7 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Impact</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={150} /> : '0'}+
+                {isVisible ? <AnimatedCounter value={user.overall_score} /> : '0'}
               </p>
               <p className="text-sm text-white/80 mt-1">People helped</p>
             </div>
@@ -323,13 +338,7 @@ const VolunteerDashboard = () => {
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Badges</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.values(BADGES).flat().map(badge => (
-                <Badge 
-                  key={badge.id} 
-                  badge={badge} 
-                  earned={user.earnedBadges.includes(badge.id)} 
-                />
-              ))}
+              
             </div>
           </div>
 

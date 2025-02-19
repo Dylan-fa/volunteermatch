@@ -285,6 +285,9 @@ def view_friends(request):
             friendship.status = "accepted"
             friendship.save()
             message = "Added as a Friend Successfully"
+        elif request.POST.get("cancel_friendship_id"):
+            friendship = Friendship.objects.get(id = request.POST.get("cancel_friendship_id"))
+            friendship.delete()
         else:
 
             toVol = request.POST.get("volunteer_id")
@@ -295,12 +298,14 @@ def view_friends(request):
             Friendship.objects.create(from_volunteer = fromV, to_volunteer = toV, status = "pending")
 
     reqs = []
+    sent = []
 
     for friendship in Friendship.objects.filter(status = "pending"):
         if friendship.to_volunteer == fromV:
             reqs.append(friendship)
+        if friendship.from_volunteer == fromV:
+            sent.append(friendship)
 
-    print(reqs)
 
     users = Volunteer.objects.exclude(id = fromV.id)
 
@@ -313,14 +318,53 @@ def view_friends(request):
     context = {
             "message": message,
             "users": users,
-            "requests": reqs
+            "requests": reqs,
+            "sent_reqs": sent
         }
     
     return render(request, 'friends_page.html', context)
 
+@api_view(['GET'])
+def api_volunteer_list(request):
+    if request.user.is_authenticated:
+        users = Volunteer.objects.exclude(user = request.user) + User.objects.exclude(id = request.user.id)
+    else:
+        users = Volunteer.objects.all()
+    print(users)
+    data = [{
+        'id': user.id,
+        'f_name': user.user.first_name,
+        'l_name': user.user.last_name,
+        'display_name': user.display_name,
+        'opportunities_completed': user.opportunities_completed,
+        'last_completion': user.last_completion,
 
+    } for user in users]
+    return Response(data)
 
-
+@api_view(['GET'])
+def api_volunteer_detail(request, id):
+    user = Volunteer.objects.get(id = id)
+    data = {
+        'id': user.id,
+        'f_name': user.user.first_name,
+        'l_name': user.user.last_name,
+        'display_name': user.display_name,
+        'opportunities_completed': user.opportunities_completed,
+        'last_completion': user.last_completion,
+        'scores': {
+            'elderly': user.elderly_score,
+            'medical': user.medical_score,
+            'community': user.community_score,
+            'education': user.education_score,
+            'animals': user.animals_score,
+            'sports': user.sports_score,
+            'disability': user.disability_score,
+            'greener_planet': user.greener_planet_score,
+        },
+        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score
+    }
+    return Response(data)
 
 
 
@@ -558,7 +602,8 @@ def api_opportunity_list(request):
             request.user.is_authenticated and 
             hasattr(request.user, 'volunteer') and 
             opp.applications.filter(volunteer=request.user.volunteer).exists()
-        )
+        ),
+        'effort' : opp.estimated_effort_ranking
     } for opp in opportunities]
     return Response(data)
 

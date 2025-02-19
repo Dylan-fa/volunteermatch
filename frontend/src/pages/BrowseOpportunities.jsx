@@ -62,10 +62,14 @@ const OpportunityCard = ({ opportunity }) => {
               <h3 className="text-lg font-semibold text-gray-900">
                 {opportunity.title}
               </h3>
+              
               <p className="text-sm text-gray-500">
                 {opportunity.organization.name}
               </p>
             </div>
+            <h4 className='text-sm text-gray-500'>
+                Effort: {opportunity.effort}
+            </h4>
           </div>
           
           {/* Verification Badges */}

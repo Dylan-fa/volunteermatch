@@ -35,6 +35,14 @@ class Volunteer(models.Model):
     opportunities_completed = models.IntegerField(default = 0)
     last_completion = models.DateTimeField(null = True, blank=True)
     display_name = models.CharField(max_length = 16, unique = True)
+    elderly_score = models.IntegerField(default = 0)
+    medical_score = models.IntegerField(default = 0)
+    sports_score = models.IntegerField(default = 0)
+    animals_score = models.IntegerField(default = 0)
+    disability_score = models.IntegerField(default = 0)
+    greener_planet_score = models.IntegerField(default = 0)
+    community_score = models.IntegerField(default = 0)
+    education_score = models.IntegerField(default = 0)
 
 
     def __str__(self):
