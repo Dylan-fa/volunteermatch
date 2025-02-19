@@ -23,36 +23,6 @@ const BADGES = {
   ]
 };
 
-// Sample friends data
-const FRIENDS = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    avatar: "👩",
-    status: "online",
-    hours: 75,
-    badges: 8,
-    recentActivity: "Completed a mentoring session"
-  },
-  {
-    id: 2,
-    name: "Mike Chen",
-    avatar: "👨",
-    status: "offline",
-    hours: 120,
-    badges: 12,
-    recentActivity: "Earned 'Environmental Hero' badge"
-  },
-  {
-    id: 3,
-    name: "Emma Wilson",
-    avatar: "👩",
-    status: "online",
-    hours: 45,
-    badges: 5,
-    recentActivity: "Started a new project"
-  }
-];
 
 // Badge Component
 const Badge = ({ badge, earned }) => {
@@ -184,14 +154,16 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
 const VolunteerDashboard = () => {
   const [user, setUser] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [FRIENDS, setFriends] = useState([]);
 
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
         setIsLoading(true);
-        const data = await api.get('/volunteer/1/');
+        const data = await api.get('/volunteer/2/');
         console.log(data)
         setUser(data);
+        setFriends(data.friends);
 
       } catch (error) {
         console.error('Error fetching opportunities:', error);
@@ -308,21 +280,16 @@ const VolunteerDashboard = () => {
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <span className="text-3xl bg-gray-50 p-2 rounded-full">{friend.avatar}</span>
-                      <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${
-                        friend.status === 'online' 
-                          ? 'bg-gradient-to-r from-green-400 to-emerald-500' 
-                          : 'bg-gray-300'
-                      } border-2 border-white`}></span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{friend.name}</h3>
+                      <h3 className="font-semibold text-gray-900">{friend.display_name}</h3>
                       <p className="text-sm text-gray-500">{friend.recentActivity}</p>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-4 text-sm">
                     <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
                       <FaClock className="w-4 h-4" />
-                      {friend.hours} hours
+                      {friend.overall_score} impact
                     </span>
                     <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-3 py-1 rounded-full">
                       <FaMedal className="w-4 h-4" />

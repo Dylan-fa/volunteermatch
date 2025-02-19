@@ -95,7 +95,6 @@ def hello(request):         #  Used to collect all information needed to display
     message = ""
 
 
-
     charities = Organization.objects.all()
     friends = []
     current_user = None
@@ -345,6 +344,15 @@ def api_volunteer_list(request):
 @api_view(['GET'])
 def api_volunteer_detail(request, id):
     user = Volunteer.objects.get(id = id)
+
+    friends = []
+    for friendship in Friendship.objects.filter(status = "accepted"):
+        if friendship.to_volunteer == user:
+            friends.append(friendship.from_volunteer)
+        elif friendship.from_volunteer == user:
+            friends.append(friendship.to_volunteer)
+    print(friends)
+
     data = {
         'id': user.id,
         'f_name': user.user.first_name,
@@ -362,11 +370,18 @@ def api_volunteer_detail(request, id):
             'disability': user.disability_score,
             'greener_planet': user.greener_planet_score,
         },
-        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score
+        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score,
+        'friends': [{
+            'id': friend.id,
+            'f_name': friend.user.first_name,
+            'l_name': friend.user.last_name,
+            'display_name': friend.display_name,
+            'opportunities_completed': friend.opportunities_completed,
+            'last_completion': friend.last_completion,
+            'overall_score': friend.elderly_score + friend.medical_score + friend.community_score + friend.education_score + friend.animals_score + friend.sports_score + friend.disability_score + friend.greener_planet_score,
+        } for friend in friends]
     }
     return Response(data)
-
-
 
 
 
