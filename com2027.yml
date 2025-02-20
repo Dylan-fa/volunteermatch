@@ -1,7 +1,10 @@
-project_name: Project Name
+project_name: Volunteera
 
-project_description: |
+project_description: 
   Short description (100 words) about the web app proposed and developed. You can provide a brief overview of the project here, including which UN's SDGs this project is tackling.
+
+  Volunteera is a web application designed to connect volunteers with charities, organisations, seeking assistance for social causes
+  SDG 3 (Good Health and Wellbeing), 10 (Reduce Inequalities)
 
   Line breaks are permitted.
 
@@ -11,7 +14,7 @@ group_members:
   - Thomas Fitzsimons
   - Adel Anarbayeva
   - Rudhr Shaji
-  - Amir Dzakwan
+  - Dzak Dzulzalani
   - Dylan Farrar
 
-group_image: team.jpg
+group_image: TBD
