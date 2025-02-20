@@ -1,12 +1,8 @@
 project_name: Volunteera
 
 project_description: 
-  Short description (100 words) about the web app proposed and developed. You can provide a brief overview of the project here, including which UN's SDGs this project is tackling.
-
   Volunteera is a web application designed to connect volunteers with charities, organisations, seeking assistance for social causes
   SDG 3 (Good Health and Wellbeing), 10 (Reduce Inequalities)
-
-  Line breaks are permitted.
 
 group_members:
   - Alex Morris
