@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router';
 import debounce from 'lodash/debounce';
-import { useUser } from '../contexts/UserContext';
 
 const OrganizationRegistration = ({ onRegisterSuccess }) => {
   const [step, setStep] = useState(1);
@@ -24,10 +22,7 @@ const OrganizationRegistration = ({ onRegisterSuccess }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showResults, setShowResults] = useState(false);
   const searchContainerRef = useRef(null);
-  const navigate = useNavigate();
-  const { login } = useUser();  // Add this hook
 
   useEffect(() => {
     const handleClickOutside = (event) => {
