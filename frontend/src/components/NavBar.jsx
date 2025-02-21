@@ -84,6 +84,20 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                   )}
                 </>
               )}
+            {user.is_organization ? ('') : (
+              <Link 
+                to="/friends" 
+                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Friends
+              </Link>)}
+              <Link 
+                to="/leaderboard"
+                className='px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900'
+                >
+                Leaderboard
+              </Link>
+
               
               {user ? (
                 <div className="relative ml-3 flex items-center space-x-4">

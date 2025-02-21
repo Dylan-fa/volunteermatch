@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import os
 import json
+from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
@@ -32,6 +33,7 @@ class Volunteer(models.Model):
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
     interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True, null=True)
     #------------------------------------------------------------------------------------------- Alex added below
+    hours = models.IntegerField(default = 0)
     opportunities_completed = models.IntegerField(default = 0)
     last_completion = models.DateTimeField(null = True, blank=True)
     display_name = models.CharField(max_length = 16, unique = True)
@@ -59,6 +61,11 @@ class Friendship(models.Model):
     to_volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='friendships_received')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.from_volunteer == self.to_volunteer:
+            raise ValidationError("You cannot be friends with yourself")
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ['from_volunteer', 'to_volunteer']

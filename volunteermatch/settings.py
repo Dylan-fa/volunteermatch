@@ -48,6 +48,10 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
+
 SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True

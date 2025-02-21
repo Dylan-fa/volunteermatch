@@ -22,6 +22,7 @@ from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
 
 # Use this file for your templated views only
 from django.http import HttpResponse, HttpResponseForbidden
@@ -100,6 +101,8 @@ def hello(request):         #  Used to collect all information needed to display
     current_user = None
     if request.user.is_authenticated:
         current_user = Volunteer.objects.get(user = request.user)
+        if current_user == None:
+            current_user = Organization.objects.get(user = request.user)
 
     if request.method == "POST":
         fID = request.POST.get("friend_id")
@@ -136,7 +139,15 @@ def hello(request):         #  Used to collect all information needed to display
 def custom404(request, exception):          #  used to render the 404 page when a 404 error is thrown only when django debug settings set to False
     return render(request, "404Page.html", status = 404)
 
-
+@api_view(["GET"])
+def list_pending_friendships(request):
+    friendships = Friendship.objects.filter(status = "pending")
+    data = [{
+        'id': friendship.id,
+        'from_volunteer': friendship.from_volunteer.id,
+        'to_volunteer': friendship.to_volunteer.id,
+    } for friendship in friendships]
+    return Response(data)
 
 def calculate_impact(request, charity, volunteer):
 
@@ -146,9 +157,11 @@ def calculate_impact(request, charity, volunteer):
     current_application = None
 
     for application in applications:
-        if  application.volunteer == volunteer:
+        if  application.volunteer == volunteer and application.opportunity == opportunity:
             current_application = application
             break
+    if current_application == None:
+        return HttpResponse("No Application for this volunteer")
 
     # Open and load JSON file to get population data
     file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
@@ -179,7 +192,8 @@ def calculate_impact(request, charity, volunteer):
 
     opening_duration = end_date.day - start_date.day    # finds how long the opportunity was posted for
     if ((end_date.day - date_time_applied.day) < opening_duration * 0.15) and participants_at_application < capacity / 2:
-        bonus_points += round((end_date - date_time_applied).total_seconds() / 3600)   
+        bonus_points += round((end_date - date_time_applied).total_seconds() / 3600 / 6)   
+
         # adds a point for every hour they applied before the closing when it is in the last 15% of opening time
 
     # each factors weights contributing to the final score
@@ -258,7 +272,7 @@ def calculate_impact(request, charity, volunteer):
 
 
 
-    final_value = time_value * weights.get("time") + status_value * weights.get("status") + duration_value * weights.get("duration") + recent_value * weights.get("recent") + effort_value * weights.get("effort") + min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected") + bonus_points# + distance_value * weights.get("distance")
+    final_value = (time_value * weights.get("time")) + (status_value * weights.get("status")) + (duration_value * weights.get("duration")) + (recent_value * weights.get("recent")) + (effort_value * weights.get("effort")) + (min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected")) + bonus_points
 
     if days_since_last_opportunity_completed < 30 or days_since_last_opportunity_completed > 120:
         final_value *= 1.2              # adds a streak bonus to help volunteers keep going as it gives them incentive to do more volunteering
@@ -269,12 +283,66 @@ def calculate_impact(request, charity, volunteer):
     final_value /= 2
     final_value = round(final_value)
 
+    print(str(time_value) + " time")
+    print(str(status_value) + " status")
+    print(str(duration_value) + " duration")
+    print(str(recent_value) + " recent")
+    print(str(effort_value) + " effort")
+    print(str((min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected"))) + " people")
+
 
     return HttpResponse(final_value)
+
+
+@csrf_exempt
+def delete_friendship(request, friend_id, volunteer_id):
+    if request.method == "DELETE":
+        u = Volunteer.objects.get(id = volunteer_id)
+        friend = Volunteer.objects.get(id = friend_id)
+        print(friend_id)
+        print(volunteer_id)
+        for friendship in Friendship.objects.all():
+            if friendship.to_volunteer == u and friendship.from_volunteer == friend:
+                print("deleting")
+                friendship.delete()
+            if friendship.from_volunteer == u and friendship.to_volunteer == friend:
+                print("deleting")
+                friendship.delete()
+ 
+        return JsonResponse({"message": "Friendship removed successfully"}, status=200)
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@csrf_exempt
+def create_friendship(request, friend_id, volunteer_id):
+    if request.method == "POST":
+        u = Volunteer.objects.get(id = volunteer_id)
+        friend = Volunteer.objects.get(id = friend_id)
+        
+        Friendship.objects.create(from_volunteer = u, to_volunteer = friend, status = "pending")
+ 
+        return JsonResponse({"message": "Friend request sent"}, status=201)
+    return JsonResponse({"error": "Invalid request"}, status=405)
+
+@csrf_exempt
+def accept_friendship(request, friend_id, volunteer_id):
+    if request.method == "POST":
+        u = Volunteer.objects.get(id = volunteer_id)
+        friend = Volunteer.objects.get(id = friend_id)
+        
+        friendship = Friendship.objects.get(to_volunteer = u, from_volunteer = friend)
+        friendship.status = "accepted"
+        friendship.save()
+ 
+        return JsonResponse({"message": "Friend request sent"}, status=201)
+    return JsonResponse({"error": "Invalid request"}, status=405)
 
 @login_required
 def view_friends(request):
     message = ""
+    if request.user.is_authenticated:
+        current_user = Volunteer.objects.filter(user = request.user)
+        if len(current_user) == 0:
+            return HttpResponseForbidden("only volunteers can access this")
 
     fromV = Volunteer.objects.get(user = request.user)
 
@@ -329,7 +397,6 @@ def api_volunteer_list(request):
         users = Volunteer.objects.exclude(user = request.user) + User.objects.exclude(id = request.user.id)
     else:
         users = Volunteer.objects.all()
-    print(users)
     data = [{
         'id': user.id,
         'f_name': user.user.first_name,
@@ -337,6 +404,7 @@ def api_volunteer_list(request):
         'display_name': user.display_name,
         'opportunities_completed': user.opportunities_completed,
         'last_completion': user.last_completion,
+        'email': user.user.email
 
     } for user in users]
     return Response(data)
@@ -351,10 +419,10 @@ def api_volunteer_detail(request, id):
             friends.append(friendship.from_volunteer)
         elif friendship.from_volunteer == user:
             friends.append(friendship.to_volunteer)
-    print(friends)
 
     data = {
         'id': user.id,
+        'hours': user.hours,
         'f_name': user.user.first_name,
         'l_name': user.user.last_name,
         'display_name': user.display_name,

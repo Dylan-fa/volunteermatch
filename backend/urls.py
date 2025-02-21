@@ -29,6 +29,11 @@ urlpatterns = [
     path('api/volunteer/list/', views.api_volunteer_list, name='api_volunteer_list'),
     path('api/volunteer/<int:id>/', views.api_volunteer_detail, name='api_volunteer_detail'),
 
+    path('api/friendship/delete/<int:friend_id>/<int:volunteer_id>/', views.delete_friendship),
+    path('api/friendship/create/<int:friend_id>/<int:volunteer_id>/', views.create_friendship),
+    path('api/friendship/accept/<int:friend_id>/<int:volunteer_id>/', views.accept_friendship),
+    path('api/friendship/list/pending/', views.list_pending_friendships),
+
     path('<int:charity>/<int:volunteer>', views.calculate_impact),
     path('view/opportunity/all/', views.view_all_opportunities),
     path('view-all/badges/<slug:slug>/', views.view_all_badges),

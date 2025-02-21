@@ -11,4 +11,5 @@ export default [
     route("/about", "./pages/AboutUs.jsx"),
     route("/opportunities/create", "./pages/CreateOpportunity.jsx"),
     route("/dashboard", "./pages/Dashboard.jsx"),
+    route("/friends", "./pages/Friends.jsx"),
 ];

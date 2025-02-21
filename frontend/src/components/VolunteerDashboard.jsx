@@ -2,27 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from './PageTransition';
 import api from '../utils/api';
-// Badge definitions
-const BADGES = {
-  hours: [
-    { id: 1, name: "First Step", icon: "🌱", description: "Complete your first hour", requirement: 1 },
-    { id: 2, name: "Regular Helper", icon: "⭐", description: "Complete 10 hours", requirement: 10 },
-    { id: 3, name: "Dedicated Volunteer", icon: "🌟", description: "Complete 50 hours", requirement: 50 },
-    { id: 4, name: "Community Champion", icon: "👑", description: "Complete 100 hours", requirement: 100 },
-  ],
-  categories: [
-    { id: 5, name: "Environmental Hero", icon: "🌍", description: "Complete 5 environmental projects", category: "Environment" },
-    { id: 6, name: "Education Mentor", icon: "📚", description: "Complete 5 education projects", category: "Education" },
-    { id: 7, name: "Healthcare Helper", icon: "❤️", description: "Complete 5 healthcare projects", category: "Healthcare" },
-    { id: 8, name: "Community Builder", icon: "🤝", description: "Complete 5 community projects", category: "Community" },
-  ],
-  special: [
-    { id: 9, name: "Diversity Champion", icon: "🌈", description: "Volunteer in 5 different categories" },
-    { id: 10, name: "Team Player", icon: "👥", description: "Participate in 3 group activities" },
-    { id: 11, name: "Local Hero", icon: "🏆", description: "Complete 10 projects in your local area" },
-  ]
-};
-
 
 // Badge Component
 const Badge = ({ badge, earned }) => {
@@ -152,18 +131,26 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
 };
 
 const VolunteerDashboard = () => {
-  const [user, setUser] = useState([]);
+  const [volunteer, setVolunteer] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [FRIENDS, setFriends] = useState([]);
+  const { user } = useUser();
+  let user_id = 0
 
   useEffect(() => {
-    const fetchOpportunities = async () => {
+    const fetchUser = async () => {
       try {
         setIsLoading(true);
-        const data = await api.get('/volunteer/2/');
-        console.log(data)
-        setUser(data);
-        setFriends(data.friends);
+        const data1 = await api.get('/volunteer/list/');
+        const users = data1;
+        users.forEach(item =>{
+          if (item.email == user.email){
+            user_id = item.id
+          }
+        })
+        const data2 = await api.get('/volunteer/' + user_id + '/');
+        setVolunteer(data2);
+        setFriends(data2.friends);
 
       } catch (error) {
         console.error('Error fetching opportunities:', error);
@@ -171,9 +158,12 @@ const VolunteerDashboard = () => {
         setIsLoading(false);
       }
     };
+    if(user){
+      fetchUser();
+    }
+  }, [user]);
 
-    fetchOpportunities();
-  }, []);
+ 
 
 
   const [isVisible, setIsVisible] = useState(false);
@@ -204,17 +194,13 @@ const VolunteerDashboard = () => {
           {/* Profile Overview */}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6 mb-8">
             <div className="flex items-center gap-6">
-              <div className="text-5xl bg-white/20 p-4 rounded-full">{user.avatar || "👤"}</div>
+              <div className="text-5xl bg-white/20 p-4 rounded-full">{volunteer.avatar || "👤"}</div>
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-white">{user.f_name + " " + user.l_name}</h1>
+                <h1 className="text-2xl font-semibold text-white">{volunteer.f_name + " " + volunteer.l_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaClock className="w-5 h-5" />
-                    {user.hours} hours volunteered
-                  </span>
-                  <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                    <FaMedal className="w-5 h-5" />
-                     badges earned
+                    {volunteer.hours} hours volunteered
                   </span>
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaUsers className="w-5 h-5" />
@@ -235,7 +221,7 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Total Hours</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={user.hours} /> : '0'}
+                {isVisible ? <AnimatedCounter value={volunteer.hours} /> : '0'}
               </p>
               <p className="text-sm text-white/80 mt-1">Hours volunteered</p>
             </div>
@@ -243,11 +229,11 @@ const VolunteerDashboard = () => {
             <div className={`bg-gradient-to-br from-emerald-500 to-green-600 p-6 rounded-xl shadow-lg transform transition-all duration-500 delay-100 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}>
-              <h3 className="text-lg font-medium text-white/90 mb-2">Projects</h3>
+              <h3 className="text-lg font-medium text-white/90 mb-2">Completions</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={user.opportunities_completed} /> : '0'}
+                {isVisible ? <AnimatedCounter value={volunteer.opportunities_completed} /> : '0'}
               </p>
-              <p className="text-sm text-white/80 mt-1">Completed projects</p>
+              <p className="text-sm text-white/80 mt-1">Opportunities Done</p>
             </div>
 
             <div className={`bg-gradient-to-br from-violet-500 to-purple-600 p-6 rounded-xl shadow-lg transform transition-all duration-500 delay-200 ${
@@ -255,9 +241,9 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Impact</h3>
               <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={user.overall_score} /> : '0'}
+                {isVisible ? <AnimatedCounter value={volunteer.overall_score} /> : '0'}
               </p>
-              <p className="text-sm text-white/80 mt-1">People helped</p>
+              <p className="text-sm text-white/80 mt-1">Points</p>
             </div>
 
             <div className={`bg-gradient-to-br from-amber-500 to-yellow-600 p-6 rounded-xl shadow-lg transform transition-all duration-500 delay-300 ${
@@ -298,14 +284,6 @@ const VolunteerDashboard = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Badges Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Badges</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
             </div>
           </div>
 
