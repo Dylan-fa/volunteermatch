@@ -877,302 +877,418 @@ class Command(BaseCommand):
 
 
 
-        # Create Volunteers
+         # Create Volunteers
         volunteers = [
         {
             "email": "john.doe@gmail.com",
+            "first_name": "John",
+            "last_name": "Doe",
             "username": "john_doe",
             "display_name": "JohnD"
         },
         {
             "email": "sarah.smith@gmail.com",
+            "first_name": "Sarah",
+            "last_name": "Smith",
             "username": "sarah_smith",
             "display_name": "SarahS"
         },
         {
             "email": "michael.johnson@gmail.com",
+            "first_name": "Michael",
+            "last_name": "Johnson",
             "username": "michael_johnson",
             "display_name": "MikeJ"
         },
         {
             "email": "emily.watson@gmail.com",
+            "first_name": "Emily",
+            "last_name": "Watson",
             "username": "emily_watson",
             "display_name": "EmilyW"
         },
         {
             "email": "david.brown@gmail.com",
+            "first_name": "David",
+            "last_name": "Brown",
             "username": "david_brown",
             "display_name": "DaveB"
         },
         {
             "email": "jessica.taylor@gmail.com",
+            "first_name": "Jessica",
+            "last_name": "Taylor",
             "username": "jessica_taylor",
             "display_name": "JessT"
         },
         {
             "email": "chris.evans@gmail.com",
+            "first_name": "Chris",
+            "last_name": "Evans",
             "username": "chris_evans",
             "display_name": "ChrisE"
         },
         {
             "email": "amanda.white@gmail.com",
+            "first_name": "Amanda",
+            "last_name": "White",
             "username": "amanda_white",
             "display_name": "MandyW"
         },
         {
             "email": "daniel.harris@gmail.com",
+            "first_name": "Daniel",
+            "last_name": "Harris",
             "username": "daniel_harris",
             "display_name": "DanH"
         },
         {
             "email": "laura.moore@gmail.com",
+            "first_name": "Laura",
+            "last_name": "Moore",
             "username": "laura_moore",
             "display_name": "LauraM"
         },
         {
             "email": "james.anderson@gmail.com",
+            "first_name": "James",
+            "last_name": "Anderson",
             "username": "james_anderson",
             "display_name": "JimA"
         },
         {
             "email": "megan.thomas@gmail.com",
+            "first_name": "Megan",
+            "last_name": "Thomas",
             "username": "megan_thomas",
             "display_name": "MeganT"
         },
         {
             "email": "alex.martin@gmail.com",
+            "first_name": "Alex",
+            "last_name": "Martin",
             "username": "alex_martin",
             "display_name": "AlexM"
         },
         {
             "email": "rebecca.lee@gmail.com",
+            "first_name": "Rebecca",
+            "last_name": "Lee",
             "username": "rebecca_lee",
             "display_name": "BeccaL"
         },
         {
             "email": "ryan.clark@gmail.com",
+            "first_name": "Ryan",
+            "last_name": "Clark",
             "username": "ryan_clark",
             "display_name": "RyanC"
         },
         {
             "email": "samantha.adams@gmail.com",
+            "first_name": "Samantha",
+            "last_name": "Adams",
             "username": "samantha_adams",
             "display_name": "SamA"
         },
         {
             "email": "kevin.roberts@gmail.com",
+            "first_name": "Kevin",
+            "last_name": "Roberts",
             "username": "kevin_roberts",
             "display_name": "KevR"
         },
         {
             "email": "olivia.hall@gmail.com",
+            "first_name": "Olivia",
+            "last_name": "Hall",
             "username": "olivia_hall",
             "display_name": "OliviaH"
         },
         {
             "email": "brian.wright@gmail.com",
+            "first_name": "Brian",
+            "last_name": "Wright",
             "username": "brian_wright",
             "display_name": "BrianW"
         },
         {
             "email": "zoe.green@gmail.com",
+            "first_name": "Zoe",
+            "last_name": "Green",
             "username": "zoe_green",
             "display_name": "ZoeG"
         },
         {
             "email": "brandon.walker@gmail.com",
+            "first_name": "Brandon",
+            "last_name": "Walker",
             "username": "brandon_walker",
             "display_name": "BrandonW"
         },
-        {
+            {
             "email": "natalie.king@gmail.com",
+            "first_name": "Natalie",
+            "last_name": "King",
             "username": "natalie_king",
             "display_name": "NatK"
         },
         {
             "email": "ethan.wood@gmail.com",
+            "first_name": "Ethan",
+            "last_name": "Wood",
             "username": "ethan_wood",
             "display_name": "EthanW"
         },
         {
             "email": "melissa.baker@gmail.com",
+            "first_name": "Melissa",
+            "last_name": "Baker",
             "username": "melissa_baker",
             "display_name": "MelB"
         },
         {
             "email": "tyler.hill@gmail.com",
+            "first_name": "Tyler",
+            "last_name": "Hill",
             "username": "tyler_hill",
             "display_name": "TylerH"
         },
         {
             "email": "victoria.young@gmail.com",
+            "first_name": "Victoria",
+            "last_name": "Young",
             "username": "victoria_young",
             "display_name": "VickyY"
         },
         {
             "email": "sean.carter@gmail.com",
+            "first_name": "Sean",
+            "last_name": "Carter",
             "username": "sean_carter",
             "display_name": "SeanC"
         },
         {
             "email": "grace.morris@gmail.com",
+            "first_name": "Grace",
+            "last_name": "Morris",
             "username": "grace_morris",
             "display_name": "GraceM"
         },
         {
             "email": "jackson.cooper@gmail.com",
+            "first_name": "Jackson",
+            "last_name": "Cooper",
             "username": "jackson_cooper",
             "display_name": "JackC"
         },
         {
             "email": "noah.bennett@gmail.com",
+            "first_name": "Noah",
+            "last_name": "Bennett",
             "username": "noah_bennett",
             "display_name": "NoahB"
         },
         {
             "email": "sophia.coleman@gmail.com",
+            "first_name": "Sophia",
+            "last_name": "Coleman",
             "username": "sophia_coleman",
             "display_name": "SophiaC"
         },
         {
             "email": "liam.foster@gmail.com",
+            "first_name": "Liam",
+            "last_name": "Foster",
             "username": "liam_foster",
             "display_name": "LiamF"
         },
         {
             "email": "ava.campbell@gmail.com",
+            "first_name": "Ava",
+            "last_name": "Campbell",
             "username": "ava_campbell",
             "display_name": "AvaC"
         },
         {
             "email": "mason.perry@gmail.com",
+            "first_name": "Mason",
+            "last_name": "Perry",
             "username": "mason_perry",
             "display_name": "MasonP"
         },
         {
             "email": "ella.richards@gmail.com",
+            "first_name": "Ella",
+            "last_name": "Richards",
             "username": "ella_richards",
             "display_name": "EllaR"
         },
         {
             "email": "lucas.hughes@gmail.com",
+            "first_name": "Lucas",
+            "last_name": "Hughes",
             "username": "lucas_hughes",
             "display_name": "LucasH"
         },
         {
             "email": "mia.turner@gmail.com",
+            "first_name": "Mia",
+            "last_name": "Turner",
             "username": "mia_turner",
             "display_name": "MiaT"
         },
         {
             "email": "henry.morris@gmail.com",
+            "first_name": "Henry",
+            "last_name": "Morris",
             "username": "henry_morris",
             "display_name": "HenryM"
         },
         {
             "email": "charlotte.martinez@gmail.com",
+            "first_name": "Charlotte",
+            "last_name": "Martinez",
             "username": "charlotte_martinez",
             "display_name": "CharlieM"
         },
         {
             "email": "benjamin.cox@gmail.com",
+            "first_name": "Benjamin",
+            "last_name": "Cox",
             "username": "benjamin_cox",
             "display_name": "BenC"
         },
         {
             "email": "scarlett.harrison@gmail.com",
+            "first_name": "Scarlett",
+            "last_name": "Harrison",
             "username": "scarlett_harrison",
             "display_name": "ScarlettH"
         },
         {
             "email": "jacob.ellis@gmail.com",
+            "first_name": "Jacob",
+            "last_name": "Ellis",
             "username": "jacob_ellis",
             "display_name": "JakeE"
         },
         {
             "email": "isabella.ross@gmail.com",
+            "first_name": "Isabella",
+            "last_name": "Ross",
             "username": "isabella_ross",
             "display_name": "IzzyR"
         },
         {
             "email": "oliver.bryant@gmail.com",
+            "first_name": "Oliver",
+            "last_name": "Bryant",
             "username": "oliver_bryant",
             "display_name": "OllieB"
         },
         {
             "email": "grace.ramirez@gmail.com",
+            "first_name": "Grace",
+            "last_name": "Ramirez",
             "username": "grace_ramirez",
             "display_name": "GraceR"
         },
         {
             "email": "daniel.mitchell@gmail.com",
+            "first_name": "Daniel",
+            "last_name": "Mitchell",
             "username": "daniel_mitchell",
             "display_name": "DannyM"
         },
         {
             "email": "harper.carter@gmail.com",
+            "first_name": "Harper",
+            "last_name": "Carter",
             "username": "harper_carter",
             "display_name": "HarperC"
         },
         {
             "email": "samuel.walker@gmail.com",
+            "first_name": "Samuel",
+            "last_name": "Walker",
             "username": "samuel_walker",
             "display_name": "SamW"
         },
         {
             "email": "lily.bailey@gmail.com",
+            "first_name": "Lily",
+            "last_name": "Bailey",
             "username": "lily_bailey",
             "display_name": "LilyB"
         },
         {
             "email": "ethan.king@gmail.com",
+            "first_name": "Ethan",
+            "last_name": "King",
             "username": "ethan_king",
             "display_name": "EthanK"
         },
         {
             "email": "chloe.green@gmail.com",
+            "first_name": "Chloe",
+            "last_name": "Green",
             "username": "chloe_green",
             "display_name": "ChloeG"
         },
         {
             "email": "jackson.scott@gmail.com",
+            "first_name": "Jackson",
+            "last_name": "Scott",
             "username": "jackson_scott",
             "display_name": "JackS"
         },
         {
             "email": "violet.baker@gmail.com",
+            "first_name": "Violet",
+            "last_name": "Baker",
             "username": "violet_baker",
             "display_name": "VioletB"
         },
         {
             "email": "andrew.adams@gmail.com",
+            "first_name": "Andrew",
+            "last_name": "Adams",
             "username": "andrew_adams",
             "display_name": "AndyA"
         },
         {
             "email": "madison.roberts@gmail.com",
+            "first_name": "Madison",
+            "last_name": "Roberts",
             "username": "madison_roberts",
             "display_name": "MaddyR"
         },
         {
             "email": "leo.jenkins@gmail.com",
+            "first_name": "Leo",
+            "last_name": "Jenkins",
             "username": "leo_jenkins",
             "display_name": "LeoJ"
         },
         {
             "email": "hazel.ward@gmail.com",
+            "first_name": "Hazel",
+            "last_name": "Ward",
             "username": "hazel_ward",
             "display_name": "HazelW"
         },
         {
             "email": "dylan.cooper@gmail.com",
+            "first_name": "Dylan",
+            "last_name": "Cooper",
             "username": "dylan_cooper",
             "display_name": "DylanC"
         }
-        ]  
+    ]
 
         for vol_data in volunteers:
-            user, _ = User.objects.get_or_create(email=vol_data["email"], defaults={"username": vol_data["username"]})
+            user, _ = User.objects.get_or_create(email=vol_data["email"], first_name=vol_data["first_name"], last_name=vol_data["last_name"], defaults={"username": vol_data["username"]})
             user.set_password("1234")
             user.save()
             volunteer, _ = Volunteer.objects.get_or_create(user=user, display_name=vol_data["display_name"])
