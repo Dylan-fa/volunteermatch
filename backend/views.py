@@ -304,14 +304,10 @@ def delete_friendship(request, friend_id, volunteer_id):
     if request.method == "DELETE":
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
-        print(friend_id)
-        print(volunteer_id)
         for friendship in Friendship.objects.all():
             if friendship.to_volunteer == u and friendship.from_volunteer == friend:
-                print("deleting")
                 friendship.delete()
             if friendship.from_volunteer == u and friendship.to_volunteer == friend:
-                print("deleting")
                 friendship.delete()
  
         return JsonResponse({"message": "Friendship removed successfully"}, status=200)
@@ -410,7 +406,6 @@ def api_volunteer_list(request):
         'opportunities_completed': user.opportunities_completed,
         'last_completion': user.last_completion,
         'email': user.user.email
-
     } for user in users]
     return Response(data)
 
@@ -456,15 +451,12 @@ def api_volunteer_detail(request, id):
     }
     return Response(data)
 
-    
+
 def sort(opportunities, type):
     filtered = []
 
     for opportunity in opportunities:
-        print("opportunity = " + opportunity.title)
         for category in opportunity.categories.all():
-            print("category = " + category.name)
-            print("type = " + type)
             if type == category.name:
                 filtered.append(opportunity)
     
@@ -489,11 +481,9 @@ def sort_effort(opportunities, effort):
 def get_coordinates_from_postcode(postcode):
     
     geolocator = Nominatim(user_agent="backend")
-    print(geolocator)
     
     try:
         location = geolocator.geocode(postcode)
-        print(location)
         if location:
             return location.latitude, location.longitude
         else:
@@ -516,14 +506,12 @@ def sort_location(opportunities, user_postcode, max_distance_km):
             user_location = (user_lat, user_lon)
             
             distance = geodesic(user_location, opp_location).km  # Calculate distance in km
-            print(str (distance))
             if float(distance) <= float(max_distance_km):
                 filtered.append(opportunity)
 
     return filtered
 
 def ordering(opportunities, order):
-    print("pip")
     if order == "nearest_deadline":
         ordered = opportunities.order_by("-start_time")
     
@@ -614,7 +602,6 @@ def charity_search(request):
         response = requests.get(api_url, headers=headers)
         response.raise_for_status()
         charities = response.json()
-        print(charities)
         # Format the response according to the actual API fields and limit results
         formatted_charities = [
             {

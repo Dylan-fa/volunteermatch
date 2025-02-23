@@ -866,7 +866,7 @@ class Command(BaseCommand):
                 "start_date": now() + timedelta(days=7),
                 "end_date": now() + timedelta(days=180),
                 "start_time": 0,  # Full-day responsibility
-                "end_time": 0,  # Full-day responsibility
+                "end_time": 23,  # Full-day responsibility
                 "estimated_duration": 24,
                 "estimated_effort_ranking": "high",
                 "capacity": 5,

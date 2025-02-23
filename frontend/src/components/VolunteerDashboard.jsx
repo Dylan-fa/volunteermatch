@@ -144,7 +144,7 @@ const VolunteerDashboard = () => {
         const data1 = await api.get('/volunteer/list/');
         const users = data1;
         users.forEach(item =>{
-          if (item.email == user.email){
+          if (item.email === user.email){
             user_id = item.id
           }
         })
