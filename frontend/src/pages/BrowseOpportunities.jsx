@@ -51,70 +51,72 @@ const VerificationBadge = ({ type }) => {
 // Opportunity Card component
 const OpportunityCard = ({ opportunity }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="p-6">
-        {/* Header section */}
-        <div className="flex flex-col gap-4">
-          {/* Title and Organization */}
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">{opportunity.image || '📋'}</span>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {opportunity.title}
-              </h3>
-              
-              <p className="text-sm text-gray-500">
-                {opportunity.organization.name}
-              </p>
+    <div className='opportunity'>
+      <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="p-6">
+          {/* Header section */}
+          <div className="flex flex-col gap-4">
+            {/* Title and Organization */}
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">{opportunity.image || '📋'}</span>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {opportunity.title}
+                </h3>
+                
+                <p className="text-sm text-gray-500">
+                  {opportunity.organization.name}
+                </p>
+              </div>
+              <h4 className='text-sm text-gray-500'>
+                  Effort: {opportunity.effort}
+              </h4>
             </div>
-            <h4 className='text-sm text-gray-500'>
-                Effort: {opportunity.effort}
-            </h4>
+            
+            {/* Verification Badges */}
+            <div className="flex flex-wrap gap-2">
+              {opportunity.organization.companiesHouseVerified && (
+                <VerificationBadge type="companiesHouse" />
+              )}
+              {opportunity.organization.charitiesCommissionVerified && (
+                <VerificationBadge type="charitiesCommission" />
+              )}
+            </div>
           </div>
           
-          {/* Verification Badges */}
-          <div className="flex flex-wrap gap-2">
-            {opportunity.organization.companiesHouseVerified && (
-              <VerificationBadge type="companiesHouse" />
-            )}
-            {opportunity.organization.charitiesCommissionVerified && (
-              <VerificationBadge type="charitiesCommission" />
-            )}
-          </div>
-        </div>
-        
-        {/* Description */}
-        <p className="mt-4 text-gray-600">
-          {opportunity.description}
-        </p>
-        
-        {/* Tags */}
-        {opportunity.tags && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {opportunity.tags.map((tag, index) => (
-              <span 
-                key={index}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-              >
-                {tag}
+          {/* Description */}
+          <p className="mt-4 text-gray-600">
+            {opportunity.description}
+          </p>
+          
+          {/* Tags */}
+          {opportunity.tags && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {opportunity.tags.map((tag, index) => (
+                <span 
+                  key={index}
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          {/* Footer */}
+          <div className="mt-6 flex justify-between items-center">
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span className="flex items-center gap-1">
+                <span>📍</span> {opportunity.location_name}
               </span>
-            ))}
+            </div>
+            <Link
+              to={`/opportunity/${opportunity.id}`}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+            >
+              Learn More
+            </Link>
           </div>
-        )}
-        
-        {/* Footer */}
-        <div className="mt-6 flex justify-between items-center">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <span>📍</span> {opportunity.location_name}
-            </span>
-          </div>
-          <Link
-            to={`/opportunity/${opportunity.id}`}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
-          >
-            Learn More
-          </Link>
         </div>
       </div>
     </div>
@@ -124,6 +126,20 @@ const OpportunityCard = ({ opportunity }) => {
 const BrowseOpportunities = () => {
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  function searchOpportunity() {
+    let input = document.getElementById("searchBar").value.toLowerCase();
+    let opportunities = document.querySelectorAll(".opportunity");
+    console.log(opportunities);
+
+    opportunities.forEach(opportunity => {
+        if (opportunity.textContent.toLowerCase().includes(input)) {
+            opportunity.style.display = "block";
+        } else {
+            opportunity.style.display = "none";
+        }
+    });
+}
 
   useEffect(() => {
     const fetchOpportunities = async () => {
@@ -195,7 +211,9 @@ const BrowseOpportunities = () => {
               <div className="mb-6 flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <input
+                    id='searchBar'
                     type="text"
+                    onKeyUp={searchOpportunity}
                     placeholder="Search opportunities..."
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                   />
