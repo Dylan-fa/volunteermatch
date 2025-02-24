@@ -4,6 +4,9 @@ import { GoogleLogin } from '@react-oauth/google';
 const VolunteerRegistration = ({ onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
     email: '',
+    first_name: '',
+    last_name: '',
+    display_name: '',
     password: '',
     password2: ''
   });
@@ -91,6 +94,45 @@ const VolunteerRegistration = ({ onRegisterSuccess }) => {
             required
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             onChange={(e) => setFormData({...formData, email: e.target.value})}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+            First Name
+          </label>
+          <input
+            id="first_name"
+            type="first_name"
+            required
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+            Last Name
+          </label>
+          <input
+            id="last_name"
+            type="last_name"
+            required
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="display_name" className="block text-sm font-medium text-gray-700">
+            Display Name
+          </label>
+          <input
+            id="display_name"
+            type="display_name"
+            required
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            onChange={(e) => setFormData({...formData, display_name: e.target.value})}
           />
         </div>
 

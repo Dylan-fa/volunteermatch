@@ -714,6 +714,9 @@ def google_login_callback(request):
 @api_view(['POST'])
 def register_volunteer(request):
     email = request.data.get('email')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
+    display_name = request.data.get('display_name')
     password = request.data.get('password')
     password2 = request.data.get('password2')
     
@@ -721,8 +724,8 @@ def register_volunteer(request):
         return Response({'error': 'Passwords do not match'}, status=400)
         
     try:
-        user = User.objects.create_user(username=email, email=email, password=password)
-        volunteer = Volunteer.objects.create(user=user)
+        user = User.objects.create_user(username=email, first_name = first_name, last_name = last_name, email=email, password=password)
+        volunteer = Volunteer.objects.create(user=user, display_name = display_name)
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
