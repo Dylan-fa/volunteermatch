@@ -38,9 +38,6 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 
-def view_leaderboard(request):
-    return(leaderboard(request))
-
 def view_all_opportunities(request):
     if request.method == "POST":
         return(filtered_opp(request))

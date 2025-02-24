@@ -35,22 +35,28 @@ const Leaderboard = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-white-900 flex items-center justify-center p-4">
-      <div className="bg-gray-800 text-white p-6 rounded-2xl shadow-xl w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Leaderboard</h2>
-        <ul>
-          {volunteers.map((vol, index) => (
-            <li
-              key={vol.id}
-              className={'flex justify-between items-center p-3 rounded-lg mb-2'}
-            >
-              <span className="font-medium">{vol.display_name}</span>
-              <span className="font-bold">{vol.overall_score}</span>
-            </li>
-          ))}
-        </ul>
+      {isLoading ? (
+      <div className="flex justify-center items-center h-screen">
+        <Spin/>
+      </div>) : (
+      <div className="min-h-screen bg-white-900 flex items-center justify-center p-4">
+        <div className="bg-gray-700 text-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+          <h2 className="text-2xl font-bold text-center mb-4">Leaderboard</h2>
+          <ul>
+            {volunteers.map((vol, index) => (
+              <li
+                key={vol.id}
+                className={'flex justify-between items-center p-3 rounded-lg mb-2 border'}
+              >
+                {index + 1}
+                <span className="font-medium">{vol.display_name}</span>
+                <span className="font-bold">{vol.overall_score}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
+        )}
     </PageTransition>
   );
 };

@@ -283,11 +283,6 @@ const acceptFriend = async (friendshipId) => {
                                 </div>
                             </div>
                                 
-                                {/* Score */}
-                                <p className="mt-4 text-gray-600">
-                                    {vol.overall_score}
-                                </p>
-                                
                                 {/* Add Friend Button */}
                                 <div className="mt-6 flex justify-between items-center">
                                     <button onClick={() => addFriend(vol.id)} className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors" >Add</button>
