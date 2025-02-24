@@ -22,6 +22,7 @@ from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
 from datetime import datetime
+from django.db.models import F, Sum
 
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
@@ -36,6 +37,9 @@ from django.http import HttpResponse
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
+
+def view_leaderboard(request):
+    return(leaderboard(request))
 
 def view_all_opportunities(request):
     if request.method == "POST":
@@ -299,7 +303,7 @@ def calculate_impact(request, charity, volunteer):
     return HttpResponse(final_value)
 
 
-@csrf_exempt
+@api_view(["DELETE"])
 def delete_friendship(request, friend_id, volunteer_id):
     if request.method == "DELETE":
         u = Volunteer.objects.get(id = volunteer_id)
@@ -313,7 +317,7 @@ def delete_friendship(request, friend_id, volunteer_id):
         return JsonResponse({"message": "Friendship removed successfully"}, status=200)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-@csrf_exempt
+@api_view(["POST"])
 def create_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
         u = Volunteer.objects.get(id = volunteer_id)
@@ -324,7 +328,7 @@ def create_friendship(request, friend_id, volunteer_id):
         return JsonResponse({"message": "Friend request sent"}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=405)
 
-@csrf_exempt
+@api_view(["POST"])
 def accept_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
         u = Volunteer.objects.get(id = volunteer_id)
@@ -450,6 +454,54 @@ def api_volunteer_detail(request, id):
         } for friend in friends]
     }
     return Response(data)
+
+def volunteers_order(volunteers, order):
+    
+    volunteers = volunteers.annotate(
+       overall_score=Sum(
+           F("elderly_score") + 
+           F("medical_score") + 
+           F("community_score") + 
+           F("education_score") + 
+           F("animals_score") + 
+           F("sports_score") + 
+           F("disability_score") + 
+           F("greener_planet_score")
+       ))
+     
+    if order == "most_points":
+        volunteers = volunteers.order_by("-overall_score")  # Descending order
+    elif order == "least_points":
+        volunteers = volunteers.order_by("overall_score")  # Ascending order
+
+    return volunteers
+
+def view_leaderboard(request):
+    leaderboard_order = request.POST.get('order')
+    friends_only = request.POST.get('friends_only')
+    friends = []
+    
+    volunteers = Volunteer.objects.all()
+
+  
+
+    if friends_only:
+        current_user = Volunteer.objects.get(user = request.user)
+        for friendship in Friendship.objects.filter(status = "accepted"):
+            if friendship.to_volunteer == current_user:
+                friends.append(friendship.from_volunteer)
+            if friendship.from_volunteer == current_user:
+                friends.append(friendship.to_volunteer)
+        volunteers = friends
+    
+    if leaderboard_order != "-":
+        volunteers = volunteers_order(volunteers, leaderboard_order)
+
+    
+
+    return render(request, "leaderboard.html", {"volunteers": volunteers})
+
+
 
 
 def sort(opportunities, type):

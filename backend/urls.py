@@ -40,5 +40,6 @@ urlpatterns = [
     path('view/badges/<slug:slug>/', views.view_specified_badge),
     path('view/badges/', views.view_badges),
     path('view/friends/', views.view_friends),
+    path('view/leaderboard/', views.view_leaderboard),
     path('', views.hello),
 ]
