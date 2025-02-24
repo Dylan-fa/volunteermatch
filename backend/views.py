@@ -409,7 +409,18 @@ def api_volunteer_list(request):
         'display_name': user.display_name,
         'opportunities_completed': user.opportunities_completed,
         'last_completion': user.last_completion,
-        'email': user.user.email
+        'email': user.user.email,
+        'scores': {
+            'elderly': user.elderly_score,
+            'medical': user.medical_score,
+            'community': user.community_score,
+            'education': user.education_score,
+            'animals': user.animals_score,
+            'sports': user.sports_score,
+            'disability': user.disability_score,
+            'greener_planet': user.greener_planet_score,
+        },
+        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score,
     } for user in users]
     return Response(data)
 
