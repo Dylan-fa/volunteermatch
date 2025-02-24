@@ -16,7 +16,14 @@ const OpportunityForm = () => {
     requirements: '',
     location_name: '',
     latitude: null,
-    longitude: null
+    longitude: null,
+    start_time: '',
+    end_time: '',
+    estimated_effort_ranking: 'medium',
+    estimated_duration: 1,
+    start_date: null,
+    end_date: null,
+    capacity: 1,
   });
   const [marker, setMarker] = useState(null);
   const [error, setError] = useState('');
@@ -128,16 +135,90 @@ const OpportunityForm = () => {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Average Start Time (24 hour clock)</label>
+          <input
+            type="number"
+            max={24}
+            min={0}
+            name="start_time"
+            value={formData.start_time}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Average End Time (24 hour clock)</label>
+          <input
+            type="number"
+            max={24}
+            min={0}
+            name="end_time"
+            value={formData.end_time}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Estimated Duration (In Days)</label>
+          <input
+            type="number"
+            min={0}
+            name="estimated_duration"
+            value={formData.estimated_duration}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Start Date</label>
+          <input
+            type="date"
+            name="start_date"
+            value={formData.start_date}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">End Date</label>
+          <input
+            type="date"
+            name="end_date"
+            value={formData.end_date}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Capacity</label>
+          <input
+            type="number"
+            min={0}
+            name="capacity"
+            value={formData.capacity}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Estimated Effort</label>
+          <select id="effort" name="estimated_effort_ranking" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Location</label>
-          <input
-            type="text"
-            name="location_name"
-            value={formData.location_name}
-            readOnly
-            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50"
-          />
+          
           <div className="mt-2 h-[400px] w-full">
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
               <Map

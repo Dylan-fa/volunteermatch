@@ -865,8 +865,16 @@ def api_create_opportunity(request):
         return Response({'error': 'Only organizations can create opportunities'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
+    geolocator = Nominatim(user_agent="my_geopy_app")
+    
     data = request.data.copy()  # Make a mutable copy
     data['organization'] = request.user.organization.id
+    
+
+    location = geolocator.reverse(str(data['latitude']) + "," + str(data['longitude']))
+    city = location.raw['address'].get('city', '')
+    data['location_name'] = city
+    print(data)
     
     serializer = OpportunitySerializer(data=data)
     if serializer.is_valid():

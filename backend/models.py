@@ -110,7 +110,7 @@ class Opportunity(models.Model):
     estimated_effort_ranking = models.CharField(choices = CHOICES, max_length=6)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    capacity = models.IntegerField(default = 0)
+    capacity = models.IntegerField()
     current_volunteers_count = models.IntegerField(default = 0)
 
     def save(self, *args, **kwargs):
