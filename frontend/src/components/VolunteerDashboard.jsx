@@ -1,99 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
-import PageTransition from './PageTransition';
-import api from '../utils/api';
-
-// Badge Component
-const Badge = ({ badge, earned }) => {
-  // Color mapping for different badge types
-  const getBadgeColors = (id) => {
-    const colors = {
-      // Hours badges (blue theme)
-      1: 'bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200',
-      2: 'bg-blue-200 border-blue-400 text-blue-900 hover:bg-blue-300',
-      3: 'bg-blue-300 border-blue-500 text-blue-900 hover:bg-blue-400',
-      4: 'bg-gradient-to-r from-blue-400 to-blue-500 border-blue-600 text-white hover:from-blue-500 hover:to-blue-600',
-      
-      // Category badges with gradients
-      5: 'bg-gradient-to-r from-emerald-400 to-green-500 border-green-600 text-white hover:from-emerald-500 hover:to-green-600', // Environmental
-      6: 'bg-gradient-to-r from-violet-400 to-purple-500 border-purple-600 text-white hover:from-violet-500 hover:to-purple-600', // Education
-      7: 'bg-gradient-to-r from-rose-400 to-red-500 border-red-600 text-white hover:from-rose-500 hover:to-red-600', // Healthcare
-      8: 'bg-gradient-to-r from-amber-400 to-yellow-500 border-yellow-600 text-white hover:from-amber-500 hover:to-yellow-600', // Community
-      
-      // Special badges (premium gradients)
-      9: 'bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 border-purple-500 text-white hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500',
-      10: 'bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 border-blue-500 text-white hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500',
-      11: 'bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 border-orange-500 text-white hover:from-amber-500 hover:via-orange-500 hover:to-yellow-500',
-    };
-    return colors[id] || 'bg-gray-100 border-gray-300 text-gray-600';
-  };
-
-  return (
-    <div 
-      className={`p-4 rounded-lg border-2 transition-all duration-300 transform hover:scale-105 ${
-        earned 
-          ? getBadgeColors(badge.id)
-          : 'bg-gray-50 border-gray-200 text-gray-400 opacity-60'
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">{badge.icon}</span>
-    <div>
-          <h3 className={`font-semibold ${
-            earned 
-              ? badge.id <= 4 ? 'text-blue-900' : 'text-white'
-              : 'text-gray-500'
-          }`}>
-            {badge.name}
-          </h3>
-          <p className={`text-sm ${
-            earned 
-              ? badge.id <= 4 ? 'text-blue-800/80' : 'text-white/90'
-              : 'text-gray-500'
-          }`}>
-            {badge.description}
-          </p>
-        </div>
-      </div>
-      {earned && (
-        <div className={`mt-2 text-xs flex items-center gap-1 ${
-          badge.id <= 4 ? 'text-blue-900' : 'text-white'
-        }`}>
-          <FaMedal className="w-3 h-3" />
-          <span>Earned</span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Friend Card Component
-const FriendCard = ({ friend }) => (
-  <div className="p-4 bg-white rounded-lg border hover:shadow-md transition-all duration-200">
-    <div className="flex items-center gap-4">
-      <div className="relative">
-        <span className="text-3xl">{friend.avatar}</span>
-        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${
-          friend.status === 'online' ? 'bg-green-400' : 'bg-gray-300'
-        } border-2 border-white`}></span>
-      </div>
-      <div className="flex-1">
-        <h3 className="font-medium text-gray-900">{friend.name}</h3>
-        <p className="text-sm text-gray-500">{friend.recentActivity}</p>
-      </div>
-    </div>
-    <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-      <span className="flex items-center gap-1">
-        <FaClock className="w-4 h-4" />
-        {friend.hours} hours
-      </span>
-      <span className="flex items-center gap-1">
-        <FaMedal className="w-4 h-4" />
-        {friend.badges} badges
-      </span>
-    </div>
-  </div>
-);
+import PageTransition from '../components/PageTransition';
+import { useUser } from '../contexts/UserContext';
+import Spin from '../components/LoadingSpinner';
 
 // Add this new component for animated counting
 const AnimatedCounter = ({ value, duration = 2000 }) => {
@@ -185,10 +94,13 @@ const VolunteerDashboard = () => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [isLoading]);
 
   return (
     <PageTransition>
+      {isLoading ? (<div className="flex justify-center items-center h-screen">
+        <Spin/>
+      </div>) : (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Profile Overview */}
@@ -265,7 +177,7 @@ const VolunteerDashboard = () => {
                 <div key={friend.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 transition-all duration-300 hover:shadow-xl hover:scale-105">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <span className="text-3xl bg-gray-50 p-2 rounded-full">{friend.avatar}</span>
+                      <span className="text-3xl bg-gray-50 p-2 rounded-full">👤</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">{friend.display_name}</h3>
@@ -324,7 +236,9 @@ const VolunteerDashboard = () => {
           </div>
         </div>
       </div>
+      )}
     </PageTransition>
+            
   );
 };
 

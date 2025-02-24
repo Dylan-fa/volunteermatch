@@ -3,6 +3,7 @@ import PageTransition from '../components/PageTransition';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 import Cookies from 'js-cookie';
+import Spin from '../components/LoadingSpinner'
 
 const Friends = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -259,9 +260,7 @@ const acceptFriend = async (friendshipId) => {
               {/* Friends Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {isLoading ? (
-                  <div className="col-span-2 text-center py-12">
-                    <div className="animate-pulse">Loading volunteers...</div>
-                  </div>
+                  <Spin/>
                 ) : volunteers.length === 0 ? (
                   <div className="col-span-2 text-center py-12">
                     <p className="text-gray-500">No volunteers found</p>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
+import Spin from '../components/LoadingSpinner';
 import api from '../utils/api';
 
 const CATEGORIES = [
@@ -175,7 +176,12 @@ const BrowseOpportunities = () => {
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Categories</h2>
                   <div className="space-y-2">
-                    {CATEGORIES.map(category => (
+                    {isLoading ? (
+                    <div className="col-span-2 text-center py-12">
+                      <Spin/>
+                    </div>) : (
+                    
+                    CATEGORIES.map(category => (
                       <button
                         key={category.name}
                         className="w-full flex justify-between items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
@@ -183,7 +189,7 @@ const BrowseOpportunities = () => {
                         <span>{category.name}</span>
                         <span className="text-gray-400">{category.count}</span>
                       </button>
-                    ))}
+                    )))}
                   </div>
                 </div>
 
@@ -238,7 +244,7 @@ const BrowseOpportunities = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {isLoading ? (
                   <div className="col-span-2 text-center py-12">
-                    <div className="animate-pulse">Loading opportunities...</div>
+                    <Spin/>
                   </div>
                 ) : opportunities.length === 0 ? (
                   <div className="col-span-2 text-center py-12">
