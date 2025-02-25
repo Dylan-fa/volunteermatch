@@ -22,6 +22,9 @@ urlpatterns = [
     path('api/opportunities/', views.api_opportunity_list, name='api_opportunity_list'),
     path('api/opportunities/<int:pk>/', views.api_opportunity_detail, name='api_opportunity_detail'),
     path('api/opportunities/create/', views.api_create_opportunity, name='api_create_opportunity'),
+    path('api/opportunities/distance/filter/', views.api_filter_distance, name='api_filter_distance'),
+    
+    path('api/categories/', views.api_list_categories),
 
     path('api/organization/stats/', views.api_organization_stats, name='api_organization_stats'),
     path('api/organization/profile/', views.api_organization_profile, name='api_organization_profile'),

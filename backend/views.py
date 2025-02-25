@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
 from django.conf import settings
-from .models import Organization, Volunteer, Opportunity, Application, Friendship
+from .models import *
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
@@ -551,7 +551,7 @@ def get_coordinates_from_postcode(postcode):
     except GeocoderTimedOut:
         return None, None
 
-def sort_location(opportunities, user_postcode, max_distance_km):
+def calculate_opp_in_distance(opportunities, user_postcode, max_distance_km):
 
     user_lat, user_lon = get_coordinates_from_postcode(user_postcode)
 
@@ -634,7 +634,7 @@ def filtered_opp(request):
         opportunities = sort_effort(opportunities, effort)
 
     if user_postcode and max_distance_km:
-        opportunities = sort_location(opportunities, user_postcode, max_distance_km)
+        opportunities = calculate_opp_in_distance(opportunities, user_postcode, max_distance_km)
 
     if order != "-":
         opportunities = ordering(opportunities, order)
@@ -858,9 +858,12 @@ def register_organization(request):
             'error': str(e)
         }, status=400)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def api_opportunity_list(request):
     opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
+    if request.method == "POST":
+        opportunities = filtered_opp(request)
+    
     data = [{
         'id': opp.id,
         'title': opp.title,
@@ -879,8 +882,38 @@ def api_opportunity_list(request):
             hasattr(request.user, 'volunteer') and 
             opp.applications.filter(volunteer=request.user.volunteer).exists()
         ),
-        'effort' : opp.estimated_effort_ranking
+        'effort' : opp.estimated_effort_ranking,
+        'categories' : list(opp.categories.values_list('name', flat=True))
     } for opp in opportunities]
+    return Response(data)
+
+@api_view(['POST'])
+def api_filter_distance(request):
+    opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
+    if request.method == "POST":
+        opportunities = calculate_opp_in_distance(opportunities, request.data.get('postcode'), request.data.get('max_distance'))
+        data = [{
+            'id': opp.id,
+            'title': opp.title,
+            'description': opp.description,
+            'organization': {
+                'name': opp.organization.name,
+                'logo': opp.organization.logo.url if opp.organization.logo else None,
+            },
+            'location_name': opp.location_name,
+            'latitude': opp.latitude,
+            'longitude': opp.longitude,
+            'requirements': opp.requirements,
+            'pending_applications': opp.pending_applications_count(),
+            'has_applied': bool(
+                request.user.is_authenticated and 
+                hasattr(request.user, 'volunteer') and 
+                opp.applications.filter(volunteer=request.user.volunteer).exists()
+            ),
+            'effort' : opp.estimated_effort_ranking,
+            'categories' : list(opp.categories.values_list('name', flat=True))
+        } for opp in opportunities]
+
     return Response(data)
 
 @api_view(['GET'])
@@ -1001,4 +1034,15 @@ def api_organization_profile(request):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=400)
+        
+@api_view(['GET'])
+def api_list_categories(request):
+    categories = Category.objects.all()
+    data = [{
+        'id': category.id,
+        'name': category.name,
+        'description': category.description,
+        'count' : Opportunity.objects.filter(categories = category).count()
+    } for category in categories]
+    return Response(data)
 

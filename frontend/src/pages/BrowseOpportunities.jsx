@@ -5,24 +5,6 @@ import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
 import api from '../utils/api';
 
-const CATEGORIES = [
-  { name: 'All Categories', count: '2.5k' },
-  { name: 'Environment', count: '850' },
-  { name: 'Education', count: '420' },
-  { name: 'Healthcare', count: '380' },
-  { name: 'Community', count: '510' },
-  { name: 'Arts & Culture', count: '290' },
-];
-
-const LOCATIONS = [
-  { name: 'All Locations', count: '2.5k' },
-  { name: 'London', count: '850' },
-  { name: 'Manchester', count: '420' },
-  { name: 'Birmingham', count: '380' },
-  { name: 'Leeds', count: '310' },
-  { name: 'Liverpool', count: '290' },
-];
-
 // Verification badge component
 const VerificationBadge = ({ type }) => {
   const badges = {
@@ -127,6 +109,7 @@ const OpportunityCard = ({ opportunity }) => {
 const BrowseOpportunities = () => {
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
   function searchOpportunity() {
     let input = document.getElementById("searchBar").value.toLowerCase();
@@ -155,8 +138,66 @@ const BrowseOpportunities = () => {
       }
     };
 
-    fetchOpportunities();
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get('/api/categories/');
+        setCategories(response);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
+
+  function filterOpportunities(category) {
+
+    let arr = [];
+    opportunities.forEach(opp => {
+      if(opp.categories.includes(category)){
+        arr.push(opp)
+      }
+    })
+    setOpportunities(arr)
+  }
+
+
+  function clearFilters() {
+    fetchOpportunities()
+  }
+
+  const [formData, setFormData] = useState({
+      postcode: null,
+      max_distance: null,
+    });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/opportunities/distance/filter/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      const data = await response.json();
+      setOpportunities(data)
+      localStorage.setItem('token', data.access);
+      localStorage.setItem('refreshToken', data.refresh);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    } catch (err) {}
+  };
 
   return (
     <PageTransition>
@@ -181,32 +222,45 @@ const BrowseOpportunities = () => {
                       <Spin/>
                     </div>) : (
                     
-                    CATEGORIES.map(category => (
-                      <button
-                        key={category.name}
-                        className="w-full flex justify-between items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <span>{category.name}</span>
-                        <span className="text-gray-400">{category.count}</span>
-                      </button>
-                    )))}
+                    <div>
+                  
+                    {categories.map(category => (
+                      <div key= {category.id}>
+                        <label><button onClick = {() => filterOpportunities(category.name)} name={category.name} className="w-full flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"> {category.name} <span className="text-gray-400 ml-aut">{category.count}</span></button></label>
+                        
+                        </div>
+                    ))}
+                    <button
+                      onClick={clearFilters}
+                      className="bg-white-500 text-grey px-4 py-2 rounded mt-2 w-full hover:bg-gray-50"
+                    >
+                      Clear Filters
+                    </button>
                   </div>
+                    ) }
+                </div>
                 </div>
 
                 {/* Locations Section */}
                 <div>
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Locations</h2>
-                  <div className="space-y-2">
-                    {LOCATIONS.map(location => (
-                      <button
-                        key={location.name}
-                        className="w-full flex justify-between items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <span>{location.name}</span>
-                        <span className="text-gray-400">{location.count}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Location</h2>
+                  <form className="space-y-2" onSubmit={handleSubmit}>
+                      <input
+                        id='user_postcode'
+                        type="text"
+                        placeholder="Your Postcode..."
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        onChange={(e) => setFormData({...formData, postcode: e.target.value})}
+                      />
+                      <input
+                        id='max_distance'
+                        type="number"
+                        placeholder="Distance in km..."
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        onChange={(e) => setFormData({...formData, max_distance: e.target.value})}
+                      />
+                      <button type='submit'>Submit</button>
+                  </form>
                 </div>
               </div>
             </div>
