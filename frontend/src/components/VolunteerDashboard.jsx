@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
+import api from '../utils/api';
 import { useUser } from '../contexts/UserContext';
 import Spin from '../components/LoadingSpinner';
 
@@ -44,36 +45,49 @@ const VolunteerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [FRIENDS, setFriends] = useState([]);
   const { user } = useUser();
-  let user_id = 0
-
+  
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setIsLoading(true);
-        const data1 = await api.get('/volunteer/list/');
-        const users = data1;
-        users.forEach(item =>{
-          if (item.email === user.email){
-            user_id = item.id
+        
+        // Get the list of volunteers
+        const volunteers = await api.get('/volunteer/list/');
+        
+        // Find the current user's volunteer ID
+        let currentVolunteerId = null;
+        
+        if (volunteers && Array.isArray(volunteers)) {
+          // Try to find the volunteer by email
+          const currentVolunteer = volunteers.find(item => 
+            item.email === user.email
+          );
+          
+          if (currentVolunteer) {
+            currentVolunteerId = currentVolunteer.id;
           }
-        })
-        const data2 = await api.get('/volunteer/' + user_id + '/');
-        setVolunteer(data2);
-        setFriends(data2.friends);
-
+        }
+        
+        // Only proceed if we found a valid volunteer ID
+        if (currentVolunteerId) {
+          const volunteerData = await api.get(`/volunteer/${currentVolunteerId}/`);
+          setVolunteer(volunteerData);
+          setFriends(volunteerData.friends || []);
+        } else {
+          console.error('Could not find volunteer record for the current user');
+          // You might want to handle this case, perhaps redirect or show a message
+        }
       } catch (error) {
-        console.error('Error fetching opportunities:', error);
+        console.error('Error fetching volunteer data:', error);
       } finally {
         setIsLoading(false);
       }
     };
+    
     if(user){
       fetchUser();
     }
   }, [user]);
-
- 
-
 
   const [isVisible, setIsVisible] = useState(false);
   const statsRef = useRef(null);
