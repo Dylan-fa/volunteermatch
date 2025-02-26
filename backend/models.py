@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import os
+import json
+from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
@@ -28,7 +31,20 @@ class Interest(models.Model):
 class Volunteer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
-    interests = models.ManyToManyField(Interest, related_name='interested_volunteers')
+    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True)
+    #------------------------------------------------------------------------------------------- Alex added below
+    hours = models.IntegerField(default = 0)
+    opportunities_completed = models.IntegerField(default = 0)
+    last_completion = models.DateTimeField(null = True, blank=True)
+    display_name = models.CharField(max_length = 16, unique = True)
+    elderly_score = models.IntegerField(default = 0)
+    medical_score = models.IntegerField(default = 0)
+    sports_score = models.IntegerField(default = 0)
+    animals_score = models.IntegerField(default = 0)
+    disability_score = models.IntegerField(default = 0)
+    greener_planet_score = models.IntegerField(default = 0)
+    community_score = models.IntegerField(default = 0)
+    education_score = models.IntegerField(default = 0)
 
 
     def __str__(self):
@@ -45,6 +61,11 @@ class Friendship(models.Model):
     to_volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='friendships_received')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.from_volunteer == self.to_volunteer:
+            raise ValidationError("You cannot be friends with yourself")
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ['from_volunteer', 'to_volunteer']
@@ -65,16 +86,44 @@ class Organization(models.Model):
 
 class Opportunity(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='opportunities')
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, unique = True)
     description = models.TextField()
     requirements = models.TextField()
-    location_name = models.CharField(max_length=200)
+    location_name = models.CharField(max_length=200)        #Make sure it is always a city please
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, related_name='opportunities')
+    #------------------------------------------------------------------------------------------------- Alex Addded Below Need to talk through
+
+    CHOICES = {
+        "low" : "Low", 
+        "medium" : "Medium", 
+        "high" : "High"
+    }
+    # start and end time are reflective of the normal work hours like 9-5 where start is 9 and end is 17 since it is a 24 hour clock
+    start_time = models.IntegerField() # add validators not more than 24 and not less than 0
+    end_time = models.IntegerField() # add validators not more than 24 and not less than 0
+    estimated_duration = models.IntegerField()
+    estimated_effort_ranking = models.CharField(choices = CHOICES, max_length=6)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    capacity = models.IntegerField()
+    current_volunteers_count = models.IntegerField(default = 0)
+
+    def save(self, *args, **kwargs):
+        file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
+        with open(file_path, "r") as file:
+            data = json.load(file)
+
+        for location in data:
+            if self.location_name == location["city"]:
+                self.latitude = location["lat"]
+                self.longitude = location["lng"]
+        return super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.title
@@ -92,6 +141,7 @@ class Application(models.Model):
     volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='applications')
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE, related_name='applications')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    current_volunteers = models.IntegerField()
     date_applied = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     notes = models.TextField(blank=True)

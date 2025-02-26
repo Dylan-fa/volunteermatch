@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+
+    {% block title %}
+    {% trans 'Explore' %}
+    {% endblock title %}
+
+    {% block content %}
+    
+    <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
+    <h1> {% trans 'Leaderboard' %}</h1>
+     
+    <div style = "display:flex; margin-top: 5vw;">
+
+        <form class = "filterBox" action = "/view/leaderboard/" method = "post">
+            {% csrf_token %}
+            <h3 style = "margin: 0">filters</h3>
+            
+
+
+
+            <!-- Sorting Options -->
+            <label for="dropdown">Sort by:</label>
+
+            <select name="order" id="dropdown">
+
+              <option value="-">-</option> 
+          
+              <option value="most_points">Total Points</option>
+          
+              <option value="least_points">Least Points</option>
+          
+          
+            </select>
+
+            <label for="friends_only">Friends Only:</label>
+            <input type="checkbox" name="friends_only" id="friends_only"
+                {% if request.user.is_authenticated%}{% else %}disabled{% endif %}>
+
+            <!-- Submit Button -->
+            <button type="submit">Apply Filters</button>
+            <button type="reset">Clear Filters</button>
+        </form>
+
+        <div class = "gridDisplay">
+            {% for volunteer in volunteers %}
+                <div class = "display">
+                    {{volunteer.user}} <br>
+                    {{volunteer.overall_score}}
+
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    
+
+
+
+</html>
+{% endblock content %}

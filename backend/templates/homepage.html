@@ -1,0 +1,108 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+
+    {% block title %}
+    {% trans 'Explore' %}
+    {% endblock title %}
+
+    {% block content %}
+    <h1 style = "background-color: rgb(116, 213, 116); margin: 0 0 0 0;">{{message}}</h1>
+    <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
+    <h1> {% trans '"Project Name" Explore' %}</h1>
+    <h2 style = "padding-top: 5vw;">{%trans 'Picked For You' %}</h2>
+    <div class = "grid" id = "featuredScroller">
+
+        <div class = scroll-content id = scrollable-content-featured>
+            {% for charity in charities %}
+        
+            <div class = "display">
+                <img src="{{charity.logo}}">
+                <br>
+                {{charity.name}}
+                <br>
+                charity number = {{charity.charity_number}}
+            </div>
+            {% endfor %}
+        </div>
+        <button class = "overlay-button-left" onclick="scrollLeftFeatured()"><</button>
+        <button class = "overlay-button-right" onclick="scrollRightFeatured()">></button>
+    </div>
+
+    <h2 style = "padding-top: 5vw;"> {% trans 'Your Current Activities' %}</h2>
+
+    <div class = "grid" id = "currentOpportunities">
+
+        <div class = scroll-content id = scrollable-content-current>
+            {% for activity in ongoingActivities %}
+        
+            <div class = "display">
+                {{activity}}
+            </div>
+            {% endfor %}
+        </div>
+        <button class = "overlay-button-left" onclick="scrollLeftCurrent()"><</button>
+        <button class = "overlay-button-right" onclick="scrollRightCurrent()">></button>
+    </div>
+
+    <h2 style = "padding-top: 5vw;">{% trans 'Friends' %} </h2>
+
+    <div class = "grid" id = "completedOpportunities">
+
+        <div class = scroll-content id = scrollable-content-complete>
+            {% for friend in friends %}
+        
+            <form class = "display", method = "post", action = "/">
+                {% csrf_token %}
+                {{friend.display_name}}
+                <br>
+                <input type="hidden" name="friend_id" value="{{ friend.id }}">
+                <button type = "submit" class = "addButton" style = "margin: 14vw 0 0 5vw; height: 3vh; background-color: red;">
+                    Remove
+                </button>
+                    
+            </form>
+            {% endfor %}
+        </div>
+        <button class = "overlay-button-left" onclick="scrollLeftComplete()"><</button>
+        <button class = "overlay-button-right" onclick="scrollRightComplete()">></button>
+    </div>
+    
+    <script>
+        const scrollContainerFeatured = document.getElementById("scrollable-content-featured");
+
+        function scrollLeftFeatured() {
+            scrollContainerFeatured.scrollBy({ left: -100, behavior: "smooth" });
+        }
+
+        function scrollRightFeatured() {
+            scrollContainerFeatured.scrollBy({ left: 100, behavior: "smooth" });
+        }
+
+        const scrollContainerCurrent = document.getElementById("scrollable-content-current");
+
+        function scrollLeftCurrent() {
+            scrollContainerCurrent.scrollBy({ left: -100, behavior: "smooth" });
+        }
+
+        function scrollRightCurrent() {
+            scrollContainerCurrent.scrollBy({ left: 100, behavior: "smooth" });
+        }
+
+        const scrollContainerComplete = document.getElementById("scrollable-content-complete");
+
+        function scrollLeftComplete() {
+            scrollContainerComplete.scrollBy({ left: -100, behavior: "smooth" });
+        }
+
+        function scrollRightComplete() {
+            scrollContainerComplete.scrollBy({ left: 100, behavior: "smooth" });
+        }
+    </script>
+</html>
+    {% endblock content %}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+    {% block title %}
+    {% trans 'Explore' %}
+    {% endblock title %}
+<body>
+    {% block content %}
+    
+    <h4 class = "greyText">{% trans 'Welcome to' %}</h4>
+    <h1> {% trans '"Project Name" Badges' %}</h1>
+    <h4 class = "greyText">{% trans 'Click a badge for more info' %}</h4>
+    
+    
+        <div style="display: flex;">
+            <div style="margin-top: 10vw; margin-left: 10vw; text-align: center;">
+                Elderly Badge
+                <a href = "/view-all/badges/Elderly-Badges">
+                    <div class = "displayBadges" style="margin-top: 1vw;">
+                            
+                        <img src="/media/ElderlyBadge.png">
+                        
+                    </div>
+                </a>
+            </div>
+    
+
+    
+        <div style="margin-top: 10vw; text-align: center;">
+            Medical Badge
+            <a href = "/view-all/badges/Medical-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+    
+        <div style="margin-top: 10vw; text-align: center;">
+            Disability Badge
+            <a href = "/view-all/badges/Disability-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                    
+                    <img src="/media/ElderlyBadge.png">
+                
+                </div>
+            </a>
+        </div>
+    
+        <div style="margin-top: 10vw; text-align: center;">
+            Animals Badge
+            <a href = "/view-all/badges/Animals-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+    </div>
+    <div style="display: flex;">
+    
+        <div style="margin-top: 3vw; margin-left: 10vw; text-align: center;">
+            Sports Badge
+            <a href = "/view-all/badges/Sports-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+    
+        <div style="margin-top: 3vw; text-align: center;">
+            Greener Planet Badge
+            <a href = "/view-all/badges/Greener-Planet-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+    
+        <div style="margin-top: 3vw; text-align: center;">
+            Education Badge
+            <a href = "/view-all/badges/Education-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+
+        <div style="margin-top: 3vw; text-align: center;">
+            Community Badge
+            <a href = "/view-all/badges/Community-Badges">
+                <div class = "displayBadges" style="margin-top: 1vw;">
+                        
+                        <img src="/media/ElderlyBadge.png">
+                    
+                </div>
+            </a>
+        </div>
+    </div>
+    
+
+
+</body>
+</html>
+    {% endblock content %}
