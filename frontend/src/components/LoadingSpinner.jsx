@@ -1,11 +1,13 @@
-import { Spinner } from 'react-bootstrap';
+import './LoadingSpinner.css';
 
 function Spin() {
   return (
-    <Spinner animation="border" role="status">
-      <span className="visually-hidden">Loading...</span>
-    </Spinner>
+    <div className="spinner-container">
+      <div className="spinner" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
   );
 }
 
-export default Spin
+export default Spin;

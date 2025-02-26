@@ -84,17 +84,18 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                   )}
                 </>
               )}
-            {user.is_organization ? ('') : (
-              <Link 
-                to="/friends" 
-                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
-              >
-                Friends
-              </Link>)}
+              {user && !user.is_organization && (
+                <Link 
+                  to="/friends" 
+                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+                >
+                  Friends
+                </Link>
+              )}
               <Link 
                 to="/leaderboard"
                 className='px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900'
-                >
+              >
                 Leaderboard
               </Link>
 
@@ -243,6 +244,20 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
               </div>
             </Link>
           )}
+          {user && !user.is_organization && (
+            <Link 
+              to="/friends" 
+              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >
+              Friends
+            </Link>
+          )}
+          <Link 
+            to="/leaderboard"
+            className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+          >
+            Leaderboard
+          </Link>
           {user ? (
             <>
               <div className="px-3 py-2">

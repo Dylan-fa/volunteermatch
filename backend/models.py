@@ -31,7 +31,7 @@ class Interest(models.Model):
 class Volunteer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
-    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True, null=True)
+    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True)
     #------------------------------------------------------------------------------------------- Alex added below
     hours = models.IntegerField(default = 0)
     opportunities_completed = models.IntegerField(default = 0)

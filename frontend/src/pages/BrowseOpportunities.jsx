@@ -111,6 +111,18 @@ const BrowseOpportunities = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
 
+  const fetchOpportunities = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/opportunities/');
+      setOpportunities(response);
+    } catch (error) {
+      console.error('Error fetching opportunities:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   function searchOpportunity() {
     let input = document.getElementById("searchBar").value.toLowerCase();
     let opportunities = document.querySelectorAll(".opportunity");
@@ -126,23 +138,10 @@ const BrowseOpportunities = () => {
 }
 
   useEffect(() => {
-    const fetchOpportunities = async () => {
-      try {
-        setIsLoading(true);
-        const data = await api.get('/opportunities/');
-        setOpportunities(data);
-      } catch (error) {
-        console.error('Error fetching opportunities:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-  useEffect(() => {
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get('/api/categories/');
+        const response = await api.get('/categories/');
         setCategories(response);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -150,9 +149,18 @@ const BrowseOpportunities = () => {
         setIsLoading(false);
       }
     };
+    
 
-    fetchCategories();
+    const fetchData = async () => {
+      await Promise.all([
+        fetchOpportunities(),
+        fetchCategories(),
+      ]);
+    };
+
+    fetchData();
   }, []);
+  
 
   function filterOpportunities(category) {
 

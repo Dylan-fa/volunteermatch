@@ -14,7 +14,7 @@ const Leaderboard = () => {
         const fetchVolunteers = async () => {
           try {
             setIsLoading(true);
-            const response = await api.get('/api/volunteer/list/');
+            const response = await api.get('/volunteer/list/');
             const sortedData = _.orderBy(response, ["overall_score"], ["desc"]);
             setVolunteers(sortedData)
             console.log(sortedData)
