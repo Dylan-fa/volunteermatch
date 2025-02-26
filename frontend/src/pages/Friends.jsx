@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageTransition from '../components/PageTransition';
-import axios from 'axios';
+import api from '../utils/api';
 import { useUser } from '../contexts/UserContext';
-import Cookies from 'js-cookie';
 import Spin from '../components/LoadingSpinner'
 
 const Friends = () => {
@@ -38,10 +37,10 @@ const Friends = () => {
           return;
       }
 
-      const response1 = await axios.get('/api/volunteer/list/');
-      const users = response1.data
+      const response1 = await api.get('/volunteer/list/');
+      const users = response1
 
-      let possibleVolunteers = response1.data
+      let possibleVolunteers = response1
 
       
       users.forEach(item =>{
@@ -50,17 +49,17 @@ const Friends = () => {
               setUser(item.id);
           }
       })
-      const response2 = await axios.get('/api/volunteer/' + user_id + '/');
-      setFriends(response2.data.friends);
-      const friends = response2.data.friends;
+      const response2 = await api.get('/volunteer/' + user_id + '/');
+      setFriends(response2.friends);
+      const friends = response2.friends;
 
       // filter so that none of your friends will show up as possible people to add
       possibleVolunteers = possibleVolunteers.filter(volunteer => !friends.some(friend => friend.id === volunteer.id))
       // filter so that the current user will not be able to add themselves
       possibleVolunteers = possibleVolunteers.filter(volunteer => volunteer.id !== user_id)
 
-      const pendingRequestsData = await axios.get('/api/friendship/list/pending/');
-      const pendingRequests = pendingRequestsData.data;
+      const pendingRequestsData = await api.get('/friendship/list/pending/');
+      const pendingRequests = pendingRequestsData;
 
       possibleVolunteers = possibleVolunteers.filter(volunteer => 
         !pendingRequests.some(req => 
@@ -76,8 +75,8 @@ const Friends = () => {
       let sentRequests = []
       
       for (const req of reqs) {
-        const response = await axios.get('/api/volunteer/' + req.to_volunteer + '/');
-        sentRequests.push(response.data);
+        const response = await api.get('/volunteer/' + req.to_volunteer + '/');
+        sentRequests.push(response);
       }
       setSent(sentRequests);
 
@@ -89,8 +88,8 @@ const Friends = () => {
       let fRequests = []
       
       for (const req of reqst) {
-        const response = await axios.get('/api/volunteer/' + req.from_volunteer + '/');
-        fRequests.push(response.data);
+        const response = await api.get('/volunteer/' + req.from_volunteer + '/');
+        fRequests.push(response);
       }
       setReqs(fRequests);
 
@@ -113,18 +112,12 @@ const Friends = () => {
 
   const deleteFriend = async (friendshipId) => {
     try {
-        const csrfToken = Cookies.get('csrftoken');
-        const response = await axios.delete(`/api/friendship/delete/${friendshipId}/${volunteer_id}/`, {
-            headers: {
-                "X-CSRFToken": csrfToken
-            },
-            withCredentials: true
-        });
+        const response = await api.delete(`/friendship/delete/${friendshipId}/${volunteer_id}/`);
 
         fetchUser();
 
-        setMessage(response.data.message);
-        console.log(response.data.message)
+        setMessage(response.message);
+        console.log(response.message)
 
     } catch (error) {
         console.error("Error deleting friendship:", error);
@@ -133,24 +126,18 @@ const Friends = () => {
 
 const addFriend = async (friendshipId) => {
     try {
-        const csrfToken = Cookies.get('csrftoken');
         // Ensure the request body is properly structured, if needed
-        const response = await axios.post(`/api/friendship/create/${friendshipId}/${volunteer_id}/`, {}, {
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
-            }
-        });
+        const response = await api.post(`/friendship/create/${friendshipId}/${volunteer_id}/`);
 
         fetchUser();
-        setMessage(response.data.message);
+        setMessage(response.message);
     } catch (error) {
         console.error("Error creating friendship:", error);
     }
 };
 const acceptFriend = async (friendshipId) => {
     try {
-        const response = await axios.post(`/api/friendship/accept/${friendshipId}/${volunteer_id}/`, {
+        const response = await api.post(`/friendship/accept/${friendshipId}/${volunteer_id}/`, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -158,7 +145,7 @@ const acceptFriend = async (friendshipId) => {
 
         fetchUser();
 
-        setMessage(response.data.message);
+        setMessage(response.message);
 
     } catch (error) {
         console.error("Error creating friendship:", error);

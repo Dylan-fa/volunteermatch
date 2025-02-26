@@ -1,6 +1,6 @@
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import _ from "lodash";
 
@@ -14,8 +14,8 @@ const Leaderboard = () => {
         const fetchVolunteers = async () => {
           try {
             setIsLoading(true);
-            const response = await axios.get('/api/volunteer/list/');
-            const sortedData = _.orderBy(response.data, ["overall_score"], ["desc"]);
+            const response = await api.get('/api/volunteer/list/');
+            const sortedData = _.orderBy(response, ["overall_score"], ["desc"]);
             setVolunteers(sortedData)
             console.log(sortedData)
 
