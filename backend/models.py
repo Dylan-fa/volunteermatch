@@ -31,7 +31,7 @@ class Interest(models.Model):
 class Volunteer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
-    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True)
+    interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True, null=True)
     #------------------------------------------------------------------------------------------- Alex added below
     hours = models.IntegerField(default = 0)
     opportunities_completed = models.IntegerField(default = 0)
@@ -135,7 +135,10 @@ class Application(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected')
+        ('rejected', 'Rejected'),
+        ('requesting_complete', 'Request Completion'),
+        ('completed', 'Completed'),
+        ('not_completed', 'Not Completed')
     ]
     
     volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='applications')
@@ -152,3 +155,11 @@ class Application(models.Model):
     def __str__(self):
         return f"{self.volunteer} - {self.opportunity}"
 
+class Messages(models.Model):
+    volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE)
+    from_person = models.CharField(max_length = 50, blank = False, null = False)
+    time_sent = models.DateTimeField(auto_now_add=True)
+    message = models.CharField(max_length=1024)
+
+    def __str__(self):
+        return f"From {self.from_person}, To {self.volunteer}"

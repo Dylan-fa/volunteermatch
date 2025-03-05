@@ -1,19 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router';
+import axios from 'axios';
+import { useParams, Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
-import api from '../utils/api';
+import { useUser } from '../contexts/UserContext';
 
 const OpportunityDetails = () => {
   const { id } = useParams();
   const [opportunity, setOpportunity] = useState(null);
   const mapRef = useRef(null);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchOpportunity = async () => {
       try {
-        const data = await api.get(`/opportunities/${id}/`);
-        setOpportunity(data);
-        initMap(data);
+        const response = await axios.get(`/api/opportunities/${id}/`, {
+          withCredentials: true,
+          params: { email: user.email }
+      });
+        setOpportunity(response.data);
+        initMap(response.data);
       } catch (error) {
         console.error('Error fetching opportunity:', error);
       }
@@ -38,10 +43,19 @@ const OpportunityDetails = () => {
 
   const handleApply = async () => {
     try {
-      await api.post(`/opportunities/${id}/apply/`);
+      await axios.post(`/api/opportunities/${id}/apply/`, {
+        email: user.email
+      }, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
       // Refresh opportunity data to update application status
-      const data = await api.get(`/opportunities/${id}/`);
-      setOpportunity(data);
+      const response = await axios.get(`/api/opportunities/${id}/`, {
+        withCredentials: true,
+        params: { email: user.email }
+    })
+      setOpportunity(response.data);
     } catch (error) {
       console.error('Error applying:', error);
     }

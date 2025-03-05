@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
-import PageTransition from './PageTransition';
-import api from '../utils/api';
+import axiosInstance from '../utils/axios';  // Update import to use configured instance
+import { Link } from 'react-router-dom';
+import PageTransition from '../components/PageTransition';
 
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -26,12 +26,12 @@ const OrganizationDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, profileRes] = await Promise.all([
-          api.get('/organization/stats/'),
-          api.get('/organization/profile/')
+          axiosInstance.get('/api/organization/stats/'),  // Use axiosInstance instead of axios
+          axiosInstance.get('/api/organization/profile/')
         ]);
-        setStats(statsRes);
-        setProfile(profileRes);
-        setEditForm(profileRes);
+        setStats(statsRes.data);
+        setProfile(profileRes.data);
+        setEditForm(profileRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -51,10 +51,10 @@ const OrganizationDashboard = () => {
         }
       });
 
-      const response = await api.put('/organization/profile/', formData, {
+      const response = await axiosInstance.put('/api/organization/profile/', formData, {  // Use axiosInstance
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setProfile(response);
+      setProfile(response.data);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -144,7 +144,7 @@ const OrganizationDashboard = () => {
               <StatCard title="Total Opportunities" value={stats?.total_opportunities || 0} icon="📊" />
               <StatCard title="Active Opportunities" value={stats?.active_opportunities || 0} icon="✨" />
               <StatCard title="Total Applications" value={stats?.total_applications || 0} icon="📝" />
-              <StatCard title="Pending Applications" value={stats?.pending_applications || 0} icon="⏳" />
+              <StatCard title="Pending Applications" value={stats?.pending_applications + stats?.request_applications|| 0} icon="⏳" />
             </div>
 
             {/* Recent Opportunities */}
@@ -165,9 +165,10 @@ const OrganizationDashboard = () => {
                       <div>
                         <h3 className="font-medium">{opportunity.title}</h3>
                         <p className="text-sm text-gray-500 mt-1">{opportunity.location_name}</p>
+                        <p className="text-sm text-gray-500 mt-1">{opportunity.pending_applications + opportunity.request_applications} Pending/Requested Applications</p>
                       </div>
                       <Link
-                        to={`/opportunity/${opportunity.id}`}
+                        to={`/opportunity/${opportunity.id}/pending/`}
                         className="text-sm text-gray-600 hover:text-gray-900"
                       >
                         View Details →
