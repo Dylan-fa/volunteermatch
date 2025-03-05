@@ -21,6 +21,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
+from itertools import chain
 from datetime import datetime
 from django.db.models import F, Sum
 
@@ -395,35 +396,47 @@ def view_friends(request):
 
 @api_view(['GET'])
 def api_volunteer_list(request):
-    if request.user.is_authenticated:
-        users = Volunteer.objects.exclude(user = request.user) + User.objects.exclude(id = request.user.id)
-    else:
-        users = Volunteer.objects.all()
-    data = [{
-        'id': user.id,
-        'f_name': user.user.first_name,
-        'l_name': user.user.last_name,
-        'display_name': user.display_name,
-        'opportunities_completed': user.opportunities_completed,
-        'last_completion': user.last_completion,
-        'email': user.user.email,
-        'scores': {
-            'elderly': user.elderly_score,
-            'medical': user.medical_score,
-            'community': user.community_score,
-            'education': user.education_score,
-            'animals': user.animals_score,
-            'sports': user.sports_score,
-            'disability': user.disability_score,
-            'greener_planet': user.greener_planet_score,
-        },
-        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score,
-    } for user in users]
+    volunteers = Volunteer.objects.all()
+    
+    data = []
+    
+    for volunteer in volunteers:
+        data.append({
+            'id': volunteer.id,
+            'f_name': volunteer.user.first_name,
+            'l_name': volunteer.user.last_name,
+            'display_name': volunteer.display_name,
+            'opportunities_completed': volunteer.opportunities_completed,
+            'last_completion': volunteer.last_completion,
+            'email': volunteer.user.email,
+            'scores': {
+                'elderly': volunteer.elderly_score,
+                'medical': volunteer.medical_score,
+                'community': volunteer.community_score,
+                'education': volunteer.education_score,
+                'animals': volunteer.animals_score,
+                'sports': volunteer.sports_score,
+                'disability': volunteer.disability_score,
+                'greener_planet': volunteer.greener_planet_score,
+            },
+            'overall_score': (volunteer.elderly_score + volunteer.medical_score + 
+                             volunteer.community_score + volunteer.education_score + 
+                             volunteer.animals_score + volunteer.sports_score + 
+                             volunteer.disability_score + volunteer.greener_planet_score)
+        })
+    
+    # If list is empty, include debug info about total volunteer count
+    if not data:
+        total_volunteers = Volunteer.objects.count()
+        print(f"DEBUG: No volunteers returned. Total volunteers in database: {total_volunteers}")
+        if request.user.is_authenticated:
+            print(f"DEBUG: Current user email: {request.user.email}")
+    
     return Response(data)
 
 @api_view(['GET'])
 def api_volunteer_detail(request, id):
-    user = Volunteer.objects.get(id = id)
+    user = get_object_or_404(Volunteer, id=id)
 
     friends = []
     for friendship in Friendship.objects.filter(status = "accepted"):
@@ -738,22 +751,60 @@ def google_login_callback(request):
             return Response({'error': 'Invalid credential'}, status=400)
         
         google_data = google_response.json()
+        email = google_data['email']
+        first_name = google_data.get('given_name', '')
+        last_name = google_data.get('family_name', '')
         
         # Get or create user
         try:
-            user = User.objects.get(email=google_data['email'])
+            user = User.objects.get(email=email)
+            # Check if user already has a volunteer profile
+            if hasattr(user, 'volunteer'):
+                volunteer = user.volunteer
+            else:
+                # Create volunteer profile if it doesn't exist
+                user_type = request.data.get('user_type', 'volunteer')
+                if user_type == 'volunteer':
+                    # Generate a unique display_name from email or name
+                    base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
+                    display_name = base_display_name
+                    
+                    # Ensure display_name is unique by appending numbers if needed
+                    counter = 1
+                    while Volunteer.objects.filter(display_name=display_name).exists():
+                        suffix = str(counter)
+                        max_base_length = 16 - len(suffix)
+                        display_name = f"{base_display_name[:max_base_length]}{suffix}"
+                        counter += 1
+                        
+                    volunteer = Volunteer.objects.create(user=user, display_name=display_name)
+                elif user_type == 'organization':
+                    Organization.objects.create(user=user)
+                    
         except User.DoesNotExist:
             user = User.objects.create_user(
-                username=google_data['email'],
-                email=google_data['email'],
-                first_name=google_data.get('given_name', ''),
-                last_name=google_data.get('family_name', '')
+                username=email,
+                email=email,
+                first_name=first_name,
+                last_name=last_name
             )
             
             # Create profile based on user_type
             user_type = request.data.get('user_type', 'volunteer')
             if user_type == 'volunteer':
-                Volunteer.objects.create(user=user)
+                # Generate a unique display_name from email or name
+                base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
+                display_name = base_display_name
+                
+                # Ensure display_name is unique by appending numbers if needed
+                counter = 1
+                while Volunteer.objects.filter(display_name=display_name).exists():
+                    suffix = str(counter)
+                    max_base_length = 16 - len(suffix)
+                    display_name = f"{base_display_name[:max_base_length]}{suffix}"
+                    counter += 1
+                    
+                volunteer = Volunteer.objects.create(user=user, display_name=display_name)
             elif user_type == 'organization':
                 Organization.objects.create(user=user)
 
@@ -765,7 +816,8 @@ def google_login_callback(request):
             'user': {
                 'email': user.email,
                 'is_volunteer': hasattr(user, 'volunteer'),
-                'is_organization': hasattr(user, 'organization')
+                'is_organization': hasattr(user, 'organization'),
+                'display_name': user.volunteer.display_name if hasattr(user, 'volunteer') else None
             }
         })
     except Exception as e:
