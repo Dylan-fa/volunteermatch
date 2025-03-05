@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
+import api from '../utils/api';
 
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -28,9 +29,9 @@ const OrganizationDashboard = () => {
           api.get('/organization/stats/'), 
           api.get('/organization/profile/')
         ]);
-        setStats(statsRes.data);
-        setProfile(profileRes.data);
-        setEditForm(profileRes.data);
+        setStats(statsRes);
+        setProfile(profileRes);
+        setEditForm(profileRes);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -53,7 +54,7 @@ const OrganizationDashboard = () => {
       const response = await api.put('/organization/profile/', formData, { 
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setProfile(response.data);
+      setProfile(response);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);

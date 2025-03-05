@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
+import api from '../utils/api';
 
 // Verification badge component
 const VerificationBadge = ({ type }) => {

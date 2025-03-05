@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext';
+import api from '../utils/api';
 
 const OpportunityDetails = () => {
   const { id } = useParams();
@@ -12,12 +13,11 @@ const OpportunityDetails = () => {
   useEffect(() => {
     const fetchOpportunity = async () => {
       try {
-        const response = await api.get(`/api/opportunities/${id}/`, {
+        const response = await api.get(`/opportunities/${id}/`, {
           withCredentials: true,
-          params: { email: user.email }
       });
-        setOpportunity(response.data);
-        initMap(response.data);
+        setOpportunity(response);
+        initMap(response);
       } catch (error) {
         console.error('Error fetching opportunity:', error);
       }
