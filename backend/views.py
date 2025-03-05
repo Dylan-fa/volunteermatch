@@ -21,7 +21,6 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
-from itertools import chain
 from datetime import datetime
 from django.db.models import F, Sum
 
@@ -58,7 +57,7 @@ def view_badges(request):
         return render(request, 'badgesView.html', context)
     return render(request, 'viewBadgeOptions.html')
 
-    
+
 @login_required
 def view_specified_badge(request, slug):
 
@@ -79,7 +78,7 @@ def view_all_badges(request, slug):
     badge4 = "/media/badge_placeholder.png"
     badge5 = "/media/badge_placeholder.png"
     badge6 = "/media/badge_placeholder.png"
-    
+
     if slug == "Elderly-Badges":
         badge1 = "/media/ElderlyBadge.png"
         badge2 = "/media/ElderlyBadge.png"
@@ -119,7 +118,7 @@ def hello(request):         #  Used to collect all information needed to display
         except:
             friendship = Friendship.objects.get(to_volunteer = Volunteer.objects.get(id = fID), from_volunteer = current_user)
             friendship.delete()
-            
+
         message = "Removed Friend Successfully"
 
     for friendship in Friendship.objects.all():
@@ -135,7 +134,7 @@ def hello(request):         #  Used to collect all information needed to display
             'charities': charities,
             'message': message
         }
-    
+
     if request.user.is_authenticated:
         return render(request, 'homepage.html', context)
     else:
@@ -199,19 +198,19 @@ def calculate_impact(request, charity, volunteer):
 
     opening_duration = end_date.day - start_date.day    # finds how long the opportunity was posted for
     if ((end_date.day - date_time_applied.day) < opening_duration * 0.15) and participants_at_application < capacity / 2:
-        bonus_points += round((end_date - date_time_applied).total_seconds() / 3600 / 6)   
+        bonus_points += round((end_date - date_time_applied).total_seconds() / 3600 / 6)
 
         # adds a point for every hour they applied before the closing when it is in the last 15% of opening time
 
     # each factors weights contributing to the final score
-                                                                            
+
     weights = {
         "duration" : 20,    # the time it took them to complete in proportion to estimated time
-        "effort" : 15,      # how physically straining it is    
+        "effort" : 15,      # how physically straining it is
         "recent" : 10,      # how recent the last opportunity they completed was
         "time" : 15,        # the hours worked (early and late shifts get more points)
         "status" : 5,      # how new the user is (the more tasks completed = less points)"
-        "population_affected" : 15      # the population of the closest city to charity 
+        "population_affected" : 15      # the population of the closest city to charity
     }
 
     time_value = 0.5
@@ -222,7 +221,7 @@ def calculate_impact(request, charity, volunteer):
     if start_time >= 9 and end_time <= 17:  #checking if shift(s) are a normal 9-5
         time_value = 0.5
 
-    elif start_time > 17 and (end_time < 9 or end_time < 24):   # checking if the shift(s) starts after 5 
+    elif start_time > 17 and (end_time < 9 or end_time < 24):   # checking if the shift(s) starts after 5
 
         if end_time - start_time >= 6:  # checking if the shift(s) was more than 6 hours meaning it went into midnight
             time_value = 2
@@ -238,16 +237,16 @@ def calculate_impact(request, charity, volunteer):
     elif duration > 4:      # checking if the shift was more than 4 hours
         time_value = 1
 
-        # this code ensures that a more experienced volunteer gets less points per completion  
+        # this code ensures that a more experienced volunteer gets less points per completion
         # so that it becomes more of a challenge to unlock the next badges
     status_value = max(10 / (1 + opportunities_completed / 10), 1)
     status_value = round(status_value, 1)
 
     duration_value = 1
 
-    """ this code ensures that a volunteer gets an adequate amount of points based on the time they took to complete the activity in proportion to 
+    """ this code ensures that a volunteer gets an adequate amount of points based on the time they took to complete the activity in proportion to
     how long it was expected to take"""
-    duration_value = duration_taken / estimated_duration            # allows for volunteers that have spent a longer amount of time trying to 
+    duration_value = duration_taken / estimated_duration            # allows for volunteers that have spent a longer amount of time trying to
     duration_value = round(duration_value, 2)                       # complete an opportunity to gain more points and people who dont take as long
                                                                     # as they maybe should get a lower multiplier
 
@@ -311,7 +310,7 @@ def delete_friendship(request, friend_id, volunteer_id):
                 friendship.delete()
             if friendship.from_volunteer == u and friendship.to_volunteer == friend:
                 friendship.delete()
- 
+
         return JsonResponse({"message": "Friendship removed successfully"}, status=200)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
@@ -320,9 +319,9 @@ def create_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
-        
+
         Friendship.objects.create(from_volunteer = u, to_volunteer = friend, status = "pending")
- 
+
         return JsonResponse({"message": "Friend request sent"}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=405)
 
@@ -331,11 +330,11 @@ def accept_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
-        
+
         friendship = Friendship.objects.get(to_volunteer = u, from_volunteer = friend)
         friendship.status = "accepted"
         friendship.save()
- 
+
         return JsonResponse({"message": "Friend request sent"}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=405)
 
@@ -363,8 +362,8 @@ def view_friends(request):
             toVol = request.POST.get("volunteer_id")
             toV = Volunteer.objects.get(id = toVol)
             message = "Sent a request to " + toV.display_name
-            
-            
+
+
             Friendship.objects.create(from_volunteer = fromV, to_volunteer = toV, status = "pending")
 
     reqs = []
@@ -391,15 +390,15 @@ def view_friends(request):
             "requests": reqs,
             "sent_reqs": sent
         }
-    
+
     return render(request, 'friends_page.html', context)
 
 @api_view(['GET'])
 def api_volunteer_list(request):
     volunteers = Volunteer.objects.all()
-    
+
     data = []
-    
+
     for volunteer in volunteers:
         data.append({
             'id': volunteer.id,
@@ -419,19 +418,19 @@ def api_volunteer_list(request):
                 'disability': volunteer.disability_score,
                 'greener_planet': volunteer.greener_planet_score,
             },
-            'overall_score': (volunteer.elderly_score + volunteer.medical_score + 
-                             volunteer.community_score + volunteer.education_score + 
-                             volunteer.animals_score + volunteer.sports_score + 
+            'overall_score': (volunteer.elderly_score + volunteer.medical_score +
+                             volunteer.community_score + volunteer.education_score +
+                             volunteer.animals_score + volunteer.sports_score +
                              volunteer.disability_score + volunteer.greener_planet_score)
         })
-    
+
     # If list is empty, include debug info about total volunteer count
     if not data:
         total_volunteers = Volunteer.objects.count()
         print(f"DEBUG: No volunteers returned. Total volunteers in database: {total_volunteers}")
         if request.user.is_authenticated:
             print(f"DEBUG: Current user email: {request.user.email}")
-    
+
     return Response(data)
 
 @api_view(['GET'])
@@ -477,19 +476,19 @@ def api_volunteer_detail(request, id):
     return Response(data)
 
 def volunteers_order(volunteers, order):
-    
+
     volunteers = volunteers.annotate(
        overall_score=Sum(
-           F("elderly_score") + 
-           F("medical_score") + 
-           F("community_score") + 
-           F("education_score") + 
-           F("animals_score") + 
-           F("sports_score") + 
-           F("disability_score") + 
+           F("elderly_score") +
+           F("medical_score") +
+           F("community_score") +
+           F("education_score") +
+           F("animals_score") +
+           F("sports_score") +
+           F("disability_score") +
            F("greener_planet_score")
        ))
-     
+
     if order == "most_points":
         volunteers = volunteers.order_by("-overall_score")  # Descending order
     elif order == "least_points":
@@ -501,10 +500,10 @@ def view_leaderboard(request):
     leaderboard_order = request.POST.get('order')
     friends_only = request.POST.get('friends_only')
     friends = []
-    
+
     volunteers = Volunteer.objects.all()
 
-  
+
 
     if friends_only:
         current_user = Volunteer.objects.get(user = request.user)
@@ -514,11 +513,11 @@ def view_leaderboard(request):
             if friendship.from_volunteer == current_user:
                 friends.append(friendship.to_volunteer)
         volunteers = friends
-    
+
     if leaderboard_order != "-":
         volunteers = volunteers_order(volunteers, leaderboard_order)
 
-    
+
 
     return render(request, "leaderboard.html", {"volunteers": volunteers})
 
@@ -532,7 +531,7 @@ def sort(opportunities, type):
         for category in opportunity.categories.all():
             if type == category.name:
                 filtered.append(opportunity)
-    
+
     return filtered
 
 def sort_verified(opportunities, isverified):
@@ -540,7 +539,7 @@ def sort_verified(opportunities, isverified):
     for opportunity in opportunities:
         if opportunity.organisation.approved == isverified:
             filtered.append(opportunity)
-    
+
     return filtered
 
 def sort_effort(opportunities, effort):
@@ -552,9 +551,9 @@ def sort_effort(opportunities, effort):
     return filtered
 
 def get_coordinates_from_postcode(postcode):
-    
+
     geolocator = Nominatim(user_agent="backend")
-    
+
     try:
         location = geolocator.geocode(postcode)
         if location:
@@ -577,7 +576,7 @@ def calculate_opp_in_distance(opportunities, user_postcode, max_distance_km):
         if opportunity.latitude is not None and opportunity.longitude is not None:
             opp_location = (opportunity.latitude, opportunity.longitude)
             user_location = (user_lat, user_lon)
-            
+
             distance = geodesic(user_location, opp_location).km  # Calculate distance in km
             if float(distance) <= float(max_distance_km):
                 filtered.append(opportunity)
@@ -587,13 +586,13 @@ def calculate_opp_in_distance(opportunities, user_postcode, max_distance_km):
 def ordering(opportunities, order):
     if order == "nearest_deadline":
         ordered = opportunities.order_by("-start_time")
-    
+
     elif order == "furthest_deadline":
         ordered = opportunities.order_by("start_time")
-    
+
     elif order == "newest":
         ordered = opportunities.order_by("-date_created")
-    
+
     elif order == "oldest":
         ordered = opportunities.order_by("date_created")
     return ordered
@@ -618,31 +617,31 @@ def filtered_opp(request):
 
     if elderly:
         opportunities = sort(opportunities, "Elderly")
-    
+
     if medical:
         opportunities = sort(opportunities, "Medical")
-    
+
     if disability:
         opportunities = sort(opportunities, "Disability")
-    
+
     if animal:
         opportunities = sort(opportunities, "Animal")
-    
+
     if educational:
         opportunities = sort(opportunities, "Educational")
-    
+
     if sport:
         opportunities = sort(opportunities, "Sports")
-    
+
     if greener_planet:
         opportunities = sort(opportunities, "Greener_Planet")
-    
+
     if community:
         opportunities = sort(opportunities, "Community")
-    
+
     if verification:
         opportunities = sort_verified(opportunities, True)
-    
+
     if effort != "-":
         opportunities = sort_effort(opportunities, effort)
 
@@ -661,7 +660,7 @@ def filtered_opp(request):
 def charity_search(request):
     query = request.GET.get('q', '').strip()
     limit = int(request.GET.get('limit', 50))  # Default to 50 results
-    
+
     if len(query) < 3:
         return JsonResponse([], safe=False)
 
@@ -718,19 +717,24 @@ def login_view(request):
     email = request.data.get('email')
     password = request.data.get('password')
     user = authenticate(email=email, password=password)
-    
+
     if user:
         refresh = RefreshToken.for_user(user)
         is_organization = hasattr(user, 'organization')
-        
+
+        user_data = {
+            'email': user.email,
+            'is_organization': is_organization,
+            'is_volunteer': not is_organization
+        }
+
+        if is_organization:
+            user_data['organization_id'] = user.organization.id
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'user': {
-                'email': user.email,
-                'is_organization': is_organization,
-                'organization_id': user.organization.id if is_organization else None
-            }
+            'user': user_data
         })
     return Response({'error': 'Invalid credentials'}, status=400)
 
@@ -746,15 +750,15 @@ def google_login_callback(request):
             'https://oauth2.googleapis.com/tokeninfo',
             params={'id_token': credential}
         )
-        
+
         if not google_response.ok:
             return Response({'error': 'Invalid credential'}, status=400)
-        
+
         google_data = google_response.json()
         email = google_data['email']
         first_name = google_data.get('given_name', '')
         last_name = google_data.get('family_name', '')
-        
+
         # Get or create user
         try:
             user = User.objects.get(email=email)
@@ -768,7 +772,7 @@ def google_login_callback(request):
                     # Generate a unique display_name from email or name
                     base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
                     display_name = base_display_name
-                    
+
                     # Ensure display_name is unique by appending numbers if needed
                     counter = 1
                     while Volunteer.objects.filter(display_name=display_name).exists():
@@ -776,11 +780,11 @@ def google_login_callback(request):
                         max_base_length = 16 - len(suffix)
                         display_name = f"{base_display_name[:max_base_length]}{suffix}"
                         counter += 1
-                        
+
                     volunteer = Volunteer.objects.create(user=user, display_name=display_name)
                 elif user_type == 'organization':
                     Organization.objects.create(user=user)
-                    
+
         except User.DoesNotExist:
             user = User.objects.create_user(
                 username=email,
@@ -788,14 +792,14 @@ def google_login_callback(request):
                 first_name=first_name,
                 last_name=last_name
             )
-            
+
             # Create profile based on user_type
             user_type = request.data.get('user_type', 'volunteer')
             if user_type == 'volunteer':
                 # Generate a unique display_name from email or name
                 base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
                 display_name = base_display_name
-                
+
                 # Ensure display_name is unique by appending numbers if needed
                 counter = 1
                 while Volunteer.objects.filter(display_name=display_name).exists():
@@ -803,7 +807,7 @@ def google_login_callback(request):
                     max_base_length = 16 - len(suffix)
                     display_name = f"{base_display_name[:max_base_length]}{suffix}"
                     counter += 1
-                    
+
                 volunteer = Volunteer.objects.create(user=user, display_name=display_name)
             elif user_type == 'organization':
                 Organization.objects.create(user=user)
@@ -831,10 +835,10 @@ def register_volunteer(request):
     display_name = request.data.get('display_name')
     password = request.data.get('password')
     password2 = request.data.get('password2')
-    
+
     if password != password2:
         return Response({'error': 'Passwords do not match'}, status=400)
-        
+
     try:
         user = User.objects.create_user(username=email, first_name = first_name, last_name = last_name, email=email, password=password)
         volunteer = Volunteer.objects.create(user=user, display_name = display_name)
@@ -863,7 +867,7 @@ def register_organization(request):
         description = request.data.get('description')
         logo = request.FILES.get('logo')
         selected_charity_data = request.data.get('selected_charity_data')
-        
+
         if not all([email, username, password, password2, name, description]):
             return Response({
                 'error': 'All required fields must be provided'
@@ -873,14 +877,14 @@ def register_organization(request):
             return Response({
                 'error': 'Passwords do not match'
             }, status=400)
-            
+
         # Create user
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
-        
+
         # Create organization
         organization = Organization.objects.create(
             user=user,
@@ -901,7 +905,7 @@ def register_organization(request):
                 'is_organization': True
             }
         })
-        
+
     except Exception as e:
         # If user was created but organization creation failed, delete the user
         if 'user' in locals():
@@ -915,7 +919,7 @@ def api_opportunity_list(request):
     opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
     if request.method == "POST":
         opportunities = filtered_opp(request)
-    
+
     data = [{
         'id': opp.id,
         'title': opp.title,
@@ -930,8 +934,8 @@ def api_opportunity_list(request):
         'requirements': opp.requirements,
         'pending_applications': opp.pending_applications_count(),
         'has_applied': bool(
-            request.user.is_authenticated and 
-            hasattr(request.user, 'volunteer') and 
+            request.user.is_authenticated and
+            hasattr(request.user, 'volunteer') and
             opp.applications.filter(volunteer=request.user.volunteer).exists()
         ),
         'effort' : opp.estimated_effort_ranking,
@@ -958,8 +962,8 @@ def api_filter_distance(request):
             'requirements': opp.requirements,
             'pending_applications': opp.pending_applications_count(),
             'has_applied': bool(
-                request.user.is_authenticated and 
-                hasattr(request.user, 'volunteer') and 
+                request.user.is_authenticated and
+                hasattr(request.user, 'volunteer') and
                 opp.applications.filter(volunteer=request.user.volunteer).exists()
             ),
             'effort' : opp.estimated_effort_ranking,
@@ -984,20 +988,20 @@ def api_opportunity_detail(request, pk):
         'latitude': opportunity.latitude,
         'longitude': opportunity.longitude,
         'is_owner': bool(
-            request.user.is_authenticated and 
-            hasattr(request.user, 'organization') and 
+            request.user.is_authenticated and
+            hasattr(request.user, 'organization') and
             opportunity.organization == request.user.organization
         ),
         'has_applied': bool(
-            request.user.is_authenticated and 
-            hasattr(request.user, 'volunteer') and 
+            request.user.is_authenticated and
+            hasattr(request.user, 'volunteer') and
             opportunity.applications.filter(volunteer=request.user.volunteer).exists()
         ),
         'application_status': opportunity.applications.filter(
             volunteer=request.user.volunteer
         ).first().status if (
-            request.user.is_authenticated and 
-            hasattr(request.user, 'volunteer') and 
+            request.user.is_authenticated and
+            hasattr(request.user, 'volunteer') and
             opportunity.applications.filter(volunteer=request.user.volunteer).exists()
         ) else None
     }
@@ -1006,24 +1010,24 @@ def api_opportunity_detail(request, pk):
 @api_view(['POST'])
 def api_create_opportunity(request):
     if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required'}, 
+        return Response({'error': 'Authentication required'},
                        status=status.HTTP_401_UNAUTHORIZED)
-    
+
     if not hasattr(request.user, 'organization'):
-        return Response({'error': 'Only organizations can create opportunities'}, 
+        return Response({'error': 'Only organizations can create opportunities'},
                        status=status.HTTP_403_FORBIDDEN)
-    
+
     geolocator = Nominatim(user_agent="my_geopy_app")
-    
+
     data = request.data.copy()  # Make a mutable copy
     data['organization'] = request.user.organization.id
-    
+
 
     location = geolocator.reverse(str(data['latitude']) + "," + str(data['longitude']))
     city = location.raw['address'].get('city', '')
     data['location_name'] = city
     print(data)
-    
+
     serializer = OpportunitySerializer(data=data)
     if serializer.is_valid():
         opportunity = serializer.save(organization=request.user.organization)
@@ -1034,11 +1038,11 @@ def api_create_opportunity(request):
 def api_organization_stats(request):
     if not request.user.is_authenticated or not hasattr(request.user, 'organization'):
         return Response({'error': 'Not authorized'}, status=403)
-    
+
     org = request.user.organization
     opportunities = Opportunity.objects.filter(organization=org)
     recent_opportunities = opportunities.order_by('-date_created')[:5]  # Get 5 most recent
-    
+
     data = {
         'total_opportunities': opportunities.count(),
         'active_opportunities': opportunities.filter(is_active=True).count(),
@@ -1055,9 +1059,9 @@ def api_organization_stats(request):
 def api_organization_profile(request):
     if not request.user.is_authenticated or not hasattr(request.user, 'organization'):
         return Response({'error': 'Not authorized'}, status=403)
-    
+
     org = request.user.organization
-    
+
     if request.method == 'GET':
         return Response({
             'name': org.name,
@@ -1066,7 +1070,7 @@ def api_organization_profile(request):
             'logo': org.logo.url if org.logo else None,
             'email': org.user.email
         })
-    
+
     elif request.method == 'PUT':
         try:
             if 'name' in request.data:
@@ -1076,7 +1080,7 @@ def api_organization_profile(request):
             if 'logo' in request.FILES:
                 org.logo = request.FILES['logo']
             org.save()
-            
+
             return Response({
                 'name': org.name,
                 'description': org.description,
@@ -1086,7 +1090,7 @@ def api_organization_profile(request):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=400)
-        
+
 @api_view(['GET'])
 def api_list_categories(request):
     categories = Category.objects.all()
