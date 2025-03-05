@@ -1,9 +1,111 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaUserCircle, FaMedal, FaClock, FaUsers } from 'react-icons/fa';
+import { FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
-import api from '../utils/api';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '../contexts/UserContext'
 import Spin from '../components/LoadingSpinner';
+import { useParams } from 'react-router-dom';
+import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
+import api from '../utils/api';
+
+const MessageCard = ({message}) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  async function handleMessage(id){
+    setIsVisible(false);
+    try {
+      await api.delete(`/message/${id}/remove`);
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  }
+
+  if (!isVisible) return null
+  return(
+  <div key={message.id} className="p-6 bg-white rounded-xl shadow-lg relative">
+    <div className="flex items-start space-x-4">
+      <div className="w-14 h-14 bg-yellow-300 text-white rounded-full flex items-center justify-center text-2xl font-semibold">
+        <span role="img" aria-label="star">⭐</span>
+      </div>
+
+      <div className="flex-1">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">{message.from_person}</h3>
+        <p className="text-md text-gray-700">{message.message}</p>
+      </div>
+    </div>
+
+    <p className="absolute top-2 right-4 text-xs text-gray-400">{format(new Date(message.time_sent), 'EEEE, MMMM dd, yyyy')}</p>
+
+    <div className="absolute top-1/2 right-2 transform -translate-y-1/2">
+      <button
+        className="text-gray-400 hover:bg-gray-300 rounded-full p-2 transition-all duration-200 text-2xl font-bold hover:text-gray-700"
+        onClick={() => handleMessage(message.id)}
+      >
+        X
+      </button>
+    </div>
+  </div>
+  )
+}
+
+const OpportunityCard = ({app, completeButton, setUpdate, update}) => {
+
+  async function handleClick(mode){
+    
+    try {
+      await api.post(`/application/update/${app.id}/${mode}/`);
+      } catch (error) {
+      console.error('Error:', error);
+    } 
+    setUpdate(!update);
+    
+  }
+
+  return(
+    <div className="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 relative">
+    {/* Date Applied in Top Right */}
+    <p className="absolute top-2 right-4 text-xs text-gray-500">
+      Applied: {format(new Date(app.date_applied), "MMM dd, yyyy")}
+    </p>
+
+    {/* Header with Icon */}
+    <div className="flex items-center space-x-4">
+      <div className="text-6xl w-24 h-24 bg-blue-400 text-white rounded-full flex items-center justify-center font-bold shadow-md">
+      📋
+      </div>
+
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-900">
+          {app.opportunity.opportunity_name}
+        </h3>
+        <p className="text-sm text-gray-600">{app.opportunity.organisation_name}</p>
+      </div>
+      
+      <Link
+          to={`/opportunity/${app.opportunity.id}`}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+        >
+          Learn More
+      </Link>
+      </div>
+
+    {completeButton ? (
+    <div className='flex justfy-end items-center w-full'>
+      <span className="text-sm text-gray-700 mr-4">Think you have completeed this activity?</span>
+      <button 
+          className="px-6 py-3 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+          onClick={() => handleClick("requesting_complete")}
+          disabled={app.opportunity.has_applied}
+        >
+          {app.opportunity.status === 'requesting_complete' ? 'Sent Requested' : 'Complete'}
+      </button>
+    </div>
+    ) : ('')}
+    </div>
+  )
+}
+
+
 
 // Add this new component for animated counting
 const AnimatedCounter = ({ value, duration = 2000 }) => {
@@ -44,50 +146,59 @@ const VolunteerDashboard = () => {
   const [volunteer, setVolunteer] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [FRIENDS, setFriends] = useState([]);
+  const [MESSAGES, setMessages] = useState([]);
+  const [pending, setPending] = useState([]);
+  const [accepted, setAccepted] = useState([]);
   const { user } = useUser();
-  
+  const {id} = useParams();
+  const [showAll, setShowAll] = useState(false); 
+  const [showAllPending, setShowAllPending] = useState(false); 
+  const [showAllAccepted, setShowAllAccepted] = useState(false); 
+  const [update, setUpdate] = useState(false);
+
+  const visibleMessages = showAll ? MESSAGES : MESSAGES.slice(0, 3);
+  const visible_pending = showAllPending ? pending : pending.slice(0, 1);
+  const visible_accepted = showAllAccepted ? accepted : accepted.slice(0, 1);
+  let user_id = 0
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setIsLoading(true);
-        
-        // Get the list of volunteers
-        const volunteers = await api.get('/volunteer/list/');
-        
-        // Find the current user's volunteer ID
-        let currentVolunteerId = null;
-        
-        if (volunteers && Array.isArray(volunteers)) {
-          // Try to find the volunteer by email
-          const currentVolunteer = volunteers.find(item => 
-            item.email === user.email
-          );
-          
-          if (currentVolunteer) {
-            currentVolunteerId = currentVolunteer.id;
-          }
+        if(id){
+          user_id = id;
+        }
+        else{
+          const response1 = await api.get('/volunteer/list/');
+          const users = response1
+          users.forEach(item =>{
+            if (item.email === user.email){
+              user_id = item.id
+            }
+          })
         }
         
-        // Only proceed if we found a valid volunteer ID
-        if (currentVolunteerId) {
-          const volunteerData = await api.get(`/volunteer/${currentVolunteerId}/`);
-          setVolunteer(volunteerData);
-          setFriends(volunteerData.friends || []);
-        } else {
-          console.error('Could not find volunteer record for the current user');
-          // You might want to handle this case, perhaps redirect or show a message
-        }
+        const response2 = await api.get('/volunteer/' + user_id + '/');
+        setVolunteer(response2);
+        setFriends(response2.friends);
+        setMessages(response2.messages);
+        setPending(response2.pending_applications);
+        setAccepted(response2.accepted_applications);
+
+
       } catch (error) {
-        console.error('Error fetching volunteer data:', error);
+        console.error('Error fetching opportunities:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
     if(user){
       fetchUser();
     }
-  }, [user]);
+  }, [user, showAll, update], );
+
+ 
+
 
   const [isVisible, setIsVisible] = useState(false);
   const statsRef = useRef(null);
@@ -201,53 +312,94 @@ const VolunteerDashboard = () => {
                   <div className="mt-3 flex items-center gap-4 text-sm">
                     <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
                       <FaClock className="w-4 h-4" />
-                      {friend.overall_score} impact
+                      {friend.overall_score} Impact
                     </span>
-                    <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-3 py-1 rounded-full">
+                    <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-1 py-1 rounded-full">
                       <FaMedal className="w-4 h-4" />
-                      {friend.badges} badges
+                      {friend.opportunities_completed} Completed Opportunities
                     </span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Recent Activity */}
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          {/* Pending Applications Tab */}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Opportunities applied for</h2>
+          {pending.length === 0 ? (
+            <div className="col-span-2 text-center py-12">
+                    <p className="text-gray-500">No pending applications</p>
+            </div>) : (
+            <div>
+            
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
               <div className="divide-y divide-gray-100">
-                <div className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center">
-                    <span className="text-2xl bg-green-50 p-2 rounded-full mr-3">🌱</span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">Community Garden Project</p>
-                      <p className="text-sm text-gray-500">Completed 3 hours • Yesterday</p>
-                    </div>
-                  </div>
+                {visible_pending.map(app => (
+                  <OpportunityCard key = {app.id} app = {app} completeButton={false} setUpdate = {setUpdate} update = {update}/>
+                  ))}
                 </div>
-                <div className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center">
-                    <span className="text-2xl bg-blue-50 p-2 rounded-full mr-3">📚</span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">Youth Mentoring Program</p>
-                      <p className="text-sm text-gray-500">Completed 2 hours • 3 days ago</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center">
-                    <span className="text-2xl bg-yellow-50 p-2 rounded-full mr-3">🏆</span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">Earned "Regular Helper" Badge</p>
-                      <p className="text-sm text-gray-500">Achievement • 1 week ago</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
+        )}
+        {pending.length > 1 && ( 
+        <button
+          onClick={() => setShowAllPending(!showAllPending)}
+          className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
+        >
+          {showAllPending ? "Show Less" : "Show More"}
+        </button>
+      )}
+
+      {/* Applications in Progress Tab */}
+      <h2 className="text-2xl font-semibold text-gray-900 mb-4">Opportunities in Progress</h2>
+          {accepted.length === 0 ? (
+            <div className="col-span-2 text-center py-12">
+                    <p className="text-gray-500">No opportunities in progress</p>
+            </div>) : (
+            <div>
+            
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+              <div className="divide-y divide-gray-100">
+                {visible_accepted.map(app => (
+                  <OpportunityCard key = {app.id} app = {app} completeButton={true} setUpdate = {setUpdate} update = {update}/>
+                  ))}
+                </div>
+            </div>
+          </div>
+        )}
+        {accepted.length > 1 && ( 
+        <button
+          onClick={() => setShowAllAccepted(!showAllAccepted)}
+          className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
+        >
+          {showAllAccepted ? "Show Less" : "Show More"}
+        </button>
+      )}
+
+          {/* Messages */}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Messages</h2>
+          {MESSAGES.length === 0 ? (
+            <div className="col-span-2 text-center py-12">
+                    <p className="text-gray-500">No messages</p>
+            </div>) : (
+            <div>
+            
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+              <div className="divide-y divide-gray-100">
+                {visibleMessages.map(message => (
+                  <MessageCard key = {message.id} message = {message} />
+                  ))}
+                </div>
+            </div>
+          </div>
+        )}
+        {MESSAGES.length > 3 && ( 
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
+        >
+          {showAll ? "Show Less" : "Show More"}
+        </button>
+      )}
         </div>
       </div>
       )}

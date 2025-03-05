@@ -5,7 +5,7 @@ import PageTransition from '../components/PageTransition';
 
 const TEAM_MEMBERS = [
   {
-    name: "Amir Dzakwan",
+    name: "Alex Morris",
     role: "Co-Founder & Full Stack Developer",
     image: "👨‍💻", // Replace with actual image
     bio: "Computer Science student at the University of Manitoba with a passion for creating technology that makes a positive impact.",
@@ -13,7 +13,7 @@ const TEAM_MEMBERS = [
     github: "https://github.com/amirdzakwan"
   },
   {
-    name: "Adel Anarbaeyva",
+    name: "Thomas Fitzsimons",
     role: "Co-Founder & Frontend Developer",
     image: "👩‍💻", // Replace with actual image
     bio: "Computer Science student specializing in user experience and frontend development, dedicated to making volunteering accessible to everyone.",
@@ -21,8 +21,16 @@ const TEAM_MEMBERS = [
     github: "https://github.com/adelanarbaeyva"
   },
   {
-    name: "Dylan Farrar",
+    name: "William Rodriguez-Ward",
     role: "Co-Founder & Backend Developer",
+    image: "👨‍💻", // Replace with actual image
+    bio: "Computer Science student focused on backend architecture and database design, committed to building scalable solutions for social good.",
+    linkedin: "https://linkedin.com/in/dylanfarrar",
+    github: "https://github.com/dylanfarrar"
+  },
+  {
+    name: "RUDYYYY",
+    role: "CEO & Main Developer",
     image: "👨‍💻", // Replace with actual image
     bio: "Computer Science student focused on backend architecture and database design, committed to building scalable solutions for social good.",
     linkedin: "https://linkedin.com/in/dylanfarrar",

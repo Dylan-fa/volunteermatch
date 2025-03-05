@@ -5,7 +5,6 @@ import VolunteerDashboard from '../components/VolunteerDashboard';
 
 const Dashboard = () => {
   const { user } = useUser();
-
   // Add loading state when user data is not available
   if (!user) {
     return (

@@ -22,6 +22,7 @@ from .models import User, Volunteer, Organization
 from .serializers import OpportunitySerializer
 import os
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import F, Sum
 
 from geopy.geocoders import Nominatim
@@ -155,10 +156,10 @@ def list_pending_friendships(request):
     } for friendship in friendships]
     return Response(data)
 
-def calculate_impact(request, charity, volunteer):
+def calculate_impact(charity, volunteer):
 
-    opportunity = Opportunity.objects.get(id = charity)
-    volunteer = get_object_or_404(Volunteer, id = volunteer)
+    opportunity = charity
+    volunteer = volunteer
     applications = Application.objects.all()
     current_application = None
 
@@ -276,7 +277,8 @@ def calculate_impact(request, charity, volunteer):
     people_helped = round(people_helped)
 
 
-
+    #if duration_value < 0:
+    #    duration_value = 0
 
     final_value = (time_value * weights.get("time")) + (status_value * weights.get("status")) + (duration_value * weights.get("duration")) + (recent_value * weights.get("recent")) + (effort_value * weights.get("effort")) + (min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected")) + bonus_points
 
@@ -297,7 +299,7 @@ def calculate_impact(request, charity, volunteer):
     print(str((min(3, max(people_helped / 100000, 0.5)) * weights.get("population_affected"))) + " people")
 
 
-    return HttpResponse(final_value)
+    return final_value
 
 
 @api_view(["DELETE"])
@@ -395,47 +397,87 @@ def view_friends(request):
 
 @api_view(['GET'])
 def api_volunteer_list(request):
-    volunteers = Volunteer.objects.all()
+    users = Volunteer.objects.all()
+    data = [{
+        'id': user.id,
+        'f_name': user.user.first_name,
+        'l_name': user.user.last_name,
+        'display_name': user.display_name,
+        'opportunities_completed': user.opportunities_completed,
+        'last_completion': user.last_completion,
+        'email': user.user.email,
+        'scores': {
+            'elderly': user.elderly_score,
+            'medical': user.medical_score,
+            'community': user.community_score,
+            'education': user.education_score,
+            'animals': user.animals_score,
+            'sports': user.sports_score,
+            'disability': user.disability_score,
+            'greener_planet': user.greener_planet_score,
+        },
+        'overall_score': user.elderly_score + user.medical_score + user.community_score + user.education_score + user.animals_score + user.sports_score + user.disability_score + user.greener_planet_score,
+    } for user in users]
+    return Response(data)
 
-    data = []
+@api_view(['GET'])
+def api_volunteer_pending(request, id):
+    data = [{
+        'id': app.volunteer.user.id,
+        'application_id': app.id,
+        'volunteer_id': app.volunteer.id,
+        'f_name': app.volunteer.user.first_name,
+        'l_name': app.volunteer.user.last_name,
+        'display_name': app.volunteer.display_name,
+        'opportunities_completed': app.volunteer.opportunities_completed,
+        'last_completion': app.volunteer.last_completion,
+        'email': app.volunteer.user.email,
+        'scores': {
+            'elderly': app.volunteer.elderly_score,
+            'medical': app.volunteer.medical_score,
+            'community': app.volunteer.community_score,
+            'education': app.volunteer.education_score,
+            'animals': app.volunteer.animals_score,
+            'sports': app.volunteer.sports_score,
+            'disability': app.volunteer.disability_score,
+            'greener_planet': app.volunteer.greener_planet_score,
+        },
+        'overall_score': app.volunteer.elderly_score + app.volunteer.medical_score + app.volunteer.community_score + app.volunteer.education_score + app.volunteer.animals_score + app.volunteer.sports_score + app.volunteer.disability_score + app.volunteer.greener_planet_score,
+    } for app in Application.objects.filter(opportunity = Opportunity.objects.get(id = id), status = "pending")]
+    return Response(data)
 
-    for volunteer in volunteers:
-        data.append({
-            'id': volunteer.id,
-            'f_name': volunteer.user.first_name,
-            'l_name': volunteer.user.last_name,
-            'display_name': volunteer.display_name,
-            'opportunities_completed': volunteer.opportunities_completed,
-            'last_completion': volunteer.last_completion,
-            'email': volunteer.user.email,
-            'scores': {
-                'elderly': volunteer.elderly_score,
-                'medical': volunteer.medical_score,
-                'community': volunteer.community_score,
-                'education': volunteer.education_score,
-                'animals': volunteer.animals_score,
-                'sports': volunteer.sports_score,
-                'disability': volunteer.disability_score,
-                'greener_planet': volunteer.greener_planet_score,
-            },
-            'overall_score': (volunteer.elderly_score + volunteer.medical_score +
-                             volunteer.community_score + volunteer.education_score +
-                             volunteer.animals_score + volunteer.sports_score +
-                             volunteer.disability_score + volunteer.greener_planet_score)
-        })
-
-    # If list is empty, include debug info about total volunteer count
-    if not data:
-        total_volunteers = Volunteer.objects.count()
-        print(f"DEBUG: No volunteers returned. Total volunteers in database: {total_volunteers}")
-        if request.user.is_authenticated:
-            print(f"DEBUG: Current user email: {request.user.email}")
-
+@api_view(['GET'])
+def api_volunteer_requested(request, id):
+    data = [{
+        'id': app.volunteer.user.id,
+        'application_id': app.id,
+        'volunteer_id': app.volunteer.id,
+        'f_name': app.volunteer.user.first_name,
+        'l_name': app.volunteer.user.last_name,
+        'display_name': app.volunteer.display_name,
+        'opportunities_completed': app.volunteer.opportunities_completed,
+        'last_completion': app.volunteer.last_completion,
+        'email': app.volunteer.user.email,
+        'scores': {
+            'elderly': app.volunteer.elderly_score,
+            'medical': app.volunteer.medical_score,
+            'community': app.volunteer.community_score,
+            'education': app.volunteer.education_score,
+            'animals': app.volunteer.animals_score,
+            'sports': app.volunteer.sports_score,
+            'disability': app.volunteer.disability_score,
+            'greener_planet': app.volunteer.greener_planet_score,
+        },
+        'overall_score': app.volunteer.elderly_score + app.volunteer.medical_score + app.volunteer.community_score + app.volunteer.education_score + app.volunteer.animals_score + app.volunteer.sports_score + app.volunteer.disability_score + app.volunteer.greener_planet_score,
+    } for app in Application.objects.filter(opportunity = Opportunity.objects.get(id = id), status = "requesting_complete")]
     return Response(data)
 
 @api_view(['GET'])
 def api_volunteer_detail(request, id):
-    user = get_object_or_404(Volunteer, id=id)
+    user = Volunteer.objects.get(id = id)
+
+    pending_applications = Application.objects.filter(status = "pending", volunteer = user)
+    accepted_applications = Application.objects.filter(status = "accepted", volunteer = user)
 
     friends = []
     for friendship in Friendship.objects.filter(status = "accepted"):
@@ -443,6 +485,8 @@ def api_volunteer_detail(request, id):
             friends.append(friendship.from_volunteer)
         elif friendship.from_volunteer == user:
             friends.append(friendship.to_volunteer)
+
+    messages = Messages.objects.all()
 
     data = {
         'id': user.id,
@@ -471,7 +515,34 @@ def api_volunteer_detail(request, id):
             'opportunities_completed': friend.opportunities_completed,
             'last_completion': friend.last_completion,
             'overall_score': friend.elderly_score + friend.medical_score + friend.community_score + friend.education_score + friend.animals_score + friend.sports_score + friend.disability_score + friend.greener_planet_score,
-        } for friend in friends]
+        } for friend in friends],
+        'messages': [{
+            'id': message.id,
+            'from_person': message.from_person,
+            'message': message.message,
+            'time_sent': message.time_sent
+        } for message in messages],
+        'pending_applications': [{
+            'id': application.id,
+            'opportunity': {
+                "id": application.opportunity.id,
+                "organisation_name": application.opportunity.organization.name,
+                "opportunity_name": application.opportunity.title,
+                "estimated_effort_ranking": application.opportunity.estimated_effort_ranking,
+            },
+            'date_applied': application.date_applied,
+        } for application in pending_applications],
+        'accepted_applications': [{
+            'id': application.id,
+            'opportunity': {
+                "id": application.opportunity.id,
+                "organisation_name": application.opportunity.organization.name,
+                "opportunity_name": application.opportunity.title,
+                "estimated_effort_ranking": application.opportunity.estimated_effort_ranking,
+            },
+            'date_applied': application.date_applied,
+        } for application in accepted_applications]
+
     }
     return Response(data)
 
@@ -655,7 +726,6 @@ def filtered_opp(request):
     return render(request, "viewAllOpportunities.html", {"charities": opportunities})
 
 
-
 @require_GET
 def charity_search(request):
     query = request.GET.get('q', '').strip()
@@ -810,18 +880,16 @@ def google_login_callback(request):
 
                 volunteer = Volunteer.objects.create(user=user, display_name=display_name)
             elif user_type == 'organization':
-                Organization.objects.create(user=user)
+                Organization.objects.get_or_create(user=login.user)
 
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(login.user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
-                'email': user.email,
-                'is_volunteer': hasattr(user, 'volunteer'),
-                'is_organization': hasattr(user, 'organization'),
-                'display_name': user.volunteer.display_name if hasattr(user, 'volunteer') else None
+                'email': login.user.email,
+                'is_volunteer': hasattr(login.user, 'volunteer'),
+                'is_organization': hasattr(login.user, 'organization')
             }
         })
     except Exception as e:
@@ -975,6 +1043,8 @@ def api_filter_distance(request):
 @api_view(['GET'])
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
+    email = request.GET.get("email", "")
+    user = User.objects.filter(email = email).first()
     data = {
         'id': opportunity.id,
         'title': opportunity.title,
@@ -1026,7 +1096,6 @@ def api_create_opportunity(request):
     location = geolocator.reverse(str(data['latitude']) + "," + str(data['longitude']))
     city = location.raw['address'].get('city', '')
     data['location_name'] = city
-    print(data)
 
     serializer = OpportunitySerializer(data=data)
     if serializer.is_valid():
@@ -1048,6 +1117,7 @@ def api_organization_stats(request):
         'active_opportunities': opportunities.filter(is_active=True).count(),
         'total_applications': sum(opp.applications.count() for opp in opportunities),
         'pending_applications': sum(opp.applications.filter(status='pending').count() for opp in opportunities),
+        'request_applications': sum(opp.applications.filter(status='requesting_complete').count() for opp in opportunities),
         'recent_opportunities': OpportunitySerializer(
             recent_opportunities,
             many=True
@@ -1102,3 +1172,46 @@ def api_list_categories(request):
     } for category in categories]
     return Response(data)
 
+@api_view(["POST"])
+def api_apply_opportunity(request, id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get("email", "")
+        user = User.objects.get(email = email)
+        volunteer = Volunteer.objects.get(user = user)
+        opportunity = Opportunity.objects.get(id = id)
+        cv = opportunity.current_volunteers_count
+        Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = "pending", current_volunteers = cv)
+    return Response(None)
+
+@api_view(["POST"])
+def api_application_update(request, id, mode):
+    if request.method == "POST":
+        app = Application.objects.get(id = id)
+        app.status = mode
+        app.save()
+        volunteer = app.volunteer
+        organisation = app.opportunity.organization.name
+        opportunity = app.opportunity.title
+        if mode == "accepted":
+            message = "Hi there, thank you for your recent application to our " + opportunity + " opportunity, we are contacting you to let you know that we have approved your application and were excited to see you soon!"
+        elif mode == "requesting_complete":
+            message = "Hi again, we have recieved your request to tick off you application for " + opportunity + ", it is under review and you should hear from us again soon!"
+        elif mode == "rejected":
+            message = "Hi again, we are sorry to inform you that you have not been succsessful in your application for " + opportunity + " this time, however we would still love to hear from you again and we wish you the best with your volunteering career!"
+        elif mode == "not_completed":
+            app.status = "accepted"
+            app.save()
+            message = "Hi, your work for the opportunity, " + opportunity + " has been reviewed and deemed not completed so carry on going and tell us when you have completed it to gain epic rewards. It has been put back into your opportunities in progress. Keep going!!"
+        elif mode == "completed":
+            points = calculate_impact(app.opportunity, app.volunteer)
+            message = "Hi, were pleased to confirm that you have completed the opportunity and have been rewarded with " + str(points) + " points!! Thank you very much and we look forward to hearing from you again."
+        Messages.objects.create(from_person = organisation, message = message, volunteer = volunteer)
+    return Response("Application updated successfully")
+
+@api_view(["DELETE"])
+def api_remove_message(request, id):
+    if request.method == "DELETE":
+        app = Messages.objects.get(id = id)
+        app.delete()
+    return Response("Message deleted successfully")

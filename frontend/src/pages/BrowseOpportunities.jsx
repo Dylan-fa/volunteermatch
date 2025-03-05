@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
@@ -111,7 +111,24 @@ const BrowseOpportunities = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
 
-  const fetchOpportunities = async () => {
+  function searchOpportunity() {
+    let input = document.getElementById("searchBar").value.toLowerCase();
+    let opportunities = document.querySelectorAll(".opportunity");
+
+    opportunities.forEach(opportunity => {
+        if (opportunity.textContent.toLowerCase().includes(input)) {
+            opportunity.style.display = "block";
+        } else {
+            opportunity.style.display = "none";
+        }
+    });
+}
+
+  useEffect(() => {
+    fetchOpportunities();
+  }, []);
+
+  async function fetchOpportunities() {
     try {
       setIsLoading(true);
       const response = await api.get('/opportunities/');
@@ -122,20 +139,6 @@ const BrowseOpportunities = () => {
       setIsLoading(false);
     }
   };
-
-  function searchOpportunity() {
-    let input = document.getElementById("searchBar").value.toLowerCase();
-    let opportunities = document.querySelectorAll(".opportunity");
-    console.log(opportunities);
-
-    opportunities.forEach(opportunity => {
-        if (opportunity.textContent.toLowerCase().includes(input)) {
-            opportunity.style.display = "block";
-        } else {
-            opportunity.style.display = "none";
-        }
-    });
-}
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -149,18 +152,9 @@ const BrowseOpportunities = () => {
         setIsLoading(false);
       }
     };
-    
 
-    const fetchData = async () => {
-      await Promise.all([
-        fetchOpportunities(),
-        fetchCategories(),
-      ]);
-    };
-
-    fetchData();
+    fetchCategories();
   }, []);
-  
 
   function filterOpportunities(category) {
 
@@ -186,7 +180,7 @@ const BrowseOpportunities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/opportunities/distance/filter/', {
+      const response = await fetch('/opportunities/distance/filter/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -233,8 +227,8 @@ const BrowseOpportunities = () => {
                     <div>
                   
                     {categories.map(category => (
-                      <div key= {category.id}>
-                        <label><button onClick = {() => filterOpportunities(category.name)} name={category.name} className="w-full flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"> {category.name} <span className="text-gray-400 ml-aut">{category.count}</span></button></label>
+                      <div key= {category.id} className="w-full">
+                        <label className="w-full"><button onClick = {() => filterOpportunities(category.name)} name={category.name} className="w-full flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"> {category.name} <span className="text-gray-400 ml-auto">{category.count}</span></button></label>
                         
                         </div>
                     ))}
@@ -267,7 +261,7 @@ const BrowseOpportunities = () => {
                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                         onChange={(e) => setFormData({...formData, max_distance: e.target.value})}
                       />
-                      <button type='submit'>Submit</button>
+                      <button className="bg-white-500 text-grey px-4 py-2 rounded mt-2 w-full hover:bg-gray-50" type='submit'>Submit</button>
                   </form>
                 </div>
               </div>

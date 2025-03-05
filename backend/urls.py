@@ -23,14 +23,23 @@ urlpatterns = [
     path('api/opportunities/<int:pk>/', views.api_opportunity_detail, name='api_opportunity_detail'),
     path('api/opportunities/create/', views.api_create_opportunity, name='api_create_opportunity'),
     path('api/opportunities/distance/filter/', views.api_filter_distance, name='api_filter_distance'),
+    path('api/opportunities/<int:id>/apply/', views.api_apply_opportunity, name='api_apply_opportunity'),
+
+    
     
     path('api/categories/', views.api_list_categories),
+
+    path('api/message/<int:id>/remove/', views.api_remove_message),
 
     path('api/organization/stats/', views.api_organization_stats, name='api_organization_stats'),
     path('api/organization/profile/', views.api_organization_profile, name='api_organization_profile'),
 
     path('api/volunteer/list/', views.api_volunteer_list, name='api_volunteer_list'),
+    path('api/volunteers/pending/<int:id>/', views.api_volunteer_pending, name='api_volunteer_pending'),
+    path('api/volunteers/requested/<int:id>/', views.api_volunteer_requested, name='api_volunteer_requested'),
     path('api/volunteer/<int:id>/', views.api_volunteer_detail, name='api_volunteer_detail'),
+
+    path('api/application/update/<int:id>/<slug:mode>/', views.api_application_update, name='api_application_update'),
 
     path('api/friendship/delete/<int:friend_id>/<int:volunteer_id>/', views.delete_friendship),
     path('api/friendship/create/<int:friend_id>/<int:volunteer_id>/', views.create_friendship),

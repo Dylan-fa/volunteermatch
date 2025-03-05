@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, redirect } from 'react-router';
 import { motion } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
 
@@ -44,7 +44,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
-              <Link to="/" className="flex-shrink-0 flex items-center">
+              <Link to={user ? ('/browse') : ('/')} className="flex-shrink-0 flex items-center">
                 <span 
                   className={`transition-all duration-500 transform ${
                     isScrolled 
