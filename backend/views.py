@@ -992,8 +992,7 @@ def api_filter_distance(request):
 @api_view(['GET'])
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
-    email = request.GET.get("email", "")
-    user = User.objects.filter(email = email).first()
+    user = request.user
     data = {
         'id': opportunity.id,
         'title': opportunity.title,
@@ -1013,6 +1012,7 @@ def api_opportunity_detail(request, pk):
             Application.objects.filter(status = "pending", volunteer=Volunteer.objects.filter(user = user).first(), opportunity = opportunity).exists()
         ),
     }
+
     return Response(data)
 
 @api_view(['POST'])
@@ -1113,14 +1113,12 @@ def api_list_categories(request):
 @api_view(["POST"])
 def api_apply_opportunity(request, id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        email = data.get("email", "")
-        user = User.objects.get(email = email)
+        user = request.user
         volunteer = Volunteer.objects.get(user = user)
         opportunity = Opportunity.objects.get(id = id)
         cv = opportunity.current_volunteers_count
         Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = "pending", current_volunteers = cv)
-    return Response(None)
+    return Response("Applied successfully")
 
 @api_view(["POST"])
 def api_application_update(request, id, mode):

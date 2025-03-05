@@ -42,18 +42,12 @@ const OpportunityDetails = () => {
 
   const handleApply = async () => {
     try {
-      await api.post(`/opportunities/${id}/apply/`, {
-        email: user.email
-      }, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      await api.post(`/opportunities/${id}/apply/`)
       // Refresh opportunity data to update application status
       const response = await api.get(`/opportunities/${id}/`, {
         withCredentials: true,
-        params: { email: user.email }
-    })
+      });
+      console.log(response)
       setOpportunity(response);
     } catch (error) {
       console.error('Error applying:', error);

@@ -19,7 +19,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   }, []);
 
   const handleLogout = () => {
-    logout();
+    logout().then(() => redirect('/'));
     // Optional: Add navigation to home page here
   };
 
