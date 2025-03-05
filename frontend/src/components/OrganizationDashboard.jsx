@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../utils/axios';  // Update import to use configured instance
 import { Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 
@@ -26,8 +25,8 @@ const OrganizationDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, profileRes] = await Promise.all([
-          axiosInstance.get('/api/organization/stats/'),  // Use axiosInstance instead of axios
-          axiosInstance.get('/api/organization/profile/')
+          api.get('/organization/stats/'), 
+          api.get('/organization/profile/')
         ]);
         setStats(statsRes.data);
         setProfile(profileRes.data);
@@ -51,7 +50,7 @@ const OrganizationDashboard = () => {
         }
       });
 
-      const response = await axiosInstance.put('/api/organization/profile/', formData, {  // Use axiosInstance
+      const response = await api.put('/organization/profile/', formData, { 
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setProfile(response.data);

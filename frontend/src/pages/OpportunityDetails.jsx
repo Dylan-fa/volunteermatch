@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext';
@@ -13,7 +12,7 @@ const OpportunityDetails = () => {
   useEffect(() => {
     const fetchOpportunity = async () => {
       try {
-        const response = await axios.get(`/api/opportunities/${id}/`, {
+        const response = await api.get(`/api/opportunities/${id}/`, {
           withCredentials: true,
           params: { email: user.email }
       });
@@ -43,7 +42,7 @@ const OpportunityDetails = () => {
 
   const handleApply = async () => {
     try {
-      await axios.post(`/api/opportunities/${id}/apply/`, {
+      await api.post(`/api/opportunities/${id}/apply/`, {
         email: user.email
       }, {
         headers: {
@@ -51,7 +50,7 @@ const OpportunityDetails = () => {
         }
       });
       // Refresh opportunity data to update application status
-      const response = await axios.get(`/api/opportunities/${id}/`, {
+      const response = await api.get(`/api/opportunities/${id}/`, {
         withCredentials: true,
         params: { email: user.email }
     })

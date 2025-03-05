@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
-import axios from 'axios';
 
 // Verification badge component
 const VerificationBadge = ({ type }) => {
@@ -131,8 +130,8 @@ const BrowseOpportunities = () => {
   async function fetchOpportunities() {
     try {
       setIsLoading(true);
-      const response = await axios.get('/api/opportunities/');
-      setOpportunities(response.data);
+      const response = await api.get('/opportunities/');
+      setOpportunities(response);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
     } finally {
@@ -144,8 +143,8 @@ const BrowseOpportunities = () => {
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('/api/categories/');
-        setCategories(response.data);
+        const response = await api.get('/categories/');
+        setCategories(response);
       } catch (error) {
         console.error('Error fetching categories:', error);
       } finally {
@@ -180,7 +179,7 @@ const BrowseOpportunities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/opportunities/distance/filter/', {
+      const response = await fetch('/opportunities/distance/filter/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

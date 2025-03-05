@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import api from '../utils/api';
 
 // Application Card component
 const ApplicationCard = ({ volunteer, application_id, refresh }) => {
@@ -12,7 +11,7 @@ const ApplicationCard = ({ volunteer, application_id, refresh }) => {
     async function handleApplication(mode){
         
         try {
-            await axios.post(`/api/application/update/${application_id}/${mode}/`);
+            await api.post(`/application/update/${application_id}/${mode}/`);
             refresh();
             } catch (error) {
             console.error('Error:', error);
@@ -55,7 +54,7 @@ const RequestCard = ({ volunteer, application_id, refresh }) => {
     async function handleApplication(mode){
         
         try {
-            await axios.post(`/api/application/update/${application_id}/${mode}/`);
+            await api.post(`/application/update/${application_id}/${mode}/`);
             refresh();
             } catch (error) {
             console.error('Error:', error);
@@ -119,11 +118,10 @@ const OpportunityPendingApplications = () => {
   async function fetchVolunteers() {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/volunteers/pending/${id}/`);
-      setVolunteers(response.data);
-      const response1 = await axios.get(`/api/volunteers/requested/${id}/`);
-      setVolunteersRequested(response1.data);
-      console.log(response1.data)
+      const response = await api.get(`/volunteers/pending/${id}/`);
+      setVolunteers(response);
+      const response1 = await api.get(`/volunteers/requested/${id}/`);
+      setVolunteersRequested(response1);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
     } finally {

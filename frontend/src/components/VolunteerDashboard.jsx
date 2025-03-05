@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext'
-import axios from 'axios';
 import Spin from '../components/LoadingSpinner';
 import { useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
 
 const MessageCard = ({message}) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -14,7 +14,7 @@ const MessageCard = ({message}) => {
   async function handleMessage(id){
     setIsVisible(false);
     try {
-      await axios.delete(`/api/message/${id}/remove`);
+      await api.delete(`/message/${id}/remove`);
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -53,7 +53,7 @@ const OpportunityCard = ({app, completeButton, setUpdate, update}) => {
   async function handleClick(mode){
     
     try {
-      await axios.post(`/api/application/update/${app.id}/${mode}/`);
+      await api.post(`/application/update/${app.id}/${mode}/`);
       } catch (error) {
       console.error('Error:', error);
     } 
@@ -169,8 +169,8 @@ const VolunteerDashboard = () => {
           user_id = id;
         }
         else{
-          const response1 = await axios.get('/api/volunteer/list/');
-          const users = response1.data
+          const response1 = await api.get('/volunteer/list/');
+          const users = response1
           users.forEach(item =>{
             if (item.email === user.email){
               user_id = item.id
@@ -178,12 +178,12 @@ const VolunteerDashboard = () => {
           })
         }
         
-        const response2 = await axios.get('/api/volunteer/' + user_id + '/');
-        setVolunteer(response2.data);
-        setFriends(response2.data.friends);
-        setMessages(response2.data.messages);
-        setPending(response2.data.pending_applications);
-        setAccepted(response2.data.accepted_applications);
+        const response2 = await api.get('/volunteer/' + user_id + '/');
+        setVolunteer(response2);
+        setFriends(response2.friends);
+        setMessages(response2.messages);
+        setPending(response2.pending_applications);
+        setAccepted(response2.accepted_applications);
 
 
       } catch (error) {
