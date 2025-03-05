@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, redirect } from 'react-router';
 import { motion } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
 
