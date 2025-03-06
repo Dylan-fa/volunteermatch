@@ -11,6 +11,7 @@ export default [
     route("/about", "./pages/AboutUs.jsx"),
     route("/opportunities/create", "./pages/CreateOpportunity.jsx"),
     route("/dashboard", "./pages/Dashboard.jsx"),
+    route("/dashboard/volunteer/:id", "./components/VolunteerDashboard.jsx"),
     route("/friends", "./pages/Friends.jsx"),
     route("/leaderboard", "./pages/Leaderboard.jsx"),
     route("/opportunity/:id/pending", "./pages/OpportunityPendingApplications.jsx"),
