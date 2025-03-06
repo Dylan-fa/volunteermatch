@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 import api from '../utils/api';
 
@@ -26,7 +26,7 @@ const OrganizationDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, profileRes] = await Promise.all([
-          api.get('/organization/stats/'), 
+          api.get('/organization/stats/'),
           api.get('/organization/profile/')
         ]);
         setStats(statsRes);
@@ -51,7 +51,7 @@ const OrganizationDashboard = () => {
         }
       });
 
-      const response = await api.put('/organization/profile/', formData, { 
+      const response = await api.put('/organization/profile/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setProfile(response);

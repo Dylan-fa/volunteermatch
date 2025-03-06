@@ -44,7 +44,8 @@ SOCIALACCOUNT_PROVIDERS = {
             "access_type": "offline",  # Changed from 'online' to 'offline'
         },
         "OAUTH_PKCE_ENABLED": True,
-        "VERIFIED_EMAIL": True
+        "VERIFIED_EMAIL": True,
+        "FETCH_USERINFO": True  # Enable fetching additional user information including profile pictures
     }
 }
 
@@ -90,7 +91,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
 
-    
+
 ]
 
 SITE_ID = 1

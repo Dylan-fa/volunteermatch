@@ -3,9 +3,8 @@ import { FaMedal, FaClock, FaUsers } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext'
 import Spin from '../components/LoadingSpinner';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
 import api from '../utils/api';
 
 const MessageCard = ({message}) => {
@@ -51,14 +50,14 @@ const MessageCard = ({message}) => {
 const OpportunityCard = ({app, completeButton, setUpdate, update}) => {
 
   async function handleClick(mode){
-    
+
     try {
       await api.post(`/application/update/${app.id}/${mode}/`);
       } catch (error) {
       console.error('Error:', error);
-    } 
+    }
     setUpdate(!update);
-    
+
   }
 
   return(
@@ -80,7 +79,7 @@ const OpportunityCard = ({app, completeButton, setUpdate, update}) => {
         </h3>
         <p className="text-sm text-gray-600">{app.opportunity.organisation_name}</p>
       </div>
-      
+
       <Link
           to={`/opportunity/${app.opportunity.id}`}
           className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
@@ -92,7 +91,7 @@ const OpportunityCard = ({app, completeButton, setUpdate, update}) => {
     {completeButton ? (
     <div className='flex justfy-end items-center w-full'>
       <span className="text-sm text-gray-700 mr-4">Think you have completeed this activity?</span>
-      <button 
+      <button
           className="px-6 py-3 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
           onClick={() => handleClick("requesting_complete")}
           disabled={app.opportunity.has_applied}
@@ -118,11 +117,11 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
       const progress = timestamp - startTimeRef.current;
       const percentage = Math.min(progress / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - percentage, 4);
       const currentCount = Math.floor(easeOutQuart * value);
-      
+
       setCount(currentCount);
 
       if (percentage < 1) {
@@ -151,9 +150,9 @@ const VolunteerDashboard = () => {
   const [accepted, setAccepted] = useState([]);
   const { user } = useUser();
   const {id} = useParams();
-  const [showAll, setShowAll] = useState(false); 
-  const [showAllPending, setShowAllPending] = useState(false); 
-  const [showAllAccepted, setShowAllAccepted] = useState(false); 
+  const [showAll, setShowAll] = useState(false);
+  const [showAllPending, setShowAllPending] = useState(false);
+  const [showAllAccepted, setShowAllAccepted] = useState(false);
   const [update, setUpdate] = useState(false);
 
   const visibleMessages = showAll ? MESSAGES : MESSAGES.slice(0, 3);
@@ -177,7 +176,7 @@ const VolunteerDashboard = () => {
             }
           })
         }
-        
+
         const response2 = await api.get('/volunteer/' + user_id + '/');
         setVolunteer(response2);
         setFriends(response2.friends);
@@ -197,7 +196,7 @@ const VolunteerDashboard = () => {
     }
   }, [user, showAll, update], );
 
- 
+
 
 
   const [isVisible, setIsVisible] = useState(false);
@@ -231,7 +230,15 @@ const VolunteerDashboard = () => {
           {/* Profile Overview */}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6 mb-8">
             <div className="flex items-center gap-6">
-              <div className="text-5xl bg-white/20 p-4 rounded-full">{volunteer.avatar || "👤"}</div>
+              {user && user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt="Profile"
+                  className="rounded-full w-24 h-24 border-4 border-white shadow-md"
+                />
+              ) : (
+                <div className="text-5xl bg-white/20 p-4 rounded-full">{volunteer.avatar || "👤"}</div>
+              )}
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-white">{volunteer.f_name + " " + volunteer.l_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
@@ -249,7 +256,7 @@ const VolunteerDashboard = () => {
           </div>
 
           {/* Stats Cards */}
-          <div 
+          <div
             ref={statsRef}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
           >
@@ -330,7 +337,7 @@ const VolunteerDashboard = () => {
                     <p className="text-gray-500">No pending applications</p>
             </div>) : (
             <div>
-            
+
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
               <div className="divide-y divide-gray-100">
                 {visible_pending.map(app => (
@@ -340,7 +347,7 @@ const VolunteerDashboard = () => {
             </div>
           </div>
         )}
-        {pending.length > 1 && ( 
+        {pending.length > 1 && (
         <button
           onClick={() => setShowAllPending(!showAllPending)}
           className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
@@ -356,7 +363,7 @@ const VolunteerDashboard = () => {
                     <p className="text-gray-500">No opportunities in progress</p>
             </div>) : (
             <div>
-            
+
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
               <div className="divide-y divide-gray-100">
                 {visible_accepted.map(app => (
@@ -366,7 +373,7 @@ const VolunteerDashboard = () => {
             </div>
           </div>
         )}
-        {accepted.length > 1 && ( 
+        {accepted.length > 1 && (
         <button
           onClick={() => setShowAllAccepted(!showAllAccepted)}
           className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
@@ -382,7 +389,7 @@ const VolunteerDashboard = () => {
                     <p className="text-gray-500">No messages</p>
             </div>) : (
             <div>
-            
+
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
               <div className="divide-y divide-gray-100">
                 {visibleMessages.map(message => (
@@ -392,7 +399,7 @@ const VolunteerDashboard = () => {
             </div>
           </div>
         )}
-        {MESSAGES.length > 3 && ( 
+        {MESSAGES.length > 3 && (
         <button
           onClick={() => setShowAll(!showAll)}
           className="w-full py-1 bg-gray-300 hover:bg-gray-400 text-white px-4 rounded-full transition-all relative"
@@ -404,7 +411,7 @@ const VolunteerDashboard = () => {
       </div>
       )}
     </PageTransition>
-            
+
   );
 };
 

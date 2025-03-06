@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { FaCheckCircle } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
@@ -21,7 +21,7 @@ const VerificationBadge = ({ type }) => {
   const badge = badges[type];
 
   return (
-    <span 
+    <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${badge.color} gap-1.5`}
       title={badge.label}
     >
@@ -46,7 +46,7 @@ const OpportunityCard = ({ opportunity }) => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   {opportunity.title}
                 </h3>
-                
+
                 <p className="text-sm text-gray-500">
                   {opportunity.organization.name}
                 </p>
@@ -55,7 +55,7 @@ const OpportunityCard = ({ opportunity }) => {
                   Effort: {opportunity.effort}
               </h4>
             </div>
-            
+
             {/* Verification Badges */}
             <div className="flex flex-wrap gap-2">
               {opportunity.organization.companiesHouseVerified && (
@@ -66,17 +66,17 @@ const OpportunityCard = ({ opportunity }) => {
               )}
             </div>
           </div>
-          
+
           {/* Description */}
           <p className="mt-4 text-gray-600">
             {opportunity.description}
           </p>
-          
+
           {/* Tags */}
           {opportunity.tags && (
             <div className="mt-4 flex flex-wrap gap-2">
               {opportunity.tags.map((tag, index) => (
-                <span 
+                <span
                   key={index}
                   className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                 >
@@ -85,7 +85,7 @@ const OpportunityCard = ({ opportunity }) => {
               ))}
             </div>
           )}
-          
+
           {/* Footer */}
           <div className="mt-6 flex justify-between items-center">
             <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -187,7 +187,7 @@ const BrowseOpportunities = () => {
         },
         body: JSON.stringify(formData),
       });
-      
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Registration failed');
@@ -223,13 +223,13 @@ const BrowseOpportunities = () => {
                     <div className="col-span-2 text-center py-12">
                       <Spin/>
                     </div>) : (
-                    
+
                     <div>
-                  
+
                     {categories.map(category => (
                       <div key= {category.id} className="w-full">
                         <label className="w-full"><button onClick = {() => filterOpportunities(category.name)} name={category.name} className="w-full flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"> {category.name} <span className="text-gray-400 ml-auto">{category.count}</span></button></label>
-                        
+
                         </div>
                     ))}
                     <button
@@ -308,9 +308,9 @@ const BrowseOpportunities = () => {
                   </div>
                 ) : (
                   opportunities.map(opportunity => (
-                    <OpportunityCard 
-                      key={opportunity.id} 
-                      opportunity={opportunity} 
+                    <OpportunityCard
+                      key={opportunity.id}
+                      opportunity={opportunity}
                     />
                   ))
                 )}

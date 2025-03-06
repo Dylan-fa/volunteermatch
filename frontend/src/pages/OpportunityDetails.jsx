@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext';
 import api from '../utils/api';
@@ -149,7 +149,7 @@ const OpportunityDetails = () => {
                 </div>
 
                 {/* Apply Button */}
-                <button 
+                <button
                   className="w-full px-6 py-3 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
                   onClick={handleApply}
                   disabled={opportunity.has_applied}
