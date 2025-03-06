@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import PageTransition from '../components/PageTransition';
 import Spin from '../components/LoadingSpinner';
-import { useParams } from 'react-router-dom';
 import api from '../utils/api';
 
 // Application Card component
 const ApplicationCard = ({ volunteer, application_id, refresh }) => {
 
     async function handleApplication(mode){
-        
+
         try {
             await api.post(`/application/update/${application_id}/${mode}/`);
             refresh();
             } catch (error) {
             console.error('Error:', error);
-            } 
-        
+            }
+
     }
 
     return (
@@ -52,14 +51,14 @@ const ApplicationCard = ({ volunteer, application_id, refresh }) => {
 const RequestCard = ({ volunteer, application_id, refresh }) => {
 
     async function handleApplication(mode){
-        
+
         try {
             await api.post(`/application/update/${application_id}/${mode}/`);
             refresh();
             } catch (error) {
             console.error('Error:', error);
-            } 
-        
+            }
+
     }
 
     return (
@@ -96,7 +95,7 @@ const OpportunityPendingApplications = () => {
   const [volunteersRequested, setVolunteersRequested] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { id } = useParams();
-  
+
 
   function searchVolunteer() {
     let input = document.getElementById("searchBar").value.toLowerCase();
@@ -156,10 +155,10 @@ const OpportunityPendingApplications = () => {
                     <h3 className='w-full'> Applications </h3>
                     <h3 className='w-full'> Requested Completion </h3>
                 </div>
-              
+
               <div className='flex'>
-                
-              
+
+
 
 
                 {/* Application Side */}
@@ -174,9 +173,9 @@ const OpportunityPendingApplications = () => {
                     </div>
                     ) : (
                     volunteers.map(volunteer => (
-                        <ApplicationCard 
-                        key={volunteer.id} 
-                        volunteer={volunteer} 
+                        <ApplicationCard
+                        key={volunteer.id}
+                        volunteer={volunteer}
                         application_id = {volunteer.application_id}
                         refresh = {fetchVolunteers}
                         />
@@ -196,21 +195,21 @@ const OpportunityPendingApplications = () => {
                     </div>
                     ) : (
                     volunteersRequested.map(volunteer => (
-                        <RequestCard 
-                        key={volunteer.id} 
-                        volunteer={volunteer} 
+                        <RequestCard
+                        key={volunteer.id}
+                        volunteer={volunteer}
                         application_id = {volunteer.application_id}
                         refresh = {fetchVolunteers}
                         />
                     ))
                     )}
                 </div>
-                              
+
               </div>
             </div>
           </div>
         </div>
-      
+
     </PageTransition>
   );
 };

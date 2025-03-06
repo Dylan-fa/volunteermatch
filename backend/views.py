@@ -828,16 +828,18 @@ def google_login_callback(request):
         email = google_data['email']
         first_name = google_data.get('given_name', '')
         last_name = google_data.get('family_name', '')
+        picture_url = google_data.get('picture', '')  # Get profile picture URL
+        user_type = request.data.get('user_type', 'volunteer')
 
         # Get or create user
         try:
             user = User.objects.get(email=email)
+
             # Check if user already has a volunteer profile
             if hasattr(user, 'volunteer'):
                 volunteer = user.volunteer
             else:
                 # Create volunteer profile if it doesn't exist
-                user_type = request.data.get('user_type', 'volunteer')
                 if user_type == 'volunteer':
                     # Generate a unique display_name from email or name
                     base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
@@ -860,11 +862,10 @@ def google_login_callback(request):
                 username=email,
                 email=email,
                 first_name=first_name,
-                last_name=last_name
+                last_name=last_name,
+                avatar_url=picture_url
             )
 
-            # Create profile based on user_type
-            user_type = request.data.get('user_type', 'volunteer')
             if user_type == 'volunteer':
                 # Generate a unique display_name from email or name
                 base_display_name = email.split('@')[0][:12]  # Use part before @ in email, max 12 chars
@@ -880,16 +881,17 @@ def google_login_callback(request):
 
                 volunteer = Volunteer.objects.create(user=user, display_name=display_name)
             elif user_type == 'organization':
-                Organization.objects.get_or_create(user=login.user)
+                Organization.objects.create(user=user)
 
-        refresh = RefreshToken.for_user(login.user)
+        refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
-                'email': login.user.email,
-                'is_volunteer': hasattr(login.user, 'volunteer'),
-                'is_organization': hasattr(login.user, 'organization')
+                'email': user.email,
+                'is_volunteer': hasattr(user, 'volunteer'),
+                'is_organization': hasattr(user, 'organization'),
+                'avatar_url': picture_url  # Include directly in response
             }
         })
     except Exception as e:

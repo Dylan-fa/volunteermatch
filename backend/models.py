@@ -12,19 +12,19 @@ class User(AbstractUser):
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    
+
     class Meta:
         verbose_name_plural = "categories"
-        
+
     def __str__(self):
         return self.name
-    
+
 
 class Interest(models.Model):
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='interests')
     description = models.TextField(blank=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -56,7 +56,7 @@ class Friendship(models.Model):
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
     ]
-    
+
     from_volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='friendships_initiated')
     to_volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='friendships_received')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -69,7 +69,7 @@ class Friendship(models.Model):
 
     class Meta:
         unique_together = ['from_volunteer', 'to_volunteer']
-        
+
     def __str__(self):
         return f"{self.from_volunteer} -> {self.to_volunteer} ({self.status})"
 
@@ -99,8 +99,8 @@ class Opportunity(models.Model):
     #------------------------------------------------------------------------------------------------- Alex Addded Below Need to talk through
 
     CHOICES = {
-        "low" : "Low", 
-        "medium" : "Medium", 
+        "low" : "Low",
+        "medium" : "Medium",
         "high" : "High"
     }
     # start and end time are reflective of the normal work hours like 9-5 where start is 9 and end is 17 since it is a 24 hour clock
@@ -140,7 +140,7 @@ class Application(models.Model):
         ('completed', 'Completed'),
         ('not_completed', 'Not Completed')
     ]
-    
+
     volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE, related_name='applications')
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE, related_name='applications')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

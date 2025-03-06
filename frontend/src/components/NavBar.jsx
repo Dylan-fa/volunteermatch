@@ -28,7 +28,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
       {/* Rainbow Gradient Bar */}
       <motion.div
         initial={{ scaleY: 0 }}
-        animate={{ 
+        animate={{
           scaleY: rainbowVisible ? 1 : 0,
           opacity: rainbowVisible ? 1 : 0
         }}
@@ -45,9 +45,9 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to={user ? ('/browse') : ('/')} className="flex-shrink-0 flex items-center">
-                <span 
+                <span
                   className={`transition-all duration-500 transform ${
-                    isScrolled 
+                    isScrolled
                       ? "animate-gradient bg-gradient-to-r from-blue-600 via-green-500 to-blue-600 bg-[length:200%_auto] bg-clip-text text-transparent text-xl font-semibold"
                       : "text-xl font-semibold text-gray-900"
                   }`}
@@ -57,7 +57,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                 </span>
               </Link>
             </div>
-            
+
             {/* Desktop menu */}
             <div className="hidden sm:flex sm:items-center sm:space-x-6">
               <Link to="/" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
@@ -85,21 +85,21 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                 </>
               )}
               {user && !user.is_organization && (
-                <Link 
-                  to="/friends" 
+                <Link
+                  to="/friends"
                   className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
                 >
                   Friends
                 </Link>
               )}
-              <Link 
+              <Link
                 to="/leaderboard"
                 className='px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900'
               >
                 Leaderboard
               </Link>
 
-              
+
               {user ? (
                 <div className="relative ml-3 flex items-center space-x-4">
                   <div className="flex items-center">
@@ -108,7 +108,16 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                         Organization
                       </span>
                     )}
-                    <span className="text-sm font-medium text-gray-700">{user.email}</span>
+                    <div className="flex items-center space-x-3">
+                      {user.avatar_url && (
+                        <img
+                          src={user.avatar_url}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        />
+                      )}
+                      <span className="text-sm font-medium text-gray-700">{user.email}</span>
+                    </div>
                   </div>
                   <button
                     onClick={handleLogout}
@@ -122,7 +131,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                   <Link to="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
                     Login
                   </Link>
-                  
+
                   {/* Register Dropdown */}
                   <div className="relative">
                     <button
@@ -131,16 +140,16 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                       className="ml-2 px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors flex items-center"
                     >
                       Register
-                      <svg 
-                        className={`ml-2 h-4 w-4 transition-transform ${showRegisterDropdown ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
+                      <svg
+                        className={`ml-2 h-4 w-4 transition-transform ${showRegisterDropdown ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    
+
                     {showRegisterDropdown && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -245,14 +254,14 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
             </Link>
           )}
           {user && !user.is_organization && (
-            <Link 
-              to="/friends" 
+            <Link
+              to="/friends"
               className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Friends
             </Link>
           )}
-          <Link 
+          <Link
             to="/leaderboard"
             className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50'
           >

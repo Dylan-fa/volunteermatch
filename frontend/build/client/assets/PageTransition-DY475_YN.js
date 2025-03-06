@@ -1,1 +1,0 @@
-import{n as t}from"./chunk-IR6S3I6Y-DPo2aVaG.js";import{m as a}from"./proxy-CXCGvyFN.js";const r=({children:i})=>t.jsx(a.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},exit:{opacity:0,y:20},transition:{duration:.3},className:"relative",children:i});export{r as P};
