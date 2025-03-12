@@ -219,7 +219,6 @@ const VolunteerDashboard = () => {
 
     return () => observer.disconnect();
   }, [isLoading]);
-
   return (
     <PageTransition>
       {isLoading ? (<div className="flex justify-center items-center h-screen">
@@ -293,11 +292,10 @@ const VolunteerDashboard = () => {
             <div className={`bg-gradient-to-br from-amber-500 to-yellow-600 p-6 rounded-xl shadow-lg transform transition-all duration-500 delay-300 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}>
-              <h3 className="text-lg font-medium text-white/90 mb-2">Rating</h3>
-              <p className="text-3xl font-bold text-white">
-                {isVisible ? <AnimatedCounter value={4.9} duration={1500} /> : '0'}
+              <h3 className="text-lg font-medium text-white/90 mb-2">Last Completion</h3>
+              <p className="text-xl font-bold text-white">
+                {isVisible ? format(new Date(volunteer.last_completion), 'EEEE, MMMM dd, yyyy') : "0"}
               </p>
-              <p className="text-sm text-white/80 mt-1">Average rating</p>
             </div>
           </div>
 

@@ -45,13 +45,4 @@ urlpatterns = [
     path('api/friendship/create/<int:friend_id>/<int:volunteer_id>/', views.create_friendship),
     path('api/friendship/accept/<int:friend_id>/<int:volunteer_id>/', views.accept_friendship),
     path('api/friendship/list/pending/', views.list_pending_friendships),
-
-    path('<int:charity>/<int:volunteer>', views.calculate_impact),
-    path('view/opportunity/all/', views.view_all_opportunities),
-    path('view-all/badges/<slug:slug>/', views.view_all_badges),
-    path('view/badges/<slug:slug>/', views.view_specified_badge),
-    path('view/badges/', views.view_badges),
-    path('view/friends/', views.view_friends),
-    path('view/leaderboard/', views.view_leaderboard),
-    path('', views.hello),
 ]

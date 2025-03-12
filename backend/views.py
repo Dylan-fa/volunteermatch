@@ -29,6 +29,8 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 from geopy.distance import geodesic
 
+from django.utils import timezone
+
 
 # Use this file for your templated views only
 from django.http import HttpResponse, HttpResponseForbidden
@@ -38,113 +40,6 @@ from django.http import HttpResponse
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
-
-def view_all_opportunities(request):
-    if request.method == "POST":
-        return(filtered_opp(request))
-    else:
-        context = {
-            'charities': Opportunity.objects.all(),
-        }
-        return render(request, 'viewAllOpportunities.html', context)
-
-def view_badges(request):
-
-    context = {
-
-    }
-
-    if(request.user.is_authenticated):
-        return render(request, 'badgesView.html', context)
-    return render(request, 'viewBadgeOptions.html')
-
-
-@login_required
-def view_specified_badge(request, slug):
-
-    context = {
-        "score":50,
-        "global_score":50,
-        "title": slug.replace("-", " "),
-        "slug":slug
-    }
-
-    return render(request, 'singleBadgeView.html', context)
-
-def view_all_badges(request, slug):
-
-    badge1 = "/media/badge_placeholder.png"
-    badge2 = "/media/badge_placeholder.png"
-    badge3 = "/media/badge_placeholder.png"
-    badge4 = "/media/badge_placeholder.png"
-    badge5 = "/media/badge_placeholder.png"
-    badge6 = "/media/badge_placeholder.png"
-
-    if slug == "Elderly-Badges":
-        badge1 = "/media/ElderlyBadge.png"
-        badge2 = "/media/ElderlyBadge.png"
-        badge3 = "/media/ElderlyBadge.png"
-        badge4 = "/media/ElderlyBadge.png"
-
-
-    context = {
-        "badge1": badge1,
-        "badge2": badge2,
-        "badge3": badge3,
-        "badge4": badge4,
-        "badge5": badge5,
-        "badge6": badge6,
-        "title": slug.replace("-", " "),
-    }
-
-    return render(request, 'viewAllBadgeUpgrades.html', context)
-
-def hello(request):         #  Used to collect all information needed to display the homepage and then reders the homepage
-    message = ""
-
-
-    charities = Organization.objects.all()
-    friends = []
-    current_user = None
-    if request.user.is_authenticated:
-        current_user = Volunteer.objects.get(user = request.user)
-        if current_user == None:
-            current_user = Organization.objects.get(user = request.user)
-
-    if request.method == "POST":
-        fID = request.POST.get("friend_id")
-        try:
-            friendship = Friendship.objects.get(to_volunteer = current_user, from_volunteer = Volunteer.objects.get(id = fID))
-            friendship.delete()
-        except:
-            friendship = Friendship.objects.get(to_volunteer = Volunteer.objects.get(id = fID), from_volunteer = current_user)
-            friendship.delete()
-
-        message = "Removed Friend Successfully"
-
-    for friendship in Friendship.objects.all():
-        if friendship.to_volunteer == current_user or friendship.from_volunteer == current_user:
-            if friendship.to_volunteer == current_user:
-                friends.append(friendship.from_volunteer)
-            elif friendship.from_volunteer == current_user:
-                friends.append(friendship.to_volunteer)
-
-    context = {
-            'ongoingActivities': ['Activity 1', 'Activity 2'],
-            'friends' : friends,
-            'charities': charities,
-            'message': message
-        }
-
-    if request.user.is_authenticated:
-        return render(request, 'homepage.html', context)
-    else:
-        return render(request, 'noLoginHome.html', context)
-
-
-
-def custom404(request, exception):          #  used to render the 404 page when a 404 error is thrown only when django debug settings set to False
-    return render(request, "404Page.html", status = 404)
 
 @api_view(["GET"])
 def list_pending_friendships(request):
@@ -182,7 +77,7 @@ def calculate_impact(charity, volunteer):
     duration_taken = datetime.now().day - application.date_applied.day
     estimated_duration = opportunity.estimated_duration
     effort_ranking = opportunity.estimated_effort_ranking
-    if volunteer.last_completion != None:
+    if volunteer.last_completion is not None:
         days_since_last_opportunity_completed = datetime.now().day - volunteer.last_completion.day
     else:
         days_since_last_opportunity_completed = 100000
@@ -200,6 +95,7 @@ def calculate_impact(charity, volunteer):
     opening_duration = end_date.day - start_date.day    # finds how long the opportunity was posted for
     if ((end_date.day - date_time_applied.day) < opening_duration * 0.15) and participants_at_application < capacity / 2:
         bonus_points += round((end_date - date_time_applied).total_seconds() / 3600 / 6)
+        print("applied last minute bonus points")
 
         # adds a point for every hour they applied before the closing when it is in the last 15% of opening time
 
@@ -284,10 +180,10 @@ def calculate_impact(charity, volunteer):
 
     if days_since_last_opportunity_completed < 30 or days_since_last_opportunity_completed > 120:
         final_value *= 1.2              # adds a streak bonus to help volunteers keep going as it gives them incentive to do more volunteering
-
+        print("less than 30 days multiplier 1.2X")
     if(opportunities_completed < 5):
         final_value *= 1 + (0.25 - opportunities_completed / 20)    # allows for new users to gain increased points for their first 5 opportunities
-
+        print("less than 5 opps multiplier " + 1 + (0.25 - opportunities_completed / 20) + "X")
     final_value /= 2
     final_value = round(final_value)
 
@@ -340,60 +236,6 @@ def accept_friendship(request, friend_id, volunteer_id):
         return JsonResponse({"message": "Friend request sent"}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=405)
 
-@login_required
-def view_friends(request):
-    message = ""
-    if request.user.is_authenticated:
-        current_user = Volunteer.objects.filter(user = request.user)
-        if len(current_user) == 0:
-            return HttpResponseForbidden("only volunteers can access this")
-
-    fromV = Volunteer.objects.get(user = request.user)
-
-    if request.method =="POST":
-        if request.POST.get("accept"):
-            friendship = Friendship.objects.get(id = request.POST.get("accept"))
-            friendship.status = "accepted"
-            friendship.save()
-            message = "Added as a Friend Successfully"
-        elif request.POST.get("cancel_friendship_id"):
-            friendship = Friendship.objects.get(id = request.POST.get("cancel_friendship_id"))
-            friendship.delete()
-        else:
-
-            toVol = request.POST.get("volunteer_id")
-            toV = Volunteer.objects.get(id = toVol)
-            message = "Sent a request to " + toV.display_name
-
-
-            Friendship.objects.create(from_volunteer = fromV, to_volunteer = toV, status = "pending")
-
-    reqs = []
-    sent = []
-
-    for friendship in Friendship.objects.filter(status = "pending"):
-        if friendship.to_volunteer == fromV:
-            reqs.append(friendship)
-        if friendship.from_volunteer == fromV:
-            sent.append(friendship)
-
-
-    users = Volunteer.objects.exclude(id = fromV.id)
-
-    for friendship in Friendship.objects.all():
-        if friendship.to_volunteer == fromV or friendship.from_volunteer == fromV:
-            users = users.exclude(id = friendship.to_volunteer.id)
-            users = users.exclude(id = friendship.from_volunteer.id)
-
-
-    context = {
-            "message": message,
-            "users": users,
-            "requests": reqs,
-            "sent_reqs": sent
-        }
-
-    return render(request, 'friends_page.html', context)
 
 @api_view(['GET'])
 def api_volunteer_list(request):
@@ -487,10 +329,14 @@ def api_volunteer_detail(request, id):
             friends.append(friendship.to_volunteer)
 
     messages = Messages.objects.all()
+    completed = Application.objects.filter(status = "completed", volunteer = user)#
+    hours = 0
+    for comp in completed:
+        hours += comp.opportunity.estimated_duration * (comp.opportunity.end_time - comp.opportunity.start_time)
 
     data = {
         'id': user.id,
-        'hours': user.hours,
+        'hours': hours,
         'f_name': user.user.first_name,
         'l_name': user.user.last_name,
         'display_name': user.display_name,
@@ -567,33 +413,6 @@ def volunteers_order(volunteers, order):
 
     return volunteers
 
-def view_leaderboard(request):
-    leaderboard_order = request.POST.get('order')
-    friends_only = request.POST.get('friends_only')
-    friends = []
-
-    volunteers = Volunteer.objects.all()
-
-
-
-    if friends_only:
-        current_user = Volunteer.objects.get(user = request.user)
-        for friendship in Friendship.objects.filter(status = "accepted"):
-            if friendship.to_volunteer == current_user:
-                friends.append(friendship.from_volunteer)
-            if friendship.from_volunteer == current_user:
-                friends.append(friendship.to_volunteer)
-        volunteers = friends
-
-    if leaderboard_order != "-":
-        volunteers = volunteers_order(volunteers, leaderboard_order)
-
-
-
-    return render(request, "leaderboard.html", {"volunteers": volunteers})
-
-
-
 
 def sort(opportunities, type):
     filtered = []
@@ -667,63 +486,6 @@ def ordering(opportunities, order):
     elif order == "oldest":
         ordered = opportunities.order_by("date_created")
     return ordered
-
-def filtered_opp(request):
-    elderly = request.POST.get('elderly') == 'on'
-    medical = request.POST.get('medical') == 'on'
-    disability = request.POST.get('disability') == 'on'
-    animal = request.POST.get('animal') == 'on'
-    educational = request.POST.get('educational') == 'on'
-    sport = request.POST.get('sport') == 'on'
-    greener_planet = request.POST.get('greener_planet') == 'on'
-    community = request.POST.get('community') == 'on'
-    verification = request.POST.get('verification') == 'on'
-    effort = request.POST.get('effort')
-    user_postcode = request.POST.get('user_postcode')
-    max_distance_km = request.POST.get('max_distance_km')
-    order = request.POST.get('order')
-
-
-    opportunities = Opportunity.objects.all()
-
-    if elderly:
-        opportunities = sort(opportunities, "Elderly")
-
-    if medical:
-        opportunities = sort(opportunities, "Medical")
-
-    if disability:
-        opportunities = sort(opportunities, "Disability")
-
-    if animal:
-        opportunities = sort(opportunities, "Animal")
-
-    if educational:
-        opportunities = sort(opportunities, "Educational")
-
-    if sport:
-        opportunities = sort(opportunities, "Sports")
-
-    if greener_planet:
-        opportunities = sort(opportunities, "Greener_Planet")
-
-    if community:
-        opportunities = sort(opportunities, "Community")
-
-    if verification:
-        opportunities = sort_verified(opportunities, True)
-
-    if effort != "-":
-        opportunities = sort_effort(opportunities, effort)
-
-    if user_postcode and max_distance_km:
-        opportunities = calculate_opp_in_distance(opportunities, user_postcode, max_distance_km)
-
-    if order != "-":
-        opportunities = ordering(opportunities, order)
-
-
-    return render(request, "viewAllOpportunities.html", {"charities": opportunities})
 
 
 @require_GET
@@ -1117,7 +879,7 @@ def api_organization_stats(request):
     data = {
         'total_opportunities': opportunities.count(),
         'active_opportunities': opportunities.filter(is_active=True).count(),
-        'total_applications': sum(opp.applications.count() for opp in opportunities),
+        'total_applications': sum(opp.applications.exclude(status = "completed").count() for opp in opportunities),
         'pending_applications': sum(opp.applications.filter(status='pending').count() for opp in opportunities),
         'request_applications': sum(opp.applications.filter(status='requesting_complete').count() for opp in opportunities),
         'recent_opportunities': OpportunitySerializer(
@@ -1184,6 +946,28 @@ def api_apply_opportunity(request, id):
         Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = "pending", current_volunteers = cv)
     return Response("Applied successfully")
 
+def complete_opportunity(vol, categories, points):
+    for cat in categories:
+        if cat.name == "Elderly":
+            vol.elderly_score = vol.elderly_score + (points / len(categories))
+        elif cat.name == "Sports":
+            vol.sports_score = vol.sports_score + (points / len(categories))
+        elif cat.name == "Greener_planet":
+            vol.greener_planet_score = vol.greener_planet_score + (points / len(categories))
+        elif cat.name == "Medical":
+            vol.medical_score = vol.medical_score + (points / len(categories))
+        elif cat.name == "Disability":
+            vol.disability_score = vol.disability_score + (points / len(categories))
+        elif cat.name == "Animal":
+            vol.animals_score = vol.animals_score + (points / len(categories))
+        elif cat.name == "Educational":
+            vol.education_score = vol.education_score + (points / len(categories))
+        elif cat.name == "Community":
+            vol.community_score = vol.community_score + (points / len(categories))
+    vol.opportunities_completed = vol.opportunities_completed + 1
+    vol.last_completion = timezone.now()
+    vol.save()
+
 @api_view(["POST"])
 def api_application_update(request, id, mode):
     if request.method == "POST":
@@ -1205,6 +989,7 @@ def api_application_update(request, id, mode):
             message = "Hi, your work for the opportunity, " + opportunity + " has been reviewed and deemed not completed so carry on going and tell us when you have completed it to gain epic rewards. It has been put back into your opportunities in progress. Keep going!!"
         elif mode == "completed":
             points = calculate_impact(app.opportunity, app.volunteer)
+            complete_opportunity(volunteer, app.opportunity.categories.all(), points)
             message = "Hi, were pleased to confirm that you have completed the opportunity and have been rewarded with " + str(points) + " points!! Thank you very much and we look forward to hearing from you again."
         Messages.objects.create(from_person = organisation, message = message, volunteer = volunteer)
     return Response("Application updated successfully")

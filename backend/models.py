@@ -33,7 +33,6 @@ class Volunteer(models.Model):
     friends = models.ManyToManyField('self', through='Friendship', symmetrical=False)
     interests = models.ManyToManyField(Interest, related_name='interested_volunteers', blank=True, null=True)
     #------------------------------------------------------------------------------------------- Alex added below
-    hours = models.IntegerField(default = 0)
     opportunities_completed = models.IntegerField(default = 0)
     last_completion = models.DateTimeField(null = True, blank=True)
     display_name = models.CharField(max_length = 16, unique = True)
