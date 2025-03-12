@@ -180,7 +180,7 @@ const BrowseOpportunities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/opportunities/distance/filter/', {
+      const response = await fetch('/api/opportunities/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -41,6 +41,18 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 
+@login_required
+def view_specified_badge(request, slug):
+
+    context = {
+        "score":50,
+        "global_score":50,
+        "title": slug.replace("-", " "),
+        "slug":slug
+    }
+
+    return render(request, 'singleBadgeView.html', context)
+
 @api_view(["GET"])
 def list_pending_friendships(request):
     friendships = Friendship.objects.filter(status = "pending")
@@ -236,6 +248,60 @@ def accept_friendship(request, friend_id, volunteer_id):
         return JsonResponse({"message": "Friend request sent"}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=405)
 
+@login_required
+def view_friends(request):
+    message = ""
+    if request.user.is_authenticated:
+        current_user = Volunteer.objects.filter(user = request.user)
+        if len(current_user) == 0:
+            return HttpResponseForbidden("only volunteers can access this")
+
+    fromV = Volunteer.objects.get(user = request.user)
+
+    if request.method =="POST":
+        if request.POST.get("accept"):
+            friendship = Friendship.objects.get(id = request.POST.get("accept"))
+            friendship.status = "accepted"
+            friendship.save()
+            message = "Added as a Friend Successfully"
+        elif request.POST.get("cancel_friendship_id"):
+            friendship = Friendship.objects.get(id = request.POST.get("cancel_friendship_id"))
+            friendship.delete()
+        else:
+
+            toVol = request.POST.get("volunteer_id")
+            toV = Volunteer.objects.get(id = toVol)
+            message = "Sent a request to " + toV.display_name
+
+
+            Friendship.objects.create(from_volunteer = fromV, to_volunteer = toV, status = "pending")
+
+    reqs = []
+    sent = []
+
+    for friendship in Friendship.objects.filter(status = "pending"):
+        if friendship.to_volunteer == fromV:
+            reqs.append(friendship)
+        if friendship.from_volunteer == fromV:
+            sent.append(friendship)
+
+
+    users = Volunteer.objects.exclude(id = fromV.id)
+
+    for friendship in Friendship.objects.all():
+        if friendship.to_volunteer == fromV or friendship.from_volunteer == fromV:
+            users = users.exclude(id = friendship.to_volunteer.id)
+            users = users.exclude(id = friendship.from_volunteer.id)
+
+
+    context = {
+            "message": message,
+            "users": users,
+            "requests": reqs,
+            "sent_reqs": sent
+        }
+
+    return render(request, 'friends_page.html', context)
 
 @api_view(['GET'])
 def api_volunteer_list(request):
@@ -472,20 +538,6 @@ def calculate_opp_in_distance(opportunities, user_postcode, max_distance_km):
                 filtered.append(opportunity)
 
     return filtered
-
-def ordering(opportunities, order):
-    if order == "nearest_deadline":
-        ordered = opportunities.order_by("-start_time")
-
-    elif order == "furthest_deadline":
-        ordered = opportunities.order_by("start_time")
-
-    elif order == "newest":
-        ordered = opportunities.order_by("-date_created")
-
-    elif order == "oldest":
-        ordered = opportunities.order_by("date_created")
-    return ordered
 
 
 @require_GET
@@ -750,7 +802,7 @@ def register_organization(request):
 def api_opportunity_list(request):
     opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
     if request.method == "POST":
-        opportunities = filtered_opp(request)
+        opportunities = calculate_opp_in_distance(opportunities, request.data["postcode"], request.data["max_distance"])
 
     data = [{
         'id': opp.id,
