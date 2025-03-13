@@ -110,6 +110,7 @@ const BrowseOpportunities = () => {
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
+  const [sortedOpportunities, setSortedOpportunities] = useState([...opportunities]);
 
   function searchOpportunity() {
     let input = document.getElementById("searchBar").value.toLowerCase();
@@ -143,7 +144,6 @@ const BrowseOpportunities = () => {
   async function orderOpportunities(order) {
     //const response = await api.post('/opportunities/filter/', {opportunities, order});
     let ordered = [...opportunities];
-    console.log(opportunities)
     if (order === "Closest Deadline") {
         setOpportunities(opportunities.sort((a, b) => new Date(a.end_date) - new Date(b.end_date)));
     } else if (order === "Furthest Deadline") {

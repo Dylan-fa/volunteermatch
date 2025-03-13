@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, redirect } from 'react-router';
 import { motion } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
+import { Navigate } from 'react-router';
 
 const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   const { user, logout } = useUser();
@@ -19,7 +20,8 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   }, []);
 
   const handleLogout = () => {
-    logout().then(() => redirect('/'));
+    logout();
+    Navigate('/');
     // Optional: Add navigation to home page here
   };
 
@@ -158,7 +160,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                         className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                       >
                         <Link
-                          to="/register"
+                          to="/register/volunteer"
                           state={{ type: 'volunteer' }}
                           className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg flex items-center"
                         >

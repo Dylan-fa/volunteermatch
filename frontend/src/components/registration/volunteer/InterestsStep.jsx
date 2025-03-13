@@ -48,8 +48,8 @@ const InterestsStep = ({ interests, selectedInterests, onToggle, onNext, onBack 
                   : 'border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50'
                 }`}
             >
-              <span className="text-3xl">{interest.icon}</span>
-              <span className="font-medium">{interest.label}</span>
+              <span className="text-3xl">🦊</span>
+              <span className="font-medium">{interest.name}</span>
             </button>
           </motion.div>
         ))}

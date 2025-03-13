@@ -649,11 +649,12 @@ def google_login_callback(request):
 @api_view(['POST'])
 def register_volunteer(request):
     email = request.data.get('email')
-    first_name = request.data.get('first_name')
-    last_name = request.data.get('last_name')
+    first_name = request.data.get('f_name')
+    last_name = request.data.get('l_name')
     display_name = request.data.get('display_name')
     password = request.data.get('password')
     password2 = request.data.get('password2')
+    interests = request.data.get("interests")
 
     if password != password2:
         return Response({'error': 'Passwords do not match'}, status=400)
@@ -661,6 +662,11 @@ def register_volunteer(request):
     try:
         user = User.objects.create_user(username=email, first_name = first_name, last_name = last_name, email=email, password=password)
         volunteer = Volunteer.objects.create(user=user, display_name = display_name)
+        if len(interests) > 1:
+            inter = Interest.objects.filter(id__in=interests)  # Get existing interests
+        else:
+            inter = Interest.objects.get(id - interests[0])
+        volunteer.interests.set(inter)
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
@@ -934,6 +940,17 @@ def api_list_categories(request):
         'description': category.description,
         'count' : Opportunity.objects.filter(categories = category).count()
     } for category in categories]
+    return Response(data)
+
+@api_view(['GET'])
+def api_list_interests(request):
+    interests = Interest.objects.all()
+    data = [{
+        'id': interest.id,
+        'name': interest.name,
+        'description': interest.description,
+
+    } for interest in interests]
     return Response(data)
 
 @api_view(["POST"])

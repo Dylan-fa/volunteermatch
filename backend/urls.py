@@ -28,6 +28,7 @@ urlpatterns = [
     
     
     path('api/categories/', views.api_list_categories),
+    path('api/interests/', views.api_list_interests),
 
     path('api/message/<int:id>/remove/', views.api_remove_message),
 

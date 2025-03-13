@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '../components/PageTransition';
 import WelcomeStep from '../components/registration/volunteer/WelcomeStep';
@@ -6,6 +7,8 @@ import BasicInfoStep from '../components/registration/volunteer/BasicInfoStep';
 import InterestsStep from '../components/registration/volunteer/InterestsStep';
 import LocationStep from '../components/registration/volunteer/LocationStep';
 import CompleteStep from '../components/registration/CompleteStep';
+import api from '../utils/api';
+import { useUser } from '../contexts/UserContext';
 
 const steps = [
   {
@@ -27,12 +30,6 @@ const steps = [
     icon: '❤️'
   },
   {
-    id: 'location',
-    title: 'Location Preferences',
-    description: 'Where would you like to volunteer?',
-    icon: '🌍'
-  },
-  {
     id: 'complete',
     title: 'All Set!',
     description: 'Ready to make a difference',
@@ -40,27 +37,20 @@ const steps = [
   }
 ];
 
-const interests = [
-  { id: 'environment', label: 'Environment', icon: '🌱' },
-  { id: 'education', label: 'Education', icon: '📚' },
-  { id: 'healthcare', label: 'Healthcare', icon: '🏥' },
-  { id: 'animals', label: 'Animal Welfare', icon: '🐾' },
-  { id: 'community', label: 'Community', icon: '🤝' },
-  { id: 'elderly', label: 'Elderly Care', icon: '👵' },
-  { id: 'youth', label: 'Youth Programs', icon: '🧑‍🤝‍🧑' },
-  { id: 'arts', label: 'Arts & Culture', icon: '🎨' }
-];
+
 
 const Register = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [interests, setInterests] = useState([])
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
+    f_name: '',
+    l_name: '',
+    display_name: '',
     email: '',
     password: '',
+    password2:'',
     interests: [],
-    location: '',
-    radius: '10',
-    availability: []
   });
 
   const nextStep = () => {
@@ -70,6 +60,44 @@ const Register = () => {
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
+
+
+  async function create_account(){
+    try {
+      const response = await fetch('/api/auth/volunteer/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+    
+  }
+
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get('/interests/');
+        setInterests(response);
+        console.log(response)
+      } catch (error) {
+        console.error('Error fetching interests:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInterests();
+  }, []);
 
   const handleInterestToggle = (interestId) => {
     setFormData(prev => ({
@@ -104,16 +132,8 @@ const Register = () => {
           />
         );
       case 3:
-        return (
-          <LocationStep
-            formData={formData}
-            setFormData={setFormData}
-            onNext={nextStep}
-            onBack={prevStep}
-          />
-        );
-      case 4:
-        return <CompleteStep />;
+        create_account()
+        return <CompleteStep type = "volunteer"/>;
       default:
         return null;
     }
