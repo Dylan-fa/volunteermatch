@@ -183,7 +183,7 @@ def calculate_impact(charity, volunteer):
         print("less than 30 days multiplier 1.2X")
     if(opportunities_completed < 5):
         final_value *= 1 + (0.25 - opportunities_completed / 20)    # allows for new users to gain increased points for their first 5 opportunities
-        print("less than 5 opps multiplier " + 1 + (0.25 - opportunities_completed / 20) + "X")
+        print("less than 5 opps multiplier " + str(1 + (0.25 - opportunities_completed / 20)) + "X")
     final_value /= 2
     final_value = round(final_value)
 
@@ -328,7 +328,7 @@ def api_volunteer_detail(request, id):
         elif friendship.from_volunteer == user:
             friends.append(friendship.to_volunteer)
 
-    messages = Messages.objects.all()
+    messages = Messages.objects.filter(volunteer = user)
     completed = Application.objects.filter(status = "completed", volunteer = user)#
     hours = 0
     for comp in completed:
@@ -929,6 +929,8 @@ def api_apply_opportunity(request, id):
         volunteer = Volunteer.objects.get(user = user)
         opportunity = Opportunity.objects.get(id = id)
         cv = opportunity.current_volunteers_count
+        if opportunity.current_volunteers_count >= opportunity.capacity:
+            return Response("Filed to apply, capacity exceeded")
         Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = "pending", current_volunteers = cv)
     return Response("Applied successfully")
 

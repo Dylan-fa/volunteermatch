@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaMedal, FaClock, FaUsers } from 'react-icons/fa';
+import { FaMedal, FaClock, FaUsers, FaTrophy } from 'react-icons/fa';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext'
 import Spin from '../components/LoadingSpinner';
-import { Link, useParams } from 'react-router';
+import { useParams, useLocation, Link } from 'react-router';
 import { format } from 'date-fns';
 import api from '../utils/api';
 
@@ -141,6 +141,27 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
   return <>{count}</>;
 };
 
+const BadgeItem = ({ category, score, maxScore, icon, color }) => {
+  const level = Math.min(7, Math.floor(score / (maxScore / 7)) + 1);
+  const progress = (score % (maxScore / 7)) / (maxScore / 7) * 100;
+  
+  return (
+    <div className="transform transition-all duration-300 hover:scale-105 p-4 bg-white rounded-xl shadow-md hover:shadow-lg">
+      <div className={`w-full h-24 ${color} text-white rounded-lg flex items-center justify-center mb-3`}>
+        <span className="text-4xl">{icon}</span>
+      </div>
+      <h3 className="font-semibold text-gray-900 mb-1">{category}</h3>
+      <p className="text-xs text-gray-600 mb-2">Level {level} Badge</p>
+      <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div
+          className={`h-2.5 rounded-full ${color.replace('bg-', 'bg-')}`}
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
 const VolunteerDashboard = () => {
   const [volunteer, setVolunteer] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -150,10 +171,13 @@ const VolunteerDashboard = () => {
   const [accepted, setAccepted] = useState([]);
   const { user } = useUser();
   const {id} = useParams();
+  const location = useLocation();
   const [showAll, setShowAll] = useState(false);
   const [showAllPending, setShowAllPending] = useState(false);
   const [showAllAccepted, setShowAllAccepted] = useState(false);
   const [update, setUpdate] = useState(false);
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'stats');
+  
 
   const visibleMessages = showAll ? MESSAGES : MESSAGES.slice(0, 3);
   const visible_pending = showAllPending ? pending : pending.slice(0, 1);
@@ -219,6 +243,14 @@ const VolunteerDashboard = () => {
 
     return () => observer.disconnect();
   }, [isLoading]);
+
+  useEffect(() => {
+    // If there's an activeTab state passed in, update the tab
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
+
   return (
     <PageTransition>
       {isLoading ? (<div className="flex justify-center items-center h-screen">
@@ -248,6 +280,10 @@ const VolunteerDashboard = () => {
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaUsers className="w-5 h-5" />
                     {FRIENDS.length} friends
+                  </span>
+                  <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                    <FaTrophy className="w-5 h-5" />
+                    {Object.keys(volunteer.scores).length} badges
                   </span>
                 </div>
               </div>
@@ -294,40 +330,46 @@ const VolunteerDashboard = () => {
             }`}>
               <h3 className="text-lg font-medium text-white/90 mb-2">Last Completion</h3>
               <p className="text-xl font-bold text-white">
-                {isVisible ? format(new Date(volunteer.last_completion), 'EEEE, MMMM dd, yyyy') : "0"}
+                {isVisible ? (volunteer.last_completion ? format(new Date(volunteer.last_completion), 'EEEE, MMMM dd, yyyy') : "Not completed") : "0"}
               </p>
             </div>
           </div>
 
-          {/* Friends Section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Friends</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {FRIENDS.map(friend => (
-                <div key={friend.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 transition-all duration-300 hover:shadow-xl hover:scale-105">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <span className="text-3xl bg-gray-50 p-2 rounded-full">👤</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{friend.display_name}</h3>
-                      <p className="text-sm text-gray-500">{friend.recentActivity}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                      <FaClock className="w-4 h-4" />
-                      {friend.overall_score} Impact
-                    </span>
-                    <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-1 py-1 rounded-full">
-                      <FaMedal className="w-4 h-4" />
-                      {friend.opportunities_completed} Completed Opportunities
-                    </span>
-                  </div>
-                </div>
-              ))}
+          {/* Tabs Navigation */}
+          <div className="mb-6 border-b border-gray-200">
+            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
+              <li className="mr-2">
+                <button 
+                  className={`inline-flex items-center justify-center p-4 rounded-t-lg border-b-2 ${activeTab === 'stats' ? 'text-blue-600 border-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'}`}
+                  onClick={() => setActiveTab('stats')}
+                >
+                  <FaMedal className="w-4 h-4 mr-2" />
+                  Activity
+                </button>
+              </li>
+              <li className="mr-2">
+                <button 
+                  className={`inline-flex items-center justify-center p-4 rounded-t-lg border-b-2 ${activeTab === 'friends' ? 'text-blue-600 border-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'}`}
+                  onClick={() => setActiveTab('friends')}
+                >
+                  <FaUsers className="w-4 h-4 mr-2" />
+                  Friends
+                </button>
+              </li>
+              <li className="mr-2">
+                <button 
+                  className={`inline-flex items-center justify-center p-4 rounded-t-lg border-b-2 ${activeTab === 'badges' ? 'text-blue-600 border-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'}`}
+                  onClick={() => setActiveTab('badges')}
+                >
+                  <FaTrophy className="w-4 h-4 mr-2" />
+                  Badges
+                </button>
+              </li>
+            </ul>
             </div>
-          </div>
+            {/* Tab Content */}
+          {activeTab === 'stats' && (
+            <>
           {/* Pending Applications Tab */}
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Opportunities applied for</h2>
           {pending.length === 0 ? (
@@ -405,6 +447,115 @@ const VolunteerDashboard = () => {
           {showAll ? "Show Less" : "Show More"}
         </button>
       )}
+      </>
+          )}
+
+          {activeTab === 'friends' && (
+            <>
+              {/* Friends Section */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Friends</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {FRIENDS.map(friend => (
+                    <div key={friend.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <span className="text-3xl bg-gray-50 p-2 rounded-full">👤</span>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{friend.display_name}</h3>
+                          <p className="text-sm text-gray-500">{friend.recentActivity}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                          <FaClock className="w-4 h-4" />
+                          {friend.overall_score} Impact
+                        </span>
+                        <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-1 py-1 rounded-full">
+                          <FaMedal className="w-4 h-4" />
+                          {friend.opportunities_completed} Completed Opportunities
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'badges' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold text-gray-900">Your Badges</h2>
+                <Link 
+                  to="/badges" 
+                  state={{ from: 'dashboard' }}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  View All Badges
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <BadgeItem 
+                  category="Elderly Care" 
+                  score={volunteer.scores.elderly || 0} 
+                  maxScore={500}
+                  icon="👵"
+                  color="bg-amber-500"
+                />
+                <BadgeItem 
+                  category="Medical" 
+                  score={volunteer.scores.medical || 0} 
+                  maxScore={500}
+                  icon="🩺"
+                  color="bg-red-500"
+                />
+                <BadgeItem 
+                  category="Special Needs" 
+                  score={volunteer.scores.disability || 0} 
+                  maxScore={500}
+                  icon="♿"
+                  color="bg-blue-500"
+                />
+                <BadgeItem 
+                  category="Animal Welfare" 
+                  score={volunteer.scores.animals || 0} 
+                  maxScore={500}
+                  icon="🐾"
+                  color="bg-green-500"
+                />
+                <BadgeItem 
+                  category="Sports" 
+                  score={volunteer.scores.animals || 0} 
+                  maxScore={500}
+                  icon="🐾"
+                  color="bg-blue-600"
+                />
+                <BadgeItem 
+                  category="Greener Planet" 
+                  score={volunteer.scores.animals || 0} 
+                  maxScore={500}
+                  icon="🐾"
+                  color="bg-green-600"
+                />
+                <BadgeItem 
+                  category="Education" 
+                  score={volunteer.scores.animals || 0} 
+                  maxScore={500}
+                  icon="🐾"
+                  color="bg-yellow-500"
+                />
+                <BadgeItem 
+                  category="Community" 
+                  score={volunteer.scores.animals || 0} 
+                  maxScore={500}
+                  icon="🐾"
+                  color="bg-purple-500"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       )}

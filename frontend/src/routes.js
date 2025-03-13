@@ -15,4 +15,5 @@ export default [
     route("/friends", "./pages/Friends.jsx"),
     route("/leaderboard", "./pages/Leaderboard.jsx"),
     route("/opportunity/:id/pending", "./pages/OpportunityPendingApplications.jsx"),
+    route("/badges", "./pages/Badges.jsx"),
 ];
