@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import make_aware
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
@@ -750,6 +751,11 @@ def api_opportunity_list(request):
         'latitude': opp.latitude,
         'longitude': opp.longitude,
         'requirements': opp.requirements,
+        'start_time': opp.start_time,
+        'end_time': opp.end_time,
+        'start_date': opp.start_date,
+        'end_date': opp.end_date,
+        'date_created': opp.date_created,
         'pending_applications': opp.pending_applications_count(),
         'has_applied': bool(
             request.user.is_authenticated and
@@ -790,10 +796,23 @@ def api_filter_distance(request):
 
     return Response(data)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
-    user = request.user
+    email = request.GET.get("email", "")
+    user = User.objects.filter(email = email).first()
+    if request.method == "POST":
+        opportunity.title = request.data['title']
+        opportunity.description = request.data['description']
+        opportunity.requirements = request.data['requirements']
+        opportunity.start_time = request.data['start_time']
+        opportunity.end_time = request.data['end_time']
+        opportunity.start_date = make_aware(datetime.strptime(request.data['start_date'], '%Y-%m-%dT%H:%M'))
+        opportunity.end_date = make_aware(datetime.strptime(request.data['end_date'], '%Y-%m-%dT%H:%M'))
+        opportunity.estimated_duration = request.data['duration']
+        opportunity.capacity = request.data['capacity']
+        opportunity.estimated_effort_ranking = request.data['estimated_effort_ranking']
+        opportunity.save()
     data = {
         'id': opportunity.id,
         'title': opportunity.title,
@@ -807,24 +826,19 @@ def api_opportunity_detail(request, pk):
         'latitude': opportunity.latitude,
         'longitude': opportunity.longitude,
         'is_owner': bool(
-            request.user.is_authenticated and
-            hasattr(request.user, 'organization') and
-            opportunity.organization == request.user.organization
+            opportunity.organization.user == user
         ),
-        'has_applied': bool(
-            request.user.is_authenticated and
-            hasattr(request.user, 'volunteer') and
-            opportunity.applications.filter(volunteer=request.user.volunteer).exists()
+        'has_applied': bool(Volunteer.objects.filter(user = user).exists and
+            Application.objects.filter(status = "pending", volunteer=Volunteer.objects.filter(user = user).first(), opportunity = opportunity).exists()
         ),
-        'application_status': opportunity.applications.filter(
-            volunteer=request.user.volunteer
-        ).first().status if (
-            request.user.is_authenticated and
-            hasattr(request.user, 'volunteer') and
-            opportunity.applications.filter(volunteer=request.user.volunteer).exists()
-        ) else None
+        'start_time': opportunity.start_time,
+        'end_time': opportunity.end_time,
+        'duration': opportunity.estimated_duration,
+        'start_date': opportunity.start_date.strftime('%Y-%m-%dT%H:%M'),
+        'end_date': opportunity.end_date.strftime('%Y-%m-%dT%H:%M'),
+        'capacity': opportunity.capacity,
+        'estimated_effort_ranking': opportunity.estimated_effort_ranking
     }
-
     return Response(data)
 
 @api_view(['POST'])

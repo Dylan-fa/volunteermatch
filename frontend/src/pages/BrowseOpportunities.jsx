@@ -140,6 +140,24 @@ const BrowseOpportunities = () => {
     }
   };
 
+  async function orderOpportunities(order) {
+    //const response = await api.post('/opportunities/filter/', {opportunities, order});
+    let ordered = [...opportunities];
+    console.log(opportunities)
+    if (order === "Closest Deadline") {
+        setOpportunities(opportunities.sort((a, b) => new Date(a.end_date) - new Date(b.end_date)));
+    } else if (order === "Furthest Deadline") {
+      setOpportunities(opportunities.sort((a, b) => new Date(b.end_date) - new Date(a.end_date)));
+    } else if (order === "Newest") {
+      setOpportunities(opportunities.sort((a, b) => new Date(b.date_created) - new Date(a.date_created)));
+    } else if (order === "Oldest") {
+      setOpportunities(opportunities.sort((a, b) => new Date(a.date_created) - new Date(b.date_created)));
+    } else {
+      fetchOpportunities();
+    }
+    setSortedOpportunities(ordered);
+  }
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -280,20 +298,18 @@ const BrowseOpportunities = () => {
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                   />
                 </div>
-                <div className="flex gap-4">
-                  <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200">
-                    <option>Location</option>
-                    <option>Within 5 miles</option>
-                    <option>Within 10 miles</option>
-                    <option>Within 25 miles</option>
+                <div>
+                  <select 
+                    onChange={(e) => orderOpportunities(e.target.value)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  >
+                    <option value="">Sort By</option>
+                    <option value="Closest Deadline">Closest Deadline</option>
+                    <option value="Furthest Deadline">Furthest Deadline</option>
+                    <option value="Newest">Newest</option>
+                    <option value="Oldest">Oldest</option>
                   </select>
-                  <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200">
-                    <option>Date</option>
-                    <option>Today</option>
-                    <option>This Week</option>
-                    <option>This Month</option>
-                  </select>
-                </div>
+                  </div>
               </div>
 
               {/* Opportunities Grid */}

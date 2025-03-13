@@ -16,4 +16,5 @@ export default [
     route("/leaderboard", "./pages/Leaderboard.jsx"),
     route("/opportunity/:id/pending", "./pages/OpportunityPendingApplications.jsx"),
     route("/badges", "./pages/Badges.jsx"),
+    route("/opportunity/:id/edit", "./pages/EditOpportunity.jsx"),
 ];

@@ -150,9 +150,9 @@ const OrganizationDashboard = () => {
             {/* Recent Opportunities */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">Recent Opportunities</h2>
+                <h2 className="text-xl font-semibold">Live Opportunities</h2>
                 <Link
-                  to="/create-opportunity"
+                  to="/opportunities/create"
                   className="px-4 py-2 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800"
                 >
                   Create New
@@ -171,7 +171,13 @@ const OrganizationDashboard = () => {
                         to={`/opportunity/${opportunity.id}/pending/`}
                         className="text-sm text-gray-600 hover:text-gray-900"
                       >
-                        View Details →
+                        View Applications →
+                      </Link>
+                      <Link
+                        to={`/opportunity/${opportunity.id}/edit/`}
+                        className="text-sm text-gray-600 hover:text-gray-900"
+                      >
+                        Edit
                       </Link>
                     </div>
                   </div>
