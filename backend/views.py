@@ -320,14 +320,31 @@ def api_volunteer_detail(request, id):
     user = Volunteer.objects.get(id = id)
     
     if request.method == 'PUT':
+        message = "Succsessfully updated"
+        colour = "green"
         user.interests.set([])
         for interest in request.data["interests"]:
             user.interests.add(Interest.objects.get(id = interest))
 
-        user.display_name = request.data["display_name"]
+        if request.data["display_name"] and user.display_name != request.data["display_name"]:
+            user.display_name = request.data["display_name"]
+
+        if request.data["password"] and request.data["passwordNew"] and request.data["passwordConfirm"]:
+            if request.data["passwordNew"] == request.data["password"]:
+                message = "Passwords cannot match"
+                colour = "green"
+            else:
+                if request.data["passwordNew"] == request.data["passwordConfirm"]:
+                    user.user.set_password(request.data["passwordNew"])
+                    colour = "green"
+                else:
+                    message = "New passwords do not match"
+                    colour = "green"
 
         user.save()
-        return Response("Successfully updated")
+        user.user.save()
+        print(message)
+        return JsonResponse({'message': message, 'colour': colour}, status=200)
 
     pending_applications = Application.objects.filter(status = "pending", volunteer = user)
     accepted_applications = Application.objects.filter(status = "accepted", volunteer = user)

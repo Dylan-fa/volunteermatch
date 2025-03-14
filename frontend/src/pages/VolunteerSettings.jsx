@@ -23,17 +23,20 @@ const VolunteerSettings = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [vol, setVol] = useState(null);
+  const [action, setAction] = useState('');
+  const [actionCol, setActionCol] = useState('red')
   const [all_interests, setInterests] = useState([]);
   const { id } = useParams();
-  const [selectedInterests, setSelected] = useState(null)
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('profile');
+  
   const [formData, setFormData] = useState({
       f_name: '',
       l_name: '',
       display_name: '',
       interests: [],
-      password1: '',
-      password2: ''
+      password: '',
+      passwordNew: '',
+      passwordConfirm: ''
     });
 
   useEffect(() => {
@@ -42,7 +45,6 @@ const VolunteerSettings = () => {
         setIsLoading(true);
         let response = await api.get(`/volunteer/${id}/`);
         setVol(response);
-        setSelected(response.interests);
         const newData = {
             f_name: response.f_name,
             l_name: response.l_name,
@@ -65,7 +67,6 @@ const VolunteerSettings = () => {
       fetchVol();
     }
     }, [id]);
-    console.log(formData)
     const container = {
         hidden: { opacity: 0 },
         show: {
@@ -100,15 +101,24 @@ const VolunteerSettings = () => {
             body: JSON.stringify(formData),
           });
           
-          const data = await response.json();
           if (!response.ok) {
             throw new Error(data.error || 'Save failed');
           }
+
+          const data = await response.json();
+
+          setAction(data.message);
+          setActionCol(data.colour);
         } catch (err) {
           console.log(err.message);
         }
         
       }
+      function setActiveTabandMessage(pr){
+        setActiveTab(pr);
+        setAction("");
+      }
+
   return (
     <PageTransition>
   {isLoading ? (
@@ -125,7 +135,7 @@ const VolunteerSettings = () => {
               <h1 className="text-2xl font-bold">Settings</h1>
               <div className="flex space-x-6">
                 <button
-                  onClick={() => setActiveTab('profile')}
+                  onClick={() => setActiveTabandMessage('profile')}
                   className={`text-white font-medium ${
                     activeTab === 'profile' ? 'underline' : 'hover:text-gray-200'
                   }`}
@@ -133,7 +143,7 @@ const VolunteerSettings = () => {
                   Profile
                 </button>
                 <button
-                  onClick={() => setActiveTab('security')}
+                  onClick={() => setActiveTabandMessage('security')}
                   className={`text-white font-medium ${
                     activeTab === 'security' ? 'underline' : 'hover:text-gray-200'
                   }`}
@@ -141,7 +151,7 @@ const VolunteerSettings = () => {
                   Security
                 </button>
                 <button
-                  onClick={() => setActiveTab('notifications')}
+                  onClick={() => setActiveTabandMessage('notifications')}
                   className={`text-white font-medium ${
                     activeTab === 'notifications' ? 'underline' : 'hover:text-gray-200'
                   }`}
@@ -149,7 +159,7 @@ const VolunteerSettings = () => {
                   Notifications
                 </button>
                 <button
-                  onClick={() => setActiveTab('interests')}
+                  onClick={() => setActiveTabandMessage('interests')}
                   className={`text-white font-medium ${
                     activeTab === 'interests' ? 'underline' : 'hover:text-gray-200'
                   }`}
@@ -159,12 +169,22 @@ const VolunteerSettings = () => {
               </div>
             </div>
           </div>
+          {action && (
+            <div className={`mt-5 ml-5 mr-5 p-4 bg-${actionCol}-100 text-black-700 rounded-full text-center`}>
+            {action}
+            </div>
+        )}
 
           {/* Content Section */}
           <div className="py-12">
             <div className="max-w-7xl mx-auto px-6">
               {activeTab === 'profile' && (
+                <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <div>
+                    
                     <h2 className="text-2xl font-semibold mb-4">Profile Settings</h2>
                     <p className="text-gray-600">Here you can update your profile information.</p>
                   
@@ -225,22 +245,72 @@ const VolunteerSettings = () => {
                     </div>
 
                 </div>
+                </motion.h2>
               )}
 
               {activeTab === 'security' && (
                 <div>
+                    <motion.h2
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
                   <h2 className="text-2xl font-semibold mb-4">Security Settings</h2>
-                  <p className="text-gray-600">Manage your security preferences, including passwords and two-factor authentication.</p>
-                  {/* Add security settings form or content here */}
+                  <p className="text-gray-600">Manage your security preferences.</p>
+                  
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Current Password
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        required
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    />
+                    </div>
+
+                    <div>
+                    <label htmlFor="passwordNew" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        New Password
+                    </label>
+                    <input
+                        id="passwordNew"
+                        type="password"
+                        required
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        onChange={(e) => setFormData({...formData, passwordNew: e.target.value})}
+                    />
+                    </div>
+
+                    <div>
+                    <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Confirm Password
+                    </label>
+                    <input
+                        id="passwordConfirm"
+                        type="password"
+                        required
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
+                    />
+                    </div>
+                    </motion.h2>
+
                 </div>
               )}
 
               {activeTab === 'notifications' && (
+                <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <div>
                   <h2 className="text-2xl font-semibold mb-4">Notification Settings</h2>
                   <p className="text-gray-600">Choose which notifications you want to receive and how.</p>
                   {/* Add notification settings form or content here */}
                 </div>
+                </motion.h2>
               )}
 
               {activeTab === 'interests' && (
