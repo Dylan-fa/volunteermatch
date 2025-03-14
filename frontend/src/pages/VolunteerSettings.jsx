@@ -26,6 +26,7 @@ const VolunteerSettings = () => {
   const [all_interests, setInterests] = useState([]);
   const { id } = useParams();
   const [selectedInterests, setSelected] = useState(null)
+  const [activeTab, setActiveTab] = useState('profile')
   const [formData, setFormData] = useState({
       f_name: '',
       l_name: '',
@@ -38,7 +39,6 @@ const VolunteerSettings = () => {
       try {
         setIsLoading(true);
         let response = await api.get(`/volunteer/${id}/`);
-        console.log(response)
         setVol(response);
         setSelected(response.interests);
         const newData = {
@@ -116,78 +116,164 @@ const VolunteerSettings = () => {
   ) : vol.is_user ? (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">Settings</h1>
-          <p className="mt-2 text-gray-600">{vol.email}</p>
-        </div>
-        <div className="max-w-2xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl font-bold text-gray-900 mb-6 text-center"
-          >
-            What causes interest you?
-          </motion.h2>
-
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 md:grid-cols-3 gap-4"
-          >
-            {all_interests.map((interest) => (
-              <motion.div
-                key={interest.id}
-                variants={item}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
+        <div className="min-h-screen bg-gray-100">
+          {/* Top navigation bar */}
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6  text-white">
+            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+              <h1 className="text-2xl font-bold">Settings</h1>
+              <div className="flex space-x-6">
                 <button
-                  onClick={() => handleInterestToggle(interest.id)}
-                  className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2
-                    ${formData.interests.includes(interest.id)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50'
-                    }`}
+                  onClick={() => setActiveTab('profile')}
+                  className={`text-white font-medium ${
+                    activeTab === 'profile' ? 'underline' : 'hover:text-gray-200'
+                  }`}
                 >
-                  <span className="text-3xl">{character[interest.category]}</span>
-                  <span className="font-medium">{interest.name}</span>
+                  Profile
                 </button>
-              </motion.div>
-            ))}
-          </motion.div>
+                <button
+                  onClick={() => setActiveTab('security')}
+                  className={`text-white font-medium ${
+                    activeTab === 'security' ? 'underline' : 'hover:text-gray-200'
+                  }`}
+                >
+                  Security
+                </button>
+                <button
+                  onClick={() => setActiveTab('notifications')}
+                  className={`text-white font-medium ${
+                    activeTab === 'notifications' ? 'underline' : 'hover:text-gray-200'
+                  }`}
+                >
+                  Notifications
+                </button>
+                <button
+                  onClick={() => setActiveTab('interests')}
+                  className={`text-white font-medium ${
+                    activeTab === 'interests' ? 'underline' : 'hover:text-gray-200'
+                  }`}
+                >
+                  Interests
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className="py-12">
+            <div className="max-w-7xl mx-auto px-6">
+              {activeTab === 'profile' && (
+                <div>
+                    <h2 className="text-2xl font-semibold mb-4">Profile Settings</h2>
+                    <p className="text-gray-600">Here you can update your profile information.</p>
+                  
+                    <div>
+                    <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 m-5">
+                        Display Name
+                    </label>
+                    <input
+                        id="display_name"
+                        type="display_name"
+                        value={vol.display_name}
+                        required
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        onChange={(e) => setFormData({...formData, display_name: e.target.value})}
+                    />
+                    </div>
+
+                </div>
+              )}
+
+              {activeTab === 'security' && (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">Security Settings</h2>
+                  <p className="text-gray-600">Manage your security preferences, including passwords and two-factor authentication.</p>
+                  {/* Add security settings form or content here */}
+                </div>
+              )}
+
+              {activeTab === 'notifications' && (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">Notification Settings</h2>
+                  <p className="text-gray-600">Choose which notifications you want to receive and how.</p>
+                  {/* Add notification settings form or content here */}
+                </div>
+              )}
+
+              {activeTab === 'interests' && (
+                <div>
+                 
+
+                  <div className="max-w-2xl mx-auto">
+                    <motion.h2
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-2xl font-bold text-gray-900 mb-6 text-center"
+                    >
+                    <h2 className="text-2xl font-semibold mb-4">Interests</h2>
+                      What causes interest you?
+                    </motion.h2>
+
+                    <motion.div
+                      variants={container}
+                      initial="hidden"
+                      animate="show"
+                      className="grid grid-cols-2 md:grid-cols-3 gap-4"
+                    >
+                      {all_interests.map((interest) => (
+                        <motion.div
+                          key={interest.id}
+                          variants={item}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            onClick={() => handleInterestToggle(interest.id)}
+                            className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2
+                              ${formData.interests.includes(interest.id)
+                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                : 'border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50'
+                              }`}
+                          >
+                            <span className="text-3xl">{character[interest.category]}</span>
+                            <span className="font-medium">{interest.name}</span>
+                          </button>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
       <div className="w-full flex justify-center items-center mt-4">
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex justify-between"
-            >
-            <button
-                onClick={saveInterests}
-                disabled={formData.interests.length === 0}
-                className={`mb-4 px-6 py-2 rounded-full text-white transition-all duration-200
-                ${formData.interests.length > 0
-                    ? 'bg-blue-500 hover:bg-blue-600'
-                    : 'bg-gray-300 cursor-not-allowed'
-                }`}
-            >
-                Save
-            </button>
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex justify-between"
+        >
+          <button
+            onClick={saveInterests}
+            disabled={formData.interests.length === 0}
+            className={`mb-4 px-6 py-2 rounded-full text-white transition-all duration-200
+              ${formData.interests.length > 0
+                ? 'bg-blue-500 hover:bg-blue-600'
+                : 'bg-gray-300 cursor-not-allowed'
+              }`}
+          >
+            Save
+          </button>
         </motion.div>
-  </div>
+      </div>
     </div>
-
-    
   ) : (
     "You cannot edit this user"
   )}
-
-  
 </PageTransition>
+
   );
 };
 
