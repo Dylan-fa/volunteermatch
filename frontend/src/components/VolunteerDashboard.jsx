@@ -162,6 +162,81 @@ const BadgeItem = ({ category, score, maxScore, icon, color }) => {
   );
 };
 
+const Badge = ({volunteer}) => {
+  return(
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900">{volunteer.is_user ? 'Your Badges' : 'Badges'}</h2>
+        <Link 
+          to="/badges" 
+          state={{ from: 'dashboard' }}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          View All Badges
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <BadgeItem 
+          category="Elderly Care" 
+          score={volunteer.scores.elderly || 0} 
+          maxScore={500}
+          icon="👵"
+          color="bg-amber-500"
+        />
+        <BadgeItem 
+          category="Medical" 
+          score={volunteer.scores.medical || 0} 
+          maxScore={500}
+          icon="🩺"
+          color="bg-red-500"
+        />
+        <BadgeItem 
+          category="Special Needs" 
+          score={volunteer.scores.disability || 0} 
+          maxScore={500}
+          icon="♿"
+          color="bg-blue-500"
+        />
+        <BadgeItem 
+          category="Animal Welfare" 
+          score={volunteer.scores.animals || 0} 
+          maxScore={500}
+          icon="🐾"
+          color="bg-green-500"
+        />
+        <BadgeItem 
+          category="Sports" 
+          score={volunteer.scores.animals || 0} 
+          maxScore={500}
+          icon="🐾"
+          color="bg-blue-600"
+        />
+        <BadgeItem 
+          category="Greener Planet" 
+          score={volunteer.scores.animals || 0} 
+          maxScore={500}
+          icon="🐾"
+          color="bg-green-600"
+        />
+        <BadgeItem 
+          category="Education" 
+          score={volunteer.scores.animals || 0} 
+          maxScore={500}
+          icon="🐾"
+          color="bg-yellow-500"
+        />
+        <BadgeItem 
+          category="Community" 
+          score={volunteer.scores.animals || 0} 
+          maxScore={500}
+          icon="🐾"
+          color="bg-purple-500"
+        />
+      </div>
+    </div>
+  )
+}
+
 const VolunteerDashboard = () => {
   const [volunteer, setVolunteer] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -271,7 +346,7 @@ const VolunteerDashboard = () => {
                 <div className="text-5xl bg-white/20 p-4 rounded-full">{volunteer.avatar || "👤"}</div>
               )}
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-white">{volunteer.f_name + " " + volunteer.l_name}</h1>
+                <h1 className="text-2xl font-semibold text-white">{volunteer.is_user ? (volunteer.f_name + " " + volunteer.l_name) : volunteer.display_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
                   <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
                     <FaClock className="w-5 h-5" />
@@ -285,6 +360,12 @@ const VolunteerDashboard = () => {
                     <FaTrophy className="w-5 h-5" />
                     {Object.keys(volunteer.scores).length} badges
                   </span>
+                  <Link
+                    to={`/volunteer/${volunteer.id}/settings`}
+                    className="flex items-center gap-2 bg-white/10 px-4 py-2 ml-auto rounded-full hover:bg-gray-800 transition-colors"
+                  >
+                    Edit Profile
+                  </Link>
                 </div>
               </div>
             </div>
@@ -334,9 +415,11 @@ const VolunteerDashboard = () => {
               </p>
             </div>
           </div>
-
+          
           {/* Tabs Navigation */}
-          <div className="mb-6 border-b border-gray-200">
+          {volunteer.is_user ? (
+            <>
+            <div className="mb-6 border-b border-gray-200">
             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
               <li className="mr-2">
                 <button 
@@ -483,79 +566,12 @@ const VolunteerDashboard = () => {
               </div>
             </>
           )}
+          
 
           {activeTab === 'badges' && (
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-gray-900">Your Badges</h2>
-                <Link 
-                  to="/badges" 
-                  state={{ from: 'dashboard' }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  View All Badges
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <BadgeItem 
-                  category="Elderly Care" 
-                  score={volunteer.scores.elderly || 0} 
-                  maxScore={500}
-                  icon="👵"
-                  color="bg-amber-500"
-                />
-                <BadgeItem 
-                  category="Medical" 
-                  score={volunteer.scores.medical || 0} 
-                  maxScore={500}
-                  icon="🩺"
-                  color="bg-red-500"
-                />
-                <BadgeItem 
-                  category="Special Needs" 
-                  score={volunteer.scores.disability || 0} 
-                  maxScore={500}
-                  icon="♿"
-                  color="bg-blue-500"
-                />
-                <BadgeItem 
-                  category="Animal Welfare" 
-                  score={volunteer.scores.animals || 0} 
-                  maxScore={500}
-                  icon="🐾"
-                  color="bg-green-500"
-                />
-                <BadgeItem 
-                  category="Sports" 
-                  score={volunteer.scores.animals || 0} 
-                  maxScore={500}
-                  icon="🐾"
-                  color="bg-blue-600"
-                />
-                <BadgeItem 
-                  category="Greener Planet" 
-                  score={volunteer.scores.animals || 0} 
-                  maxScore={500}
-                  icon="🐾"
-                  color="bg-green-600"
-                />
-                <BadgeItem 
-                  category="Education" 
-                  score={volunteer.scores.animals || 0} 
-                  maxScore={500}
-                  icon="🐾"
-                  color="bg-yellow-500"
-                />
-                <BadgeItem 
-                  category="Community" 
-                  score={volunteer.scores.animals || 0} 
-                  maxScore={500}
-                  icon="🐾"
-                  color="bg-purple-500"
-                />
-              </div>
-            </div>
-          )}
+            <Badge volunteer = {volunteer}/>
+          )}</>) : (<div><Badge volunteer = {volunteer}/></div>)}
+          
         </div>
       </div>
       )}

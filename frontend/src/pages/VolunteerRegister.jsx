@@ -10,6 +10,7 @@ import CompleteStep from '../components/registration/CompleteStep';
 import api from '../utils/api';
 import { useUser } from '../contexts/UserContext';
 
+
 const steps = [
   {
     id: 'welcome',
@@ -88,7 +89,6 @@ const Register = () => {
         setIsLoading(true);
         const response = await api.get('/interests/');
         setInterests(response);
-        console.log(response)
       } catch (error) {
         console.error('Error fetching interests:', error);
       } finally {

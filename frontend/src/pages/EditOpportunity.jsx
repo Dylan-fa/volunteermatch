@@ -4,7 +4,7 @@ import PageTransition from '../components/PageTransition';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const EditOpportunity = () => {
 
@@ -15,8 +15,8 @@ const EditOpportunity = () => {
   useEffect(() => {
     async function fetchOpp() {
       try {
-        const response = await axios.get(`/api/opportunities/${id}/`);
-        setOpp(response.data);
+        const response = await api.get(`/opportunities/${id}/`);
+        setOpp(response);
       } catch (error) {
         console.error('Error fetching opportunities:', error);
       }

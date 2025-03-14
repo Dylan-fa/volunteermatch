@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, redirect } from 'react-router';
 import { motion } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
-import { Navigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   const { user, logout } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [rainbowVisible, setRainbowVisible] = useState(false);
+  const navigate = useNavigate();
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
 
   const handleLogout = () => {
     logout();
-    Navigate('/');
+    navigate('/');
     // Optional: Add navigation to home page here
   };
 

@@ -17,6 +17,7 @@ const OpportunityDetails = () => {
           withCredentials: true,
       });
         setOpportunity(response);
+        console.log(response)
         initMap(response);
       } catch (error) {
         console.error('Error fetching opportunity:', error);
@@ -47,7 +48,6 @@ const OpportunityDetails = () => {
       const response = await api.get(`/opportunities/${id}/`, {
         withCredentials: true,
       });
-      console.log(response)
       setOpportunity(response);
     } catch (error) {
       console.error('Error applying:', error);

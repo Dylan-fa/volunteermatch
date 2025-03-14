@@ -1,10 +1,37 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
+import { useState } from 'react';
 
 const BasicInfoStep = ({ formData, setFormData, onNext, onBack }) => {
+  const [error, setError] = useState('');
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext();
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await fetch('/api/auth/google/callback/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          access_token: credentialResponse.credential,
+          user_type: 'volunteer'
+        }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Google registration failed');
+      }
+
+      //onRegisterSuccess(data);
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   return (
@@ -13,6 +40,14 @@ const BasicInfoStep = ({ formData, setFormData, onNext, onBack }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
+      <GoogleLogin
+        onSuccess={handleGoogleSuccess}
+        onError={() => setError('Google registration failed')}
+        className="mb-4"
+        containerProps={{ allow: "identity-credentials-get" }}
+        use_fedcm_for_prompt
+      />
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

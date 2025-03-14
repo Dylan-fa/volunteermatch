@@ -315,9 +315,17 @@ def api_volunteer_requested(request, id):
     } for app in Application.objects.filter(opportunity = Opportunity.objects.get(id = id), status = "requesting_complete")]
     return Response(data)
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 def api_volunteer_detail(request, id):
     user = Volunteer.objects.get(id = id)
+    
+    if request.method == 'PUT':
+        user.interests.set([])
+        for interest in request.data["interests"]:
+            user.interests.add(Interest.objects.get(id = interest))
+
+        user.save()
+        return Response("Successfully updated")
 
     pending_applications = Application.objects.filter(status = "pending", volunteer = user)
     accepted_applications = Application.objects.filter(status = "accepted", volunteer = user)
@@ -337,6 +345,7 @@ def api_volunteer_detail(request, id):
 
     data = {
         'id': user.id,
+        'email': user.user.email,
         'hours': hours,
         'f_name': user.user.first_name,
         'l_name': user.user.last_name,
@@ -388,8 +397,11 @@ def api_volunteer_detail(request, id):
                 "estimated_effort_ranking": application.opportunity.estimated_effort_ranking,
             },
             'date_applied': application.date_applied,
-        } for application in accepted_applications]
-
+        } for application in accepted_applications],
+        "is_user": bool(
+            request.user == user.user
+        ),
+        'interests': [interest.id for interest in user.interests.all()]
     }
     return Response(data)
 
@@ -834,8 +846,10 @@ def api_opportunity_detail(request, pk):
         'is_owner': bool(
             opportunity.organization.user == user
         ),
-        'has_applied': bool(Volunteer.objects.filter(user = user).exists and
-            Application.objects.filter(status = "pending", volunteer=Volunteer.objects.filter(user = user).first(), opportunity = opportunity).exists()
+        'has_applied': bool(
+            request.user.is_authenticated and 
+            hasattr(request.user, 'volunteer') and 
+            opportunity.applications.filter(volunteer=request.user.volunteer).exists()
         ),
         'start_time': opportunity.start_time,
         'end_time': opportunity.end_time,
@@ -949,6 +963,7 @@ def api_list_interests(request):
         'id': interest.id,
         'name': interest.name,
         'description': interest.description,
+        'category': interest.category.name
 
     } for interest in interests]
     return Response(data)
