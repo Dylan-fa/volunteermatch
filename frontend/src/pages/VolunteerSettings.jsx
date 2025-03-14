@@ -137,7 +137,7 @@ const VolunteerSettings = () => {
                 <button
                   onClick={() => setActiveTabandMessage('profile')}
                   className={`text-white font-medium ${
-                    activeTab === 'profile' ? 'underline' : 'hover:text-gray-200'
+                    activeTab === 'profile' ? 'underline' : 'hover:text-gray-200 hover:underline'
                   }`}
                 >
                   Profile
@@ -145,7 +145,7 @@ const VolunteerSettings = () => {
                 <button
                   onClick={() => setActiveTabandMessage('security')}
                   className={`text-white font-medium ${
-                    activeTab === 'security' ? 'underline' : 'hover:text-gray-200'
+                    activeTab === 'security' ? 'underline' : 'hover:text-gray-200 hover:underline'
                   }`}
                 >
                   Security
@@ -153,7 +153,7 @@ const VolunteerSettings = () => {
                 <button
                   onClick={() => setActiveTabandMessage('notifications')}
                   className={`text-white font-medium ${
-                    activeTab === 'notifications' ? 'underline' : 'hover:text-gray-200'
+                    activeTab === 'notifications' ? 'underline' : 'hover:text-gray-200 hover:underline'
                   }`}
                 >
                   Notifications
@@ -161,7 +161,7 @@ const VolunteerSettings = () => {
                 <button
                   onClick={() => setActiveTabandMessage('interests')}
                   className={`text-white font-medium ${
-                    activeTab === 'interests' ? 'underline' : 'hover:text-gray-200'
+                    activeTab === 'interests' ? 'underline' : 'hover:text-gray-200 hover:underline'
                   }`}
                 >
                   Interests
