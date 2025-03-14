@@ -32,6 +32,8 @@ const VolunteerSettings = () => {
       l_name: '',
       display_name: '',
       interests: [],
+      password1: '',
+      password2: ''
     });
 
   useEffect(() => {
@@ -88,7 +90,7 @@ const VolunteerSettings = () => {
         }));
     };
 
-    async function saveInterests(){
+    async function save(){
         try {
           const response = await fetch(`/api/volunteer/${id}/`, {
             method: 'PUT',
@@ -100,7 +102,7 @@ const VolunteerSettings = () => {
           
           const data = await response.json();
           if (!response.ok) {
-            throw new Error(data.error || 'Registration failed');
+            throw new Error(data.error || 'Save failed');
           }
         } catch (err) {
           console.log(err.message);
@@ -116,7 +118,7 @@ const VolunteerSettings = () => {
   ) : vol.is_user ? (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="min-h-screen bg-gray-100">
+        <div className="bg-gray-100">
           {/* Top navigation bar */}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6  text-white">
             <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -167,7 +169,49 @@ const VolunteerSettings = () => {
                     <p className="text-gray-600">Here you can update your profile information.</p>
                   
                     <div>
-                    <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 m-5">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Email address
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        required
+                        value={vol.email}
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-200"
+                        disabled={true}
+                    />
+                    </div>
+
+                    <div>
+                    <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        First Name
+                    </label>
+                    <input
+                        id="first_name"
+                        type="first_name"
+                        required
+                        value={vol.f_name}
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-200"
+                        disabled={true}
+                    />
+                    </div>
+                    
+                    <div>
+                    <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Last Name
+                    </label>
+                    <input
+                        id="last_name"
+                        type="last_name"
+                        required
+                        value={vol.l_name}
+                        className="mt-1 ml-5 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-200"
+                        disabled={true}
+                    />
+                    </div>
+
+                    <div>
+                    <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
                         Display Name
                     </label>
                     <input
@@ -256,7 +300,7 @@ const VolunteerSettings = () => {
           className="flex justify-between"
         >
           <button
-            onClick={saveInterests}
+            onClick={save}
             disabled={formData.interests.length === 0}
             className={`mb-4 px-6 py-2 rounded-full text-white transition-all duration-200
               ${formData.interests.length > 0

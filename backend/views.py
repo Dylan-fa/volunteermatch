@@ -324,6 +324,8 @@ def api_volunteer_detail(request, id):
         for interest in request.data["interests"]:
             user.interests.add(Interest.objects.get(id = interest))
 
+        user.display_name = request.data["display_name"]
+
         user.save()
         return Response("Successfully updated")
 
