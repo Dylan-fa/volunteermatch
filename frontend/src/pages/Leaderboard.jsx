@@ -4,6 +4,7 @@ import api from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import _ from "lodash";
 import { useUser } from '../contexts/UserContext';
+import { motion } from 'framer-motion';
 
 const Leaderboard = () => {
   const { user } = useUser();
@@ -40,7 +41,7 @@ const Leaderboard = () => {
       try {
         setIsLoading(true);
         const response = await api.get('/volunteer/list/');
-        const sortedData = _.orderBy(response, ["overall_score"], ["desc"]);
+        const sortedData = _.orderBy(response, ["overall_score"], ["desc"]).slice(0,50);
         setVolunteers(sortedData);
       } catch (error) {
         console.error('Error fetching volunteers:', error);
@@ -58,16 +59,12 @@ const Leaderboard = () => {
 
     const fetchFriends = async () => {
       try {
-        console.log("2")
         const response = await api.get(`/volunteer/${userID}/`);
-        console.log("1")
-        console.log(response)
         const listOfFriends = response.friends || [];
         listOfFriends.push(response)
         const sortedFriends = _.orderBy(listOfFriends, ["overall_score"], ["desc"]);
         setFriends(sortedFriends)
       } catch (error) {
-        console.log("error")
         console.error('Error fetching friends:', error);
       }
     };
@@ -83,33 +80,43 @@ const Leaderboard = () => {
         </div>
       ) : (
         <div className="min-h-screen bg-white flex items-center justify-center p-4">
-          <div className="bg-gray-700 text-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+          <div className="bg-gray-700 min-h-screen text-white p-6 rounded-2xl shadow-xl w-full max-w-md">
             <h2 className="text-2xl font-bold text-center mb-4">Leaderboard</h2>
 
-            {/* Sliding Toggle Button */}
-            <div className="flex justify-center items-center mb-6">
-              <div className="relative w-48 h-10 bg-gray-500 rounded-full flex items-center">
-                <button
-                  onClick={() => setShowFriendsLeaderboard(false)}
-                  className={`w-1/2 h-full rounded-full text-center font-medium ${
-                    !showFriendsLeaderboard ? 'bg-blue-500 text-white' : 'text-gray-300'
-                  }`}
-                >
-                  Global
-                </button>
-                <button
-                  onClick={() => setShowFriendsLeaderboard(true)}
-                  className={`w-1/2 h-full rounded-full text-center font-medium ${
-                    showFriendsLeaderboard ? 'bg-blue-500 text-white' : 'text-gray-300'
-                  }`}
-                >
-                  Friends
-                </button>
+            {friends.length > 0 ? (
+              <div className="flex justify-center items-center mb-6">
+                <div className="relative w-48 h-10 bg-gray-500 rounded-full flex items-center">
+                <div
+                  className={`absolute top-0 left-0 w-1/2 h-full bg-blue-500 rounded-full transition-transform duration-300`}
+                  style={{ transform: showFriendsLeaderboard ? "translateX(100%)" : "translateX(0%)" }}
+                ></div>
+                  <button
+                    onClick={() => setShowFriendsLeaderboard(false)}
+                    className={`relative z-10 w-1/2 h-full rounded-full text-center font-medium ${
+                      !showFriendsLeaderboard ? ' text-white' : 'text-gray-300'
+                    }`}
+                  >
+                    Global
+                  </button>
+                  <button
+                    onClick={() => setShowFriendsLeaderboard(true)}
+                    className={`relative z-10 w-1/2 h-full rounded-full text-center font-medium ${
+                      showFriendsLeaderboard ? ' text-white' : 'text-gray-300'
+                    }`}
+                  >
+                    Friends
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : null}
+            
 
             {/* Leaderboard List */}
             <ul>
+              <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
               {(showFriendsLeaderboard ? friends : volunteers).map((vol, index) => (
                 <li
                   key={vol.id}
@@ -120,6 +127,7 @@ const Leaderboard = () => {
                   <span className="font-bold">{vol.overall_score}</span>
                 </li>
               ))}
+              </motion.h2>
             </ul>
           </div>
         </div>
