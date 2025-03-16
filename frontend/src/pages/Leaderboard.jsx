@@ -154,12 +154,13 @@ const Leaderboard = () => {
                     {/* Dropdown Menu */}
                     {dropdownStates[index] && (
                       <div className="absolute z-10 right-0 mt-2 w-32 bg-black shadow-md rounded-lg">
-                        <button
+                        {user?.is_volunteer ? (<button
                           onClick={() => addFriend(vol.id, index)}
                           className="block rounded-lg w-full z-10 text-left px-4 py-2 hover:bg-gray-200"
                         >
                           Add Friend
-                        </button>
+                        </button>) : ""}
+                        
                         <Link
                           to={`/dashboard/volunteer/${vol.id}/`}
                           className="block rounded-lg w-full z-10 text-left px-4 py-2 hover:bg-gray-200"
