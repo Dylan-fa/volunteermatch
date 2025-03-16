@@ -64,7 +64,9 @@ def calculate_impact(charity, volunteer):
             current_application = application
             break
     if current_application == None:
-        return HttpResponse("No Application for this volunteer")
+        participants_at_application = opportunity.current_volunteers_count
+        date_time_applied = datetime.now()
+        duration_taken = opportunity.estimated_duration
 
     # Open and load JSON file to get population data
     file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
@@ -75,7 +77,7 @@ def calculate_impact(charity, volunteer):
     start_time = opportunity.start_time
     end_time = opportunity.end_time
     opportunities_completed = volunteer.opportunities_completed
-    duration_taken = datetime.now().day - application.date_applied.day
+    
     estimated_duration = opportunity.estimated_duration
     effort_ranking = opportunity.estimated_effort_ranking
     if volunteer.last_completion is not None:
@@ -84,10 +86,10 @@ def calculate_impact(charity, volunteer):
         days_since_last_opportunity_completed = 100000
     bonus_points = 0 #-----------------------------------------------FIXXXXXX
     start_date = opportunity.start_date
-    date_time_applied = current_application.date_applied
+    
     end_date = opportunity.end_date
     capacity = opportunity.capacity
-    participants_at_application = current_application.current_volunteers
+    
 
 
     people_helped = 0
@@ -773,6 +775,7 @@ def register_organization(request):
 @api_view(['GET', 'POST'])
 def api_opportunity_list(request):
     opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
+    volunteer = Volunteer.objects.get(user = request.user)
     if request.method == "POST":
         opportunities = calculate_opp_in_distance(opportunities, request.data["postcode"], request.data["max_distance"])
 
@@ -800,7 +803,10 @@ def api_opportunity_list(request):
             opp.applications.filter(volunteer=request.user.volunteer).exists()
         ),
         'effort' : opp.estimated_effort_ranking,
-        'categories' : list(opp.categories.values_list('name', flat=True))
+        'categories' : list(opp.categories.values_list('name', flat=True)),
+        'capacity': opp.capacity,
+        'current_count': opp.current_volunteers_count,
+        'duration': opp.estimated_duration,
     } for opp in opportunities]
     return Response(data)
 
@@ -1006,6 +1012,8 @@ def api_apply_opportunity(request, id):
             status = "accepted"
             message = "Automatic Message: You have been accepted into the opportunity " + opportunity.title + ", Thank you for your application!"
         Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = status, current_volunteers = cv)
+        opportunity.current_volunteers_count += 1
+        opportunity.save()
         Messages.objects.create(volunteer = volunteer, from_person = opportunity.organization, message = message)
     return Response("Applied successfully")
 

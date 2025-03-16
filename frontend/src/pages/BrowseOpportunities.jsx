@@ -111,7 +111,7 @@ const BrowseOpportunities = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [sortedOpportunities, setSortedOpportunities] = useState([...opportunities]);
-
+  console.log(opportunities)
   function searchOpportunity() {
     let input = document.getElementById("searchBar").value.toLowerCase();
     let opportunities = document.querySelectorAll(".opportunity");
@@ -147,13 +147,23 @@ const BrowseOpportunities = () => {
     if (order === "Closest Deadline") {
         setOpportunities(opportunities.sort((a, b) => new Date(a.end_date) - new Date(b.end_date)));
     } else if (order === "Furthest Deadline") {
-      setOpportunities(opportunities.sort((a, b) => new Date(b.end_date) - new Date(a.end_date)));
+        setOpportunities(opportunities.sort((a, b) => new Date(b.end_date) - new Date(a.end_date)));
     } else if (order === "Newest") {
-      setOpportunities(opportunities.sort((a, b) => new Date(b.date_created) - new Date(a.date_created)));
+        setOpportunities(opportunities.sort((a, b) => new Date(b.date_created) - new Date(a.date_created)));
     } else if (order === "Oldest") {
-      setOpportunities(opportunities.sort((a, b) => new Date(a.date_created) - new Date(b.date_created)));
+        setOpportunities(opportunities.sort((a, b) => new Date(a.date_created) - new Date(b.date_created)));
+    } else if (order === "Largest Capacity") {
+        setOpportunities(opportunities.sort((a, b) => a.capacity - b.capacity));
+    } else if (order === "Smallest Capacity") {
+        setOpportunities(opportunities.sort((a, b) => b.capacity - a.capacity));
+    } else if (order === "Close to Capacity") {
+      setOpportunities(opportunities.sort((a, b) => (a.capacity - a.current_count) - (b.capacity - b.current_count)));
+    } else if (order === "Low to High Duration") {
+      setOpportunities(opportunities.sort((a, b) => a.duration - b.duration));
+    } else if (order === "High to Low Duration") {
+      setOpportunities(opportunities.sort((a, b) => b.duration - a.duration));
     } else {
-      fetchOpportunities();
+        fetchOpportunities();
     }
     setSortedOpportunities(ordered);
   }
@@ -308,6 +318,11 @@ const BrowseOpportunities = () => {
                     <option value="Furthest Deadline">Furthest Deadline</option>
                     <option value="Newest">Newest</option>
                     <option value="Oldest">Oldest</option>
+                    <option value="Largest Capacity">Largest Capacity</option>
+                    <option value="Smallest Capacity">Smallest Capacity</option>
+                    <option value="Close to Capacity">Close to Capacity</option>
+                    <option value="Low to High Duration">Shortest Duration</option>
+                    <option value="High to Low Duration">Longest Duration</option>
                   </select>
                   </div>
               </div>
