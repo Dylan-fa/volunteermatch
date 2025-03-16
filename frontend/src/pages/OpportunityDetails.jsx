@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router';
 import PageTransition from '../components/PageTransition';
 import { useUser } from '../contexts/UserContext';
 import api from '../utils/api';
+import { format } from 'date-fns';
 
 const OpportunityDetails = () => {
   const { id } = useParams();
@@ -17,8 +18,8 @@ const OpportunityDetails = () => {
           withCredentials: true,
       });
         setOpportunity(response);
-        console.log(response)
         initMap(response);
+        console.log(response)
       } catch (error) {
         console.error('Error fetching opportunity:', error);
       }
@@ -109,8 +110,12 @@ const OpportunityDetails = () => {
 
                 {/* Impact */}
                 <div>
-                  <h2 className="text-xl font-medium text-gray-900 mb-4">Your Impact</h2>
-                  <p className="text-gray-600">{opportunity.impact}</p>
+                  <h2 className="text-xl font-medium text-gray-900 mb-4">Estimated Shift Times</h2>
+                  <p className="text-gray-600">{opportunity.start_time}:00 - {opportunity.end_time}:00</p>
+                </div>
+                <div>
+                  <h2 className="text-xl font-medium text-gray-900 mb-4">Estimated Impact</h2>
+                  <p className="text-gray-600">You could recieve {opportunity.estimated_points} points or more!</p>
                 </div>
               </div>
             </div>
@@ -119,9 +124,9 @@ const OpportunityDetails = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-24 bg-gray-50 rounded-xl p-6 space-y-6">
                 {/* Date & Time */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Date & Time</h3>
-                  <p className="text-gray-600">{opportunity.date}</p>
+                <div className='flex'>
+                  <h3 className="text-sm font-medium text-gray-900 mr-3">Effort Ranking: </h3>
+                  <p className="text-gray-600">{opportunity.estimated_effort_ranking.charAt(0).toUpperCase() + opportunity.estimated_effort_ranking.slice(1)}</p>
                 </div>
 
                 {/* Location */}
@@ -136,10 +141,10 @@ const OpportunityDetails = () => {
                   </div>
                 </div>
 
-                {/* Commitment */}
+                {/* Application closing date */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Time Commitment</h3>
-                  <p className="text-gray-600">{opportunity.commitment}</p>
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">Application closing date</h3>
+                  <p className="text-gray-600">{format(new Date(opportunity.end_date), 'EEEE, MMMM dd, yyyy')}</p>
                 </div>
 
                 {/* Apply Button */}

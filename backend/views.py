@@ -67,6 +67,10 @@ def calculate_impact(charity, volunteer):
         participants_at_application = opportunity.current_volunteers_count
         date_time_applied = datetime.now()
         duration_taken = opportunity.estimated_duration
+    else:
+        participants_at_application = current_application.current_volunteers
+        date_time_applied = current_application.date_applied
+        duration_taken = datetime.now().day - current_application.date_applied.day
 
     # Open and load JSON file to get population data
     file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
@@ -187,7 +191,7 @@ def calculate_impact(charity, volunteer):
     if(opportunities_completed < 5):
         final_value *= 1 + (0.25 - opportunities_completed / 20)    # allows for new users to gain increased points for their first 5 opportunities
         print("less than 5 opps multiplier " + str(1 + (0.25 - opportunities_completed / 20)) + "X")
-    final_value /= 2
+    final_value /= 1.5
     final_value = round(final_value)
 
     print(str(time_value) + " time")
@@ -842,8 +846,8 @@ def api_filter_distance(request):
 @api_view(['GET', 'POST'])
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
-    email = request.GET.get("email", "")
-    user = User.objects.filter(email = email).first()
+    user = request.user
+    volunteer = Volunteer.objects.get(user = user)
     if request.method == "POST":
         opportunity.title = request.data['title']
         opportunity.description = request.data['description']
@@ -882,7 +886,8 @@ def api_opportunity_detail(request, pk):
         'start_date': opportunity.start_date.strftime('%Y-%m-%dT%H:%M'),
         'end_date': opportunity.end_date.strftime('%Y-%m-%dT%H:%M'),
         'capacity': opportunity.capacity,
-        'estimated_effort_ranking': opportunity.estimated_effort_ranking
+        'estimated_effort_ranking': opportunity.estimated_effort_ranking,
+        'estimated_points': calculate_impact(opportunity, volunteer)
     }
     return Response(data)
 
