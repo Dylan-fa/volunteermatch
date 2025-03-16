@@ -934,17 +934,19 @@ def api_organization_profile(request):
         return Response({'error': 'Not authorized'}, status=403)
 
     org = request.user.organization
-
+    print(request.method)
     if request.method == 'GET':
         return Response({
             'name': org.name,
             'description': org.description,
             'charity_number': org.charity_number,
             'logo': org.logo.url if org.logo else None,
-            'email': org.user.email
+            'email': org.user.email,
+            'automatic': org.automatic_accepting
         })
 
     elif request.method == 'PUT':
+        
         try:
             if 'name' in request.data:
                 org.name = request.data['name']
@@ -952,6 +954,8 @@ def api_organization_profile(request):
                 org.description = request.data['description']
             if 'logo' in request.FILES:
                 org.logo = request.FILES['logo']
+            if 'automatic' in request.data:
+                org.automatic_accepting = request.data['automatic']
             org.save()
 
             return Response({
@@ -959,10 +963,10 @@ def api_organization_profile(request):
                 'description': org.description,
                 'charity_number': org.charity_number,
                 'logo': org.logo.url if org.logo else None,
-                'email': org.user.email
+                'email': org.user.email,
             })
         except Exception as e:
-            return Response({'error': str(e)}, status=400)
+            return Response('error: ', str(e), status = 400)
 
 @api_view(['GET'])
 def api_list_categories(request):
@@ -990,13 +994,19 @@ def api_list_interests(request):
 @api_view(["POST"])
 def api_apply_opportunity(request, id):
     if request.method == "POST":
+        status = "pending"
         user = request.user
         volunteer = Volunteer.objects.get(user = user)
         opportunity = Opportunity.objects.get(id = id)
         cv = opportunity.current_volunteers_count
         if opportunity.current_volunteers_count >= opportunity.capacity:
             return Response("Filed to apply, capacity exceeded")
-        Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = "pending", current_volunteers = cv)
+        message = "Thank you for applying to the opportunity " + opportunity.title + ", we will be in contact shortly after we have reviewed your application!"
+        if opportunity.organization.automatic_accepting:
+            status = "accepted"
+            message = "Automatic Message: You have been accepted into the opportunity " + opportunity.title + ", Thank you for your application!"
+        Application.objects.create(volunteer = volunteer, opportunity = opportunity, status = status, current_volunteers = cv)
+        Messages.objects.create(volunteer = volunteer, from_person = opportunity.organization, message = message)
     return Response("Applied successfully")
 
 def complete_opportunity(vol, categories, points):

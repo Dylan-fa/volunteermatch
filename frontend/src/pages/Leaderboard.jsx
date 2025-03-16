@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import _ from "lodash";
 import { useUser } from '../contexts/UserContext';
 import { motion } from 'framer-motion';
+import {Link} from 'react-router'
 
 const Leaderboard = () => {
   const { user } = useUser();
@@ -13,6 +14,13 @@ const Leaderboard = () => {
   const [friends, setFriends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showFriendsLeaderboard, setShowFriendsLeaderboard] = useState(false);
+  const [dropdownStates, setDropdownStates] = useState({});
+
+  const toggleDropdown = (id) => {
+    setDropdownStates((prev) => ({
+      [id]: !prev[id],
+    }));
+  };
 
   // Fetch userID based on the logged-in user's email
   useEffect(() => {
@@ -34,6 +42,15 @@ const Leaderboard = () => {
 
     fetchUserID();
   }, [user]);
+
+  const addFriend = async (friendshipId, index) => {
+    try {
+        await api.post(`/friendship/create/${friendshipId}/${userID}/`);
+        toggleDropdown(index);
+    } catch (error) {
+        console.error("Error creating friendship:", error);
+    }
+};
 
   // Fetch all volunteers and sort them by overall score
   useEffect(() => {
@@ -71,6 +88,7 @@ const Leaderboard = () => {
 
     fetchFriends();
   }, [userID]);
+
 
   return (
     <PageTransition>
@@ -125,7 +143,31 @@ const Leaderboard = () => {
                   <span className="font-bold">{index + 1}</span>
                   <span className="font-medium">{vol.display_name}</span>
                   <span className="font-bold">{vol.overall_score}</span>
-                </li>
+                  <div className="relative">
+                    <button
+                      onClick={() => toggleDropdown(index)}
+                      className="p-2 rounded-full hover:bg-gray-500 transition"
+                    >
+                      &#x22EE; {/* Vertical 3-dot icon */}
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {dropdownStates[index] && (
+                      <div className="absolute z-10 right-0 mt-2 w-32 bg-black shadow-md rounded-lg">
+                        <button
+                          onClick={() => addFriend(vol.id, index)}
+                          className="block rounded-lg w-full z-10 text-left px-4 py-2 hover:bg-gray-200"
+                        >
+                          Add Friend
+                        </button>
+                        <Link
+                          to={`/dashboard/volunteer/${vol.id}/`}
+                          className="block rounded-lg w-full z-10 text-left px-4 py-2 hover:bg-gray-200"
+                          >
+                          View Profile
+                      </Link>
+                    </div>
+                    )}</div></li>
               ))}
               </motion.h2>
             </ul>

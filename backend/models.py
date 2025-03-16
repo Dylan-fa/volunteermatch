@@ -78,6 +78,7 @@ class Organization(models.Model):
     logo = models.ImageField(upload_to='organization_logos/', null=True, blank=True)
     description = models.TextField()
     approved = models.BooleanField(default=False)
+    automatic_accepting = models.BooleanField(default = False)
 
     def __str__(self):
         return self.name

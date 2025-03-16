@@ -44,16 +44,8 @@ const OrganizationDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      Object.keys(editForm).forEach(key => {
-        if (editForm[key] !== profile[key]) {
-          formData.append(key, editForm[key]);
-        }
-      });
-
-      const response = await api.put('/organization/profile/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      
+      const response = await api.put('/organization/profile/', editForm)
       setProfile(response);
       setIsEditing(false);
     } catch (error) {
@@ -110,6 +102,15 @@ const OrganizationDashboard = () => {
                       onChange={e => setEditForm({...editForm, logo: e.target.files[0]})}
                       className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
                     />
+                  </div>
+                  <div className='flex'>
+                    <label className="block text-sm font-medium text-gray-700 mr-5">Automatically accept requests?  </label>
+                    <input 
+                     className = "flex"
+                     type = "checkbox" 
+                     defaultChecked = {editForm.automatic}
+                     onChange={e => setEditForm({...editForm, automatic: e.target.checked})}/>
+                      
                   </div>
                   <div className="flex justify-end">
                     <button

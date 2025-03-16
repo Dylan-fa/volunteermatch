@@ -131,7 +131,6 @@ const addFriend = async (friendshipId) => {
     try {
         // Ensure the request body is properly structured, if needed
         const response = await api.post(`/friendship/create/${friendshipId}/${volunteer_id}/`);
-
         fetchUser();
         setMessage(response.message);
     } catch (error) {
