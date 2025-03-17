@@ -158,7 +158,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
                         className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                       >
                         <Link
-                          to="/register"
+                          to="/register/volunteer"
                           state={{ type: 'volunteer' }}
                           className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg flex items-center"
                         >
