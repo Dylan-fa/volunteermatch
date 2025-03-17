@@ -5,8 +5,48 @@ import { useUser } from '../contexts/UserContext';
 import api from '../utils/api';
 import { format } from 'date-fns';
 
+const CreateDiscussion = (opportunity) => {
+    function handleSubmit(){
+
+    }
+
+    return(
+        <PageTransition>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Title</label>
+                    <input
+                        type="text"
+                        name="title"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                </div>
+        
+        
+                <div className="flex justify-end space-x-4">
+                <button
+                    type="button"
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                    Save Changes
+                </button>
+                </div>
+            </form>
+        </PageTransition>
+    )
+}
+
+
 const OpportunityDiscussions = () => {
   const { id } = useParams();
+  const [showDiscussion, setShowDiscussion] = useState(false);
   const [opportunity, setOpportunity] = useState(null);
   const mapRef = useRef(null);
   const { user } = useUser();
@@ -63,8 +103,8 @@ const OpportunityDiscussions = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Breadcrumb */}
           <nav className="mb-8">
-            <Link to="/browse" className="text-sm text-gray-500 hover:text-gray-900">
-              ← Back to opportunities
+            <Link to={`/opportunity/${id}`} className="text-sm text-gray-500 hover:text-gray-900">
+              ← Back to {opportunity.title}
             </Link>
           </nav>
 
@@ -74,97 +114,27 @@ const OpportunityDiscussions = () => {
               <div className="space-y-8">
                 {/* Header */}
                 <div>
-                  <div className="text-6xl mb-6">
-                    {opportunity.image?.logo || opportunity.image?.name || '📷'}
-                  </div>
-                  <h1 className="text-3xl font-semibold text-gray-900">{opportunity.title}</h1>
-                  <div className="mt-4 flex items-center space-x-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                      {opportunity.category}
-                    </span>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-gray-500">{opportunity.organization?.name}</span>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <h2 className="text-xl font-medium text-gray-900 mb-4">About this opportunity</h2>
-                  <p className="text-gray-600">{opportunity.description}</p>
-                </div>
-
-                {/* Requirements */}
-                <div>
-                  <h2 className="text-xl font-medium text-gray-900 mb-4">Requirements</h2>
-                  <ul className="space-y-2">
-                    {opportunity.requirements && opportunity.requirements.split('\n').filter(req => req.trim()).map((req, index) => (
-                      <li key={index} className="flex items-center text-gray-600">
-                        <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        {req.trim()}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Impact */}
-                <div>
-                  <h2 className="text-xl font-medium text-gray-900 mb-4">Estimated Shift Times</h2>
-                  <p className="text-gray-600">{opportunity.start_time}:00 - {opportunity.end_time}:00</p>
-                </div>
-                <div>
-                  <h2 className="text-xl font-medium text-gray-900 mb-4">Estimated Impact</h2>
-                  <p className="text-gray-600">You could recieve {opportunity.estimated_points} points or more!</p>
+                  <h1 className="text-3xl font-semibold text-gray-900">Discussions</h1>
                 </div>
               </div>
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 bg-gray-50 rounded-xl p-6 space-y-6">
-                {/* Date & Time */}
-                <div className='flex'>
-                  <h3 className="text-sm font-medium text-gray-900 mr-3">Effort Ranking: </h3>
-                  <p className="text-gray-600">{opportunity.estimated_effort_ranking.charAt(0).toUpperCase() + opportunity.estimated_effort_ranking.slice(1)}</p>
-                </div>
-
-                {/* Location */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Location</h3>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {opportunity.location_name}
-                  </div>
-                </div>
-
-                {/* Application closing date */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Application closing date</h3>
-                  <p className="text-gray-600">{format(new Date(opportunity.end_date), 'EEEE, MMMM dd, yyyy')}</p>
-                </div>
-
-                {/* Apply Button */}
-                <button
-                  className="w-full px-6 py-3 text-sm font-medium rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-colors"
-                  onClick={handleApply}
-                  disabled={opportunity.has_applied}
-                >
-                  {opportunity.has_applied ? 'Applied' : 'Apply Now'}
-                </button>
-
-                {/* Share Button */}
-                <Link to={`/opportunity/${id}/discussions`} className="w-full px-10 py-3 text-sm font-medium rounded-full text-gray-900 border border-gray-200 hover:bg-gray-50 transition-colors">
-                  Discussions
-                </Link>
-                <Link className="w-full px-6 py-3 text-sm font-medium rounded-full text-gray-900 border border-gray-200 hover:bg-gray-50 transition-colors">
-                  Share Opportunity
-                </Link>
-              </div>
+            {/* Application closing date */}
+            <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Application closing date</h3>
+                <p className="text-gray-600">{format(new Date(opportunity.end_date), 'EEEE, MMMM dd, yyyy')}</p>
             </div>
+            <button
+            type="button"
+            onClick={() => setShowDiscussion(!showDiscussion)}
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            >
+                Save Changes
+            </button>
+
+            {showDiscussion && <CreateDiscussion className='w-full' opportunity={opportunity} />}
+            
+
           </div>
           <div ref={mapRef} className="w-full h-[300px] rounded-lg overflow-hidden" />
         </div>

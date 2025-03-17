@@ -93,6 +93,8 @@ def calculate_impact(charity, volunteer):
     
     end_date = opportunity.end_date
     capacity = opportunity.capacity
+
+    date_time_applied = make_aware(date_time_applied)
     
 
 
@@ -779,7 +781,6 @@ def register_organization(request):
 @api_view(['GET', 'POST'])
 def api_opportunity_list(request):
     opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
-    volunteer = Volunteer.objects.get(user = request.user)
     if request.method == "POST":
         opportunities = calculate_opp_in_distance(opportunities, request.data["postcode"], request.data["max_distance"])
 
@@ -847,7 +848,10 @@ def api_filter_distance(request):
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
     user = request.user
-    volunteer = Volunteer.objects.get(user = user)
+    try:
+        volunteer = Volunteer.objects.get(user = user)
+    except:
+        volunteer = Volunteer.objects.get(id = 1)
     if request.method == "POST":
         opportunity.title = request.data['title']
         opportunity.description = request.data['description']
