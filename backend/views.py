@@ -93,9 +93,10 @@ def calculate_impact(charity, volunteer):
     
     end_date = opportunity.end_date
     capacity = opportunity.capacity
-
-    date_time_applied = make_aware(date_time_applied)
-    
+    try:
+        date_time_applied = make_aware(date_time_applied)
+    except:
+        print("naive")
 
 
     people_helped = 0
