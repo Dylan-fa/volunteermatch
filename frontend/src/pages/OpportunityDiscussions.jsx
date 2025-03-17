@@ -5,7 +5,7 @@ import { useUser } from '../contexts/UserContext';
 import api from '../utils/api';
 import { format } from 'date-fns';
 
-const OpportunityDetails = () => {
+const OpportunityDiscussions = () => {
   const { id } = useParams();
   const [opportunity, setOpportunity] = useState(null);
   const mapRef = useRef(null);
@@ -173,4 +173,4 @@ const OpportunityDetails = () => {
   );
 };
 
-export default OpportunityDetails;
+export default OpportunityDiscussions;

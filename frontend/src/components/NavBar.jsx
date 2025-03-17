@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, redirect } from 'react-router';
+import { Link, redirect, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
 
@@ -8,6 +8,7 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [rainbowVisible, setRainbowVisible] = useState(false);
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Delay the rainbow animation to start after page load
@@ -19,7 +20,8 @@ const NavBar = ({ isScrolled = false, gradientStyle = {} }) => {
   }, []);
 
   const handleLogout = () => {
-    logout().then(() => redirect('/'));
+    logout()
+    navigate('/')
     // Optional: Add navigation to home page here
   };
 

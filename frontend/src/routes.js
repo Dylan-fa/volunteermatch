@@ -3,6 +3,7 @@ import { route } from "@react-router/dev/routes";
 export default [
     route("/", "./pages/Home.jsx"),
     route("/browse", "./pages/BrowseOpportunities.jsx"),
+    route("/opportunity/:id/discussions", "./pages/OpportunityDiscussions.jsx"),
     route("/opportunity/:id", "./pages/OpportunityDetails.jsx"),
     route("/login", "./pages/Login.jsx"),
     route("/register", "./pages/Register.jsx"),
@@ -18,4 +19,5 @@ export default [
     route("/badges", "./pages/Badges.jsx"),
     route("/opportunity/:id/edit", "./pages/EditOpportunity.jsx"),
     route("/volunteer/:id/settings", "./pages/VolunteerSettings.jsx"),
+    
 ];
