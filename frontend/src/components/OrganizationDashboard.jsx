@@ -180,6 +180,12 @@ const OrganizationDashboard = () => {
                       >
                         Edit
                       </Link>
+                      <Link
+                        to={`/opportunity/${opportunity.id}/discussions/`}
+                        className="text-sm text-gray-600 hover:text-gray-900"
+                      >
+                        Discussions
+                      </Link>
                     </div>
                   </div>
                 ))}
