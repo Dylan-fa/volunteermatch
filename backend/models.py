@@ -162,3 +162,14 @@ class Messages(models.Model):
 
     def __str__(self):
         return f"From {self.from_person}, To {self.volunteer}"
+
+class Discussion(models.Model):
+    volunteer = models.ForeignKey(Volunteer, on_delete=models.CASCADE)
+    opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE)
+    title = models.CharField(max_length = 128)
+    content = models.TextField(max_length = 2048)
+    answer = models.TextField(max_length=2048, null = True, blank = True)
+    time_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

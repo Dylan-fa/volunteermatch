@@ -854,17 +854,24 @@ def api_opportunity_detail(request, pk):
     except:
         volunteer = Volunteer.objects.get(id = 1)
     if request.method == "POST":
-        opportunity.title = request.data['title']
-        opportunity.description = request.data['description']
-        opportunity.requirements = request.data['requirements']
-        opportunity.start_time = request.data['start_time']
-        opportunity.end_time = request.data['end_time']
-        opportunity.start_date = make_aware(datetime.strptime(request.data['start_date'], '%Y-%m-%dT%H:%M'))
-        opportunity.end_date = make_aware(datetime.strptime(request.data['end_date'], '%Y-%m-%dT%H:%M'))
-        opportunity.estimated_duration = request.data['duration']
-        opportunity.capacity = request.data['capacity']
-        opportunity.estimated_effort_ranking = request.data['estimated_effort_ranking']
-        opportunity.save()
+        if len(request.data) == 3:
+
+            volunteer = Volunteer.objects.get(user = request.user)
+            Discussion.objects.create(volunteer = volunteer, opportunity = Opportunity.objects.get(id = request.data["opportunity"]), title = request.data["title"], content = request.data["content"])
+            return Response("Created Discussion")
+        
+        else:
+            opportunity.title = request.data['title']
+            opportunity.description = request.data['description']
+            opportunity.requirements = request.data['requirements']
+            opportunity.start_time = request.data['start_time']
+            opportunity.end_time = request.data['end_time']
+            opportunity.start_date = make_aware(datetime.strptime(request.data['start_date'], '%Y-%m-%dT%H:%M'))
+            opportunity.end_date = make_aware(datetime.strptime(request.data['end_date'], '%Y-%m-%dT%H:%M'))
+            opportunity.estimated_duration = request.data['duration']
+            opportunity.capacity = request.data['capacity']
+            opportunity.estimated_effort_ranking = request.data['estimated_effort_ranking']
+            opportunity.save()
     data = {
         'id': opportunity.id,
         'title': opportunity.title,
@@ -1033,7 +1040,7 @@ def complete_opportunity(vol, categories, points):
             vol.elderly_score = vol.elderly_score + (points / len(categories))
         elif cat.name == "Sports":
             vol.sports_score = vol.sports_score + (points / len(categories))
-        elif cat.name == "Greener_planet":
+        elif cat.name == "Greener Planet":
             vol.greener_planet_score = vol.greener_planet_score + (points / len(categories))
         elif cat.name == "Medical":
             vol.medical_score = vol.medical_score + (points / len(categories))
@@ -1081,3 +1088,30 @@ def api_remove_message(request, id):
         app = Messages.objects.get(id = id)
         app.delete()
     return Response("Message deleted successfully")
+
+@api_view(["GET", "POST", "DELETE"])
+def api_discussions(request, id):
+    discussions = Discussion.objects.filter(opportunity = Opportunity.objects.get(id = id))
+
+    if request.method == "POST":
+        dis = Discussion.objects.get(id = request.data["id"])
+        dis.answer = request.data["answer"]
+        dis.save()
+        return Response("Updated Successfully")
+    elif request.method == "DELETE":
+        print(request.data)
+        dis = Discussion.objects.get(id = id)
+        dis.delete()
+        return Response("Deleted Successfully")
+
+    data = [{
+        'id': dis.id,
+        'title': dis.title,
+        'content': dis.content,
+        'volunteer': dis.volunteer.display_name,
+        'volunteer_email': dis.volunteer.user.email,
+        'answer': dis.answer,
+        'time_created': dis.time_created
+    }for dis in discussions]
+
+    return Response(data)

@@ -24,6 +24,8 @@ urlpatterns = [
     path('api/opportunities/create/', views.api_create_opportunity, name='api_create_opportunity'),
     path('api/opportunities/distance/filter/', views.api_filter_distance, name='api_filter_distance'),
     path('api/opportunities/<int:id>/apply/', views.api_apply_opportunity, name='api_apply_opportunity'),
+    path('api/opportunities/<int:id>/discussions/', views.api_discussions, name='api_discussions'),
+    
 
     
     

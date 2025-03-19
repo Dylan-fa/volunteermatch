@@ -289,7 +289,7 @@ const BrowseOpportunities = () => {
                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                         onChange={(e) => setFormData({...formData, max_distance: e.target.value})}
                       />
-                      <button className="bg-white-500 text-grey px-4 py-2 rounded mt-2 w-full hover:bg-gray-50" type='submit'>Submit</button>
+                      <button className="hover:cursor-pointer bg-white-500 text-grey px-4 py-2 rounded mt-2 w-full hover:bg-gray-50" type='submit'>Submit</button>
                   </form>
                 </div>
               </div>
@@ -311,7 +311,7 @@ const BrowseOpportunities = () => {
                 <div>
                   <select 
                     onChange={(e) => orderOpportunities(e.target.value)}
-                    className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 hover:cursor-pointer"
                   >
                     <option value="">Sort By</option>
                     <option value="Closest Deadline">Closest Deadline</option>

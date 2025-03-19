@@ -326,6 +326,20 @@ const VolunteerDashboard = () => {
     }
   }, [location.state]);
 
+  function goToFriendsSection(){
+    setActiveTab("friends")
+    document.getElementById("active tab").scrollIntoView({ behavior: "smooth" });
+  }
+
+  function goToBadgesSection(){
+    setActiveTab("badges")
+    document.getElementById("active tab").scrollIntoView({ behavior: "smooth" });
+  }
+  function goToActivitiesSection(){
+    setActiveTab("stats")
+    document.getElementById("active tab").scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <PageTransition>
       {isLoading ? (<div className="flex justify-center items-center h-screen">
@@ -348,15 +362,15 @@ const VolunteerDashboard = () => {
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-white">{volunteer.is_user ? (volunteer.f_name + " " + volunteer.l_name) : volunteer.display_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
-                  <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                  <span onClick = {goToActivitiesSection} className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full hover:cursor-pointer hover:shadow-lg">
                     <FaClock className="w-5 h-5" />
                     {volunteer.hours} hours volunteered
                   </span>
-                  <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                  <span onClick = {goToFriendsSection} className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full hover:cursor-pointer hover:shadow-lg">
                     <FaUsers className="w-5 h-5" />
                     {FRIENDS.length} friends
                   </span>
-                  <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                  <span  onClick = {goToBadgesSection} className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full hover:cursor-pointer hover:shadow-lg">
                     <FaTrophy className="w-5 h-5" />
                     {Object.keys(volunteer.scores).length} badges
                   </span>
@@ -419,7 +433,7 @@ const VolunteerDashboard = () => {
           {/* Tabs Navigation */}
           {volunteer.is_user ? (
             <>
-            <div className="mb-6 border-b border-gray-200">
+            <div id = "active tab" className="mb-6 border-b border-gray-200">
             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
               <li className="mr-2">
                 <button 

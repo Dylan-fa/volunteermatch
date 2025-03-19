@@ -147,7 +147,7 @@ class Command(BaseCommand):
             "Disability",
             "Animal",
             "Sports",
-            "Greener_Planet",
+            "Greener Planet",
             "Educational",
             "Community",
         ]
@@ -813,7 +813,7 @@ class Command(BaseCommand):
             }
         )
         if created:  
-            opportunity.categories.set([Category.objects.get(name="Greener_Planet")])
+            opportunity.categories.set([Category.objects.get(name="Greener Planet")])
 
 
         opportunity, created = Opportunity.objects.get_or_create(
@@ -1299,7 +1299,7 @@ class Command(BaseCommand):
         sports = Category.objects.get(name = "Sports")
         education = Category.objects.get(name = "Educational")
         community = Category.objects.get(name = "Community")
-        greener_planet = Category.objects.get(name = "Greener_Planet")
+        greener_planet = Category.objects.get(name = "Greener Planet")
         disability = Category.objects.get(name = "Disability")
         medical = Category.objects.get(name = "Medical")
 

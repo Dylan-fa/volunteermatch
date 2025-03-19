@@ -117,8 +117,7 @@ const Home = () => {
                           Join our community of volunteers and make a difference in your local area. Find opportunities that match your interests and skills.
                         </p>
                         <Link
-                          to="/register"
-                          state={{ type: 'volunteer' }}
+                          to="/register/volunteer"
                           className="inline-flex items-center text-blue-600 font-medium group-hover:text-blue-700"
                         >
                           Get Started
@@ -130,28 +129,36 @@ const Home = () => {
                     </div>
 
                     {/* Organization Option */}
-                    <div className="group relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-green-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="relative">
-                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                          <span className="text-3xl">🏢</span>
-                        </div>
-                        <h3 className="text-2xl font-semibold text-gray-900 mb-4">I'm an Organization</h3>
-                        <p className="text-gray-600 mb-6">
-                          Connect with passionate volunteers and manage your opportunities efficiently. Post opportunities and find the perfect match.
-                        </p>
+                    
+                    
+                      
+                        
+                        
+                        
                         <Link
-                          to="/register"
-                          state={{ type: 'organization' }}
+                          to="/register/organization"
                           className="inline-flex items-center text-green-600 font-medium group-hover:text-green-700"
                         >
-                          Get Started
-                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                          </svg>
+                          <div className="group relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                            <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-green-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            </div>
+                            <div className="relative">
+                              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                                <span className="text-3xl">🏢</span>
+                              </div>
+                              <h3 className="text-2xl font-semibold text-gray-900 mb-4">I'm an Organization</h3>
+                              <p className="text-gray-600 mb-6">
+                              Connect with passionate volunteers and manage your opportunities efficiently. Post opportunities and find the perfect match.
+                              </p>
+                              Get Started
+                              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
                         </Link>
-                      </div>
-                    </div>
+                      
+                    
                   </div>
                 </div>
               </div>
