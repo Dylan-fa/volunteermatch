@@ -269,9 +269,14 @@ const OpportunityDiscussions = () => {
 
             {showDiscussion && <CreateDiscussion className="w-full" opportunity={opportunity} id = {id} onClose={() => setShowDiscussion(false)} />}
 
-            {discussions.map(dis => (
+
+            {discussions.length == 0 ? (
+                <h3> No discussions yet, start one by clciking the button in the top right! </h3>
+            ) : (
+            discussions.map(dis => (
                 <DiscussionCard key = {dis.id} discussion = {dis} user = {user} reload = {setLoadingElsewhere}/>
-            ))}
+            ))
+        )}
             </div>
         </div>
         )}
