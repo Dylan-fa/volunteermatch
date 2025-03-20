@@ -41,6 +41,7 @@ from django.http import HttpResponse
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
+from django.contrib.auth.hashers import check_password
 
 @api_view(["GET"])
 def list_pending_friendships(request):
@@ -211,6 +212,9 @@ def calculate_impact(charity, volunteer):
 @api_view(["DELETE"])
 def delete_friendship(request, friend_id, volunteer_id):
     if request.method == "DELETE":
+        if volunteer_id != request.user.id:
+            return Response({'error': 'Only the user of the friend can remove friends'},
+                       status=status.HTTP_403_FORBIDDEN)
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
         for friendship in Friendship.objects.all():
@@ -225,6 +229,9 @@ def delete_friendship(request, friend_id, volunteer_id):
 @api_view(["POST"])
 def create_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
+        if volunteer_id != request.user.id:
+            return Response({'error': 'Only the user of the friend can remove friends'},
+                       status=status.HTTP_403_FORBIDDEN)
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
 
@@ -236,6 +243,9 @@ def create_friendship(request, friend_id, volunteer_id):
 @api_view(["POST"])
 def accept_friendship(request, friend_id, volunteer_id):
     if request.method == "POST":
+        if volunteer_id != request.user.id:
+            return Response({'error': 'Only the user of the friend can remove friends'},
+                       status=status.HTTP_403_FORBIDDEN)
         u = Volunteer.objects.get(id = volunteer_id)
         friend = Volunteer.objects.get(id = friend_id)
 
@@ -339,16 +349,21 @@ def api_volunteer_detail(request, id):
             user.display_name = request.data["display_name"]
 
         if request.data["password"] and request.data["passwordNew"] and request.data["passwordConfirm"]:
-            if request.data["passwordNew"] == request.data["password"]:
-                message = "Passwords cannot match"
-                colour = "green"
-            else:
-                if request.data["passwordNew"] == request.data["passwordConfirm"]:
-                    user.user.set_password(request.data["passwordNew"])
+            if check_password(request.data["password"], request.user.password):
+
+                if request.data["passwordNew"] == request.data["password"]:
+                    message = "Passwords cannot match"
                     colour = "green"
                 else:
-                    message = "New passwords do not match"
-                    colour = "green"
+                    if request.data["passwordNew"] == request.data["passwordConfirm"]:
+                        user.user.set_password(request.data["passwordNew"])
+                        colour = "green"
+                    else:
+                        message = "New passwords do not match"
+                        colour = "green"
+                        return Response({'error': 'Passwords do not match'}, status=400)
+            else:
+                return Response({'error': 'Wrong password'}, status=400)
 
         if request.data["showName"]:
             user.name_share_public = True
@@ -359,10 +374,10 @@ def api_volunteer_detail(request, id):
             user.public_friends = True
         else:
             user.public_friends = False
+            
 
         user.save()
         user.user.save()
-        print(message)
         return JsonResponse({'message': message, 'colour': colour}, status=200)
 
     pending_applications = Application.objects.filter(status = "pending", volunteer = user)
@@ -706,7 +721,7 @@ def register_volunteer(request):
     display_name = request.data.get('display_name')
     password = request.data.get('password')
     password2 = request.data.get('password2')
-    interests = request.data.get("interests")
+    interests = request.data.get("interests", [])
 
     if password != password2:
         return Response({'error': 'Passwords do not match'}, status=400)
@@ -717,7 +732,7 @@ def register_volunteer(request):
         if len(interests) > 1:
             inter = Interest.objects.filter(id__in=interests)  # Get existing interests
         else:
-            inter = Interest.objects.get(id - interests[0])
+            inter = Interest.objects.get(id = interests[0])
         volunteer.interests.set(inter)
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -729,6 +744,7 @@ def register_volunteer(request):
             }
         })
     except Exception as e:
+        print (e)
         return Response({'error': str(e)}, status=400)
 
 @api_view(['POST'])
