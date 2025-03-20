@@ -350,6 +350,16 @@ def api_volunteer_detail(request, id):
                     message = "New passwords do not match"
                     colour = "green"
 
+        if request.data["showName"]:
+            user.name_share_public = True
+        else:
+            user.name_share_public = False
+
+        if request.data["showFriends"]:
+            user.public_friends = True
+        else:
+            user.public_friends = False
+
         user.save()
         user.user.save()
         print(message)
@@ -429,7 +439,9 @@ def api_volunteer_detail(request, id):
         "is_user": bool(
             request.user == user.user
         ),
-        'interests': [interest.id for interest in user.interests.all()]
+        'interests': [interest.id for interest in user.interests.all()],
+        'showName': user.name_share_public,
+        'showFriends': user.public_friends
     }
     return Response(data)
 

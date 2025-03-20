@@ -43,6 +43,8 @@ class Volunteer(models.Model):
     greener_planet_score = models.IntegerField(default = 0)
     community_score = models.IntegerField(default = 0)
     education_score = models.IntegerField(default = 0)
+    name_share_public = models.BooleanField(default = False)
+    public_friends = models.BooleanField(default = False)
 
 
     def __str__(self):

@@ -36,7 +36,9 @@ const VolunteerSettings = () => {
       interests: [],
       password: '',
       passwordNew: '',
-      passwordConfirm: ''
+      passwordConfirm: '',
+      showName: null,
+      showFriends: null
     });
 
   useEffect(() => {
@@ -118,7 +120,7 @@ const VolunteerSettings = () => {
         setActiveTab(pr);
         setAction("");
       }
-
+console.log(formData)
   return (
     <PageTransition>
   {isLoading ? (
@@ -141,6 +143,14 @@ const VolunteerSettings = () => {
                   }`}
                 >
                   Profile
+                </button>
+                <button
+                  onClick={() => setActiveTabandMessage('accessibility')}
+                  className={`text-white font-medium ${
+                    activeTab === 'accessibility' ? 'underline' : 'hover:text-gray-200 hover:underline'
+                  }`}
+                >
+                  Accessibility
                 </button>
                 <button
                   onClick={() => setActiveTabandMessage('security')}
@@ -309,6 +319,48 @@ const VolunteerSettings = () => {
                   <h2 className="text-2xl font-semibold mb-4">Notification Settings</h2>
                   <p className="text-gray-600">Choose which notifications you want to receive and how.</p>
                   {/* Add notification settings form or content here */}
+                </div>
+                </motion.h2>
+              )}
+
+              {activeTab === 'accessibility' && (
+                <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">Accessibility Settings</h2>
+                  <p className="text-gray-600">Choose what you want others to see.</p>
+                  
+                  <div>
+                    <label htmlFor="showName" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Show your real name
+                        <input
+                          id="showName"
+                          type="checkbox"
+                          defaultChecked={vol.showName}
+                          required
+                          className='ml-5'
+                          onChange={(e) => setFormData({...formData, showName: e.target.checked})}
+                          />
+                    </label>
+                    </div>
+
+                    <div>
+                    <label htmlFor="showFriends" className="block text-sm font-medium text-gray-700 mt-5 ml-5">
+                        Let people see your friends
+                        <input
+                          id="showFriends"
+                          type="checkbox"
+                          defaultChecked={vol.showFriends}
+                          required
+                          className='ml-5'
+                          onChange={(e) => setFormData({...formData, showFriends: e.target.checked})}
+                        />
+                    </label>
+                    </div>
+                    
+
                 </div>
                 </motion.h2>
               )}

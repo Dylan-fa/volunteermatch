@@ -191,7 +191,7 @@ const Badge = ({volunteer}) => {
           color="bg-red-500"
         />
         <BadgeItem 
-          category="Special Needs" 
+          category="Disabilities" 
           score={volunteer.scores.disability || 0} 
           maxScore={500}
           icon="♿"
@@ -297,7 +297,6 @@ const VolunteerDashboard = () => {
 
 
 
-
   const [isVisible, setIsVisible] = useState(false);
   const statsRef = useRef(null);
 
@@ -360,7 +359,7 @@ const VolunteerDashboard = () => {
                 <div className="text-5xl bg-white/20 p-4 rounded-full">{volunteer.avatar || "👤"}</div>
               )}
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-white">{volunteer.is_user ? (volunteer.f_name + " " + volunteer.l_name) : volunteer.display_name}</h1>
+                <h1 className="text-2xl font-semibold text-white">{volunteer.is_user || volunteer.showName ? (volunteer.f_name + " " + volunteer.l_name) : volunteer.display_name}</h1>
                 <div className="mt-2 flex items-center gap-6 text-white/90">
                   <span onClick = {goToActivitiesSection} className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full hover:cursor-pointer hover:shadow-lg">
                     <FaClock className="w-5 h-5" />
@@ -374,12 +373,13 @@ const VolunteerDashboard = () => {
                     <FaTrophy className="w-5 h-5" />
                     {Object.keys(volunteer.scores).length} badges
                   </span>
-                  <Link
+                  {volunteer.is_user ? (<Link
                     to={`/volunteer/${volunteer.id}/settings`}
                     className="flex items-center gap-2 bg-white/10 px-4 py-2 ml-auto rounded-full hover:bg-gray-800 transition-colors"
                   >
                     Edit Profile
-                  </Link>
+                  </Link>) : null}
+                  
                 </div>
               </div>
             </div>
@@ -431,27 +431,27 @@ const VolunteerDashboard = () => {
           </div>
           
           {/* Tabs Navigation */}
-          {volunteer.is_user ? (
+          
             <>
             <div id = "active tab" className="mb-6 border-b border-gray-200">
             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
               <li className="mr-2">
-                <button 
+                {volunteer.is_user && (<button 
                   className={`inline-flex items-center justify-center p-4 rounded-t-lg border-b-2 ${activeTab === 'stats' ? 'text-blue-600 border-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'}`}
                   onClick={() => setActiveTab('stats')}
                 >
                   <FaMedal className="w-4 h-4 mr-2" />
                   Activity
-                </button>
+                </button>)}
               </li>
               <li className="mr-2">
-                <button 
+                {volunteer.showFriends && (<button 
                   className={`inline-flex items-center justify-center p-4 rounded-t-lg border-b-2 ${activeTab === 'friends' ? 'text-blue-600 border-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'}`}
                   onClick={() => setActiveTab('friends')}
                 >
                   <FaUsers className="w-4 h-4 mr-2" />
                   Friends
-                </button>
+                </button>)}
               </li>
               <li className="mr-2">
                 <button 
@@ -464,8 +464,9 @@ const VolunteerDashboard = () => {
               </li>
             </ul>
             </div>
+            
             {/* Tab Content */}
-          {activeTab === 'stats' && (
+          {activeTab === 'stats' && volunteer.is_user && (
             <>
           {/* Pending Applications Tab */}
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Opportunities applied for</h2>
@@ -584,8 +585,8 @@ const VolunteerDashboard = () => {
 
           {activeTab === 'badges' && (
             <Badge volunteer = {volunteer}/>
-          )}</>) : (<div><Badge volunteer = {volunteer}/></div>)}
-          
+          )}
+          </>
         </div>
       </div>
       )}
