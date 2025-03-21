@@ -67,11 +67,11 @@ def calculate_impact(charity, volunteer):
     if current_application == None:
         participants_at_application = opportunity.current_volunteers_count
         date_time_applied = datetime.now()
-        duration_taken = opportunity.estimated_duration
+        duration_taken = int(opportunity.estimated_duration)
     else:
         participants_at_application = current_application.current_volunteers
         date_time_applied = current_application.date_applied
-        duration_taken = datetime.now().day - current_application.date_applied.day
+        duration_taken = int(datetime.now().day - current_application.date_applied.day)
 
     # Open and load JSON file to get population data
     file_path = os.path.join(os.path.dirname(__file__), "components", "gb.json")
@@ -79,11 +79,11 @@ def calculate_impact(charity, volunteer):
         data = json.load(file)
 
     city = opportunity.location_name # get from organisation api
-    start_time = opportunity.start_time
-    end_time = opportunity.end_time
-    opportunities_completed = volunteer.opportunities_completed
+    start_time = int(opportunity.start_time)
+    end_time = int(opportunity.end_time)
+    opportunities_completed = int(volunteer.opportunities_completed)
     
-    estimated_duration = opportunity.estimated_duration
+    estimated_duration = int(opportunity.estimated_duration)
     effort_ranking = opportunity.estimated_effort_ranking
     if volunteer.last_completion is not None:
         days_since_last_opportunity_completed = datetime.now().day - volunteer.last_completion.day
@@ -844,35 +844,6 @@ def api_opportunity_list(request):
     } for opp in opportunities]
     return Response(data)
 
-@api_view(['POST'])
-def api_filter_distance(request):
-    opportunities = Opportunity.objects.filter(is_active=True).select_related('organization')
-    if request.method == "POST":
-        opportunities = calculate_opp_in_distance(opportunities, request.data.get('postcode'), request.data.get('max_distance'))
-        data = [{
-            'id': opp.id,
-            'title': opp.title,
-            'description': opp.description,
-            'organization': {
-                'name': opp.organization.name,
-                'logo': opp.organization.logo.url if opp.organization.logo else None,
-            },
-            'location_name': opp.location_name,
-            'latitude': opp.latitude,
-            'longitude': opp.longitude,
-            'requirements': opp.requirements,
-            'pending_applications': opp.pending_applications_count(),
-            'has_applied': bool(
-                request.user.is_authenticated and
-                hasattr(request.user, 'volunteer') and
-                opp.applications.filter(volunteer=request.user.volunteer).exists()
-            ),
-            'effort' : opp.estimated_effort_ranking,
-            'categories' : list(opp.categories.values_list('name', flat=True))
-        } for opp in opportunities]
-
-    return Response(data)
-
 @api_view(['GET', 'POST'])
 def api_opportunity_detail(request, pk):
     opportunity = get_object_or_404(Opportunity, pk=pk)
@@ -883,23 +854,28 @@ def api_opportunity_detail(request, pk):
         volunteer = Volunteer.objects.get(id = 1)
     if request.method == "POST":
         if len(request.data) == 3:
-
-            volunteer = Volunteer.objects.get(user = request.user)
-            Discussion.objects.create(volunteer = volunteer, opportunity = Opportunity.objects.get(id = request.data["opportunity"]), title = request.data["title"], content = request.data["content"])
-            return Response("Created Discussion")
+            try:
+                volunteer = Volunteer.objects.get(user = request.user)
+                Discussion.objects.create(volunteer = volunteer, opportunity = Opportunity.objects.get(id = request.data["opportunity"]), title = request.data["title"], content = request.data["content"])
+                return Response("Created Discussion")
+            except Exception as e:
+                return Response({"error": str(e)}, status=400)
         
         else:
-            opportunity.title = request.data['title']
-            opportunity.description = request.data['description']
-            opportunity.requirements = request.data['requirements']
-            opportunity.start_time = request.data['start_time']
-            opportunity.end_time = request.data['end_time']
-            opportunity.start_date = make_aware(datetime.strptime(request.data['start_date'], '%Y-%m-%dT%H:%M'))
-            opportunity.end_date = make_aware(datetime.strptime(request.data['end_date'], '%Y-%m-%dT%H:%M'))
-            opportunity.estimated_duration = request.data['duration']
-            opportunity.capacity = request.data['capacity']
-            opportunity.estimated_effort_ranking = request.data['estimated_effort_ranking']
-            opportunity.save()
+            try:
+                opportunity.title = request.data['title']
+                opportunity.description = request.data['description']
+                opportunity.requirements = request.data['requirements']
+                opportunity.start_time = request.data['start_time']
+                opportunity.end_time = request.data['end_time']
+                opportunity.start_date = make_aware(datetime.strptime(request.data['start_date'], '%Y-%m-%dT%H:%M'))
+                opportunity.end_date = make_aware(datetime.strptime(request.data['end_date'], '%Y-%m-%dT%H:%M'))
+                opportunity.estimated_duration = request.data['duration']
+                opportunity.capacity = request.data['capacity']
+                opportunity.estimated_effort_ranking = request.data['estimated_effort_ranking']
+                opportunity.save()
+            except Exception as e:
+                return Response({"error": str(e)}, status=400)
     data = {
         'id': opportunity.id,
         'title': opportunity.title,

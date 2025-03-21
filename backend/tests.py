@@ -182,7 +182,7 @@ class test_ModelTests(TestCase):
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        response = self.client.put("/api/volunteer/1/", data) # updating user with non matching passwords
+        response = self.client.put("/api/volunteer/1/", data) # updating user with matching passwords
         self.assertEqual(response.status_code, 200)
 
         data = {
@@ -203,19 +203,55 @@ class test_ModelTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
         data = {
-            'f_name': 'Alex',
-            'l_name': 'Morris',
-            'display_name': 'alex morris 2822',
-            'interests': [1, 2, 3],
-            'password': 'pass',
-            'email': 'alex@gmail.com',
-            'password2': 'pass',
+            'max_distance': 100,
+            'postcode': 'gu2 9sa',
         }
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        response = self.client.post("/api/auth/volunteer/register/", data) # register volunteer
+        response = self.client.post("/api/opportunities/", data) # checking distance filtering 
         self.assertEqual(response.status_code, 200)
+
+        data = {
+            'opportunity': 1,
+            'content': 'Content',
+            'title': 'Title'
+        }
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post("/api/opportunities/1/", data) # checking discussion creation
+        self.assertEqual(response.status_code, 200)
+
+        data = {
+            'opportunity': 1,
+            'content': 'Content',
+        }
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post("/api/opportunities/1/", data) # checking discussion creation with wrong content
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            'title': 'testOpp',
+            'description': 'description',
+            'requirements': 'nothing',
+            'start_time': 10,
+            'end_time': 20,
+            'estimated_effort_ranking': 'low',
+            'duration': 1,
+            'start_date': '2025-03-21T12:14',
+            'end_date': '2025-03-21T12:14',
+            'capacity': 20,
+        }
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post("/api/opportunities/1/", data) # checking opportunity update
+        print(response.data)
+        self.assertEqual(response.status_code, 200)
+
 
         
     def test_gets(self):
@@ -231,6 +267,9 @@ class test_ModelTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = self.c.get("/api/volunteer/1/")
+        self.assertEqual(response.status_code, 200)
+
+        response = self.c.get("/api/opportunities/")
         self.assertEqual(response.status_code, 200)
 
         
