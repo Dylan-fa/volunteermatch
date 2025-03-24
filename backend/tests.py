@@ -1,7 +1,6 @@
 from django.test import TestCase, Client
 from .models import *
 from django.contrib.auth import get_user_model
-from django.db import transaction
 from rest_framework.test import APIClient
 import datetime
 # model tests
@@ -218,9 +217,9 @@ class test_ModelTests(TestCase):
             'title': 'Title'
         }
 
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
-        response = self.client.post("/api/opportunities/1/", data) # checking discussion creation
+        self.client_dis = APIClient()
+        self.client_dis.force_authenticate(user=self.user)
+        response = self.client_dis.post("/api/opportunities/1/", data) # checking discussion creation
         self.assertEqual(response.status_code, 200)
 
         data = {
@@ -249,7 +248,30 @@ class test_ModelTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         response = self.client.post("/api/opportunities/1/", data) # checking opportunity update
-        print(response.data)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.c.get("/api/opportunities/1/discussions/")
+        self.assertEqual(response.status_code, 200)
+
+        data = {
+            'id': 1,
+            'answer': 'Answer',
+        }
+
+        self.client_dis.force_authenticate(user=self.user)
+        response = self.client_dis.post("/api/opportunities/1/discussions/", data) # checking discussion answer with wrong user
+        self.assertEqual(response.status_code, 403)
+
+        self.client_dis.force_authenticate(user=self.organization_user)
+        response = self.client_dis.post("/api/opportunities/1/discussions/", data) # checking discussion answer with correct user
+        self.assertEqual(response.status_code, 200)
+
+        self.client_dis.force_authenticate(user=self.organization_user)
+        response = self.client_dis.delete("/api/opportunities/1/discussions/", data) # checking discussion answer with correct user
+        self.assertEqual(response.status_code, 403)
+
+        self.client_dis.force_authenticate(user=self.user)
+        response = self.client_dis.delete("/api/opportunities/1/discussions/", data) # checking discussion answer with correct user
         self.assertEqual(response.status_code, 200)
 
 
@@ -271,6 +293,8 @@ class test_ModelTests(TestCase):
 
         response = self.c.get("/api/opportunities/")
         self.assertEqual(response.status_code, 200)
+        
+        
 
         
 

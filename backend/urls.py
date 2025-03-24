@@ -23,7 +23,7 @@ urlpatterns = [
     path('api/opportunities/<int:pk>/', views.api_opportunity_detail, name='api_opportunity_detail'), # tested
     path('api/opportunities/create/', views.api_create_opportunity, name='api_create_opportunity'), # tested
     path('api/opportunities/<int:id>/apply/', views.api_apply_opportunity, name='api_apply_opportunity'),
-    path('api/opportunities/<int:id>/discussions/', views.api_discussions, name='api_discussions'),
+    path('api/opportunities/<int:id>/discussions/', views.api_discussions, name='api_discussions'), # tested
     
 
     

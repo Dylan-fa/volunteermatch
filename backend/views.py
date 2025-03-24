@@ -93,7 +93,7 @@ def calculate_impact(charity, volunteer):
     start_date = opportunity.start_date
     
     end_date = opportunity.end_date
-    capacity = opportunity.capacity
+    capacity = int(opportunity.capacity)
     try:
         date_time_applied = make_aware(date_time_applied)
     except:
@@ -1098,15 +1098,21 @@ def api_discussions(request, id):
     discussions = Discussion.objects.filter(opportunity = Opportunity.objects.get(id = id))
 
     if request.method == "POST":
-        dis = Discussion.objects.get(id = request.data["id"])
-        dis.answer = request.data["answer"]
-        dis.save()
-        return Response("Updated Successfully")
+        if discussions[0].opportunity.organization.user == request.user:
+            dis = Discussion.objects.get(id = request.data["id"])
+            dis.answer = request.data["answer"]
+            dis.save()
+            return Response("Updated Successfully")
+        else:
+            return Response("You need to be the owner of this discussions page", status = 403)
     elif request.method == "DELETE":
-        print(request.data)
         dis = Discussion.objects.get(id = id)
-        dis.delete()
-        return Response("Deleted Successfully")
+        try:
+            if dis.volunteer == Volunteer.objects.get(user = request.user):
+                dis.delete()
+                return Response("Deleted Successfully")
+        except Exception as e:
+            return Response("Not logged in as volunteer", status = 403)
 
     data = [{
         'id': dis.id,
