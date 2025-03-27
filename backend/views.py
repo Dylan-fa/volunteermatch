@@ -32,6 +32,10 @@ from geopy.distance import geodesic
 
 from django.utils import timezone
 
+import random
+import string
+from django.core.mail import send_mail
+from django.utils import timezone
 
 # Use this file for your templated views only
 from django.http import HttpResponse, HttpResponseForbidden
@@ -42,6 +46,7 @@ from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import check_password
+from urllib.parse import urlparse
 
 @api_view(["GET"])
 def list_pending_friendships(request):
@@ -598,6 +603,56 @@ def charity_details(request, reg_number, suffix=0):
     except requests.RequestException as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+@require_GET
+def charity_contact_information(request, reg_number, suffix=0):
+    if not reg_number:
+        return JsonResponse({'error': 'Registration number required'}, status=400)
+
+    api_url = f"https://api.charitycommission.gov.uk/register/api/charitycontactinformation/{reg_number}/{suffix}"
+    headers = {
+        'Ocp-Apim-Subscription-Key': settings.CHARITY_API_KEY,
+        'Cache-Control': 'no-cache'
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Process the web URL to extract just the domain
+        web_url = data.get('web', '')
+        domain = web_url
+        
+        if web_url:
+            # Add protocol if not present for proper URL parsing
+            if not web_url.startswith('http://') and not web_url.startswith('https://'):
+                parse_url = f"https://{web_url}"
+            else:
+                parse_url = web_url
+                
+            try:
+                parsed_url = urlparse(parse_url)
+                # Get the netloc (network location part, i.e., the domain)
+                domain = parsed_url.netloc
+                # If netloc is empty, use the original URL
+                if not domain:
+                    domain = web_url
+                # Remove 'www.' prefix if present
+                elif domain.startswith('www.'):
+                    domain = domain[4:]
+            except Exception:
+                # If parsing fails, just use the original URL
+                domain = web_url
+        
+        return JsonResponse({
+            'contact_address': data.get('contact_address', ''),
+            'phone': data.get('phone', ''),
+            'email': data.get('email', ''),
+            'web': domain
+        })
+    except requests.RequestException as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 @api_view(['POST'])
 def login_view(request):
     email = request.data.get('email')
@@ -745,6 +800,116 @@ def register_volunteer(request):
         })
     except Exception as e:
         print (e)
+        return Response({'error': str(e)}, status=400)
+
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+@api_view(['POST'])
+def register_organization(request):
+    try:
+        # Extract form data
+        email = request.data.get('email')
+        username = request.data.get('username')
+        password = request.data.get('password')
+        password2 = request.data.get('password2')
+        name = request.data.get('name')
+        charity_number = request.data.get('charity_number')
+        description = request.data.get('description')
+        logo = request.FILES.get('logo')
+        selected_charity_data = request.data.get('selected_charity_data')
+
+        if not all([email, username, password, password2, name, description]):
+            return Response({
+                'error': 'All required fields must be provided'
+            }, status=400)
+
+        if password != password2:
+            return Response({
+                'error': 'Passwords do not match'
+            }, status=400)
+
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        # Create organization
+        organization = Organization.objects.create(
+            user=user,
+            name=name,
+            charity_number=charity_number,
+            description=description,
+            logo=logo,
+            approved=False  # Organizations need email verification
+        )
+
+        # Generate OTP and create verification record
+        otp_code = generate_otp()
+        OrganizationOTP.objects.create(organization=organization, otp_code=otp_code)
+        
+        # Send verification email
+        subject = 'Verify your Volunteera organization account'
+        message = (f'Thank you for registering with Volunteera!\n\n'
+                  f'Your verification code is: {otp_code}\n\n'
+                  f'Please enter this code in the verification page to activate your account.\n'
+                  f'This code will expire in 24 hours.')
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'email': user.email,
+                'is_organization': True,
+                'needs_verification': True
+            }
+        })
+
+    except Exception as e:
+        # If user was created but organization creation failed, delete the user
+        if 'user' in locals():
+            user.delete()
+        return Response({
+            'error': str(e)
+        }, status=400)
+
+@api_view(['POST'])
+def verify_organization(request):
+    try:
+        email = request.data.get('email')
+        otp_code = request.data.get('otp_code')
+        
+        if not email or not otp_code:
+            return Response({'error': 'Email and OTP code are required'}, status=400)
+        
+        try:
+            user = User.objects.get(email=email)
+            organization = user.organization
+            otp = OrganizationOTP.objects.get(organization=organization)
+        except (User.DoesNotExist, Organization.DoesNotExist, OrganizationOTP.DoesNotExist):
+            return Response({'error': 'Invalid email or OTP'}, status=400)
+        
+        if otp.otp_code != otp_code:
+            return Response({'error': 'Invalid OTP code'}, status=400)
+        
+        if not otp.is_valid():
+            return Response({'error': 'OTP has expired'}, status=400)
+        
+        # Verify the organization
+        organization.approved = True
+        organization.save()
+        
+        # Delete the OTP record
+        otp.delete()
+        
+        return Response({'message': 'Organization verified successfully'})
+    
+    except Exception as e:
         return Response({'error': str(e)}, status=400)
 
 @api_view(['POST'])
